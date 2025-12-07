@@ -78,22 +78,25 @@ export const authConfig = {
   /**
    * Cookie settings
    */
-  cookies: {
-    accessToken: {
-      name: 'ov_access_token',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-    },
-    refreshToken: {
-      name: 'ov_refresh_token',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/api/v1/auth',
-    },
+ /**
+ * Cookie settings
+ */
+cookies: {
+  accessToken: {
+    name: 'ov_access_token',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
+    path: '/',
   },
+  refreshToken: {
+    name: 'ov_refresh_token',
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' as const : 'lax' as const,
+    path: '/',  // Changed from '/api/v1/auth' to '/' for consistency
+  },
+},
 
   /**
    * MFA settings
