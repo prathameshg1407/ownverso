@@ -14,11 +14,11 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "dev:debug": "ts-node-dev --respawn --transpile-only --inspect -r tsconfig-paths/register src/index.ts",
-    "build": "npm run clean && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:check": "tsc --noEmit",
     "start": "node -r ./dist/paths.js dist/index.js",
     "start:prod": "NODE_ENV=production node -r ./dist/paths.js dist/index.js",
-    "clean": "rimraf dist",
+    "clean": "npx rimraf dist",
+    "build": "npm run clean && tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:unit": "jest --testPathPattern=unit --passWithNoTests",
