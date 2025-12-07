@@ -1,0 +1,1922 @@
+{
+  "name": "ownverso-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    
+    "@tanstack/react-query": "^5.62.0",
+    "@tanstack/react-query-devtools": "^5.62.0",
+    
+    "axios": "^1.7.9",
+    
+    "zustand": "^5.0.2",
+    
+    "zod": "^3.24.1",
+    "@hookform/resolvers": "^3.9.1",
+    "react-hook-form": "^7.54.0",
+    
+    "@radix-ui/react-avatar": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.1.4",
+    "@radix-ui/react-dropdown-menu": "^2.1.4",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-navigation-menu": "^1.2.3",
+    "@radix-ui/react-popover": "^1.1.4",
+    "@radix-ui/react-scroll-area": "^1.2.2",
+    "@radix-ui/react-select": "^2.1.4",
+    "@radix-ui/react-separator": "^1.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-switch": "^1.1.2",
+    "@radix-ui/react-tabs": "^1.1.2",
+    "@radix-ui/react-toast": "^1.2.4",
+    "@radix-ui/react-tooltip": "^1.1.6",
+    
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    
+    "lucide-react": "^0.468.0",
+    
+    "next-themes": "^0.4.4",
+    
+    "date-fns": "^4.1.0",
+    
+    "sonner": "^1.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    
+    "typescript": "^5.7.2",
+    
+    "tailwindcss": "^3.4.16",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20",
+    
+    "eslint": "^9.16.0",
+    "eslint-config-next": "^15.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.9",
+    
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    
+    "vitest": "^2.1.8",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/jest-dom": "^6.6.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+import type { Metadata, Viewport } from 'next';
+import { Inter, Merriweather } from 'next/font/google';
+
+import { Providers } from '@/providers';
+import { SEO_CONFIG, APP_CONFIG } from '@/lib/constants/config';
+import '@/styles/globals.css';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fonts
+// ─────────────────────────────────────────────────────────────────────────────
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  display: 'swap',
+  variable: '--font-merriweather',
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Metadata
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const metadata: Metadata = {
+  title: {
+    default: SEO_CONFIG.defaultTitle,
+    template: SEO_CONFIG.titleTemplate,
+  },
+  description: SEO_CONFIG.defaultDescription,
+  keywords: SEO_CONFIG.defaultKeywords,
+  authors: [{ name: SEO_CONFIG.siteName }],
+  creator: SEO_CONFIG.siteName,
+  publisher: SEO_CONFIG.siteName,
+  metadataBase: new URL(APP_CONFIG.url),
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: APP_CONFIG.url,
+    siteName: SEO_CONFIG.siteName,
+    title: SEO_CONFIG.defaultTitle,
+    description: SEO_CONFIG.defaultDescription,
+    images: [
+      {
+        url: '/images/og/default-og.png',
+        width: 1200,
+        height: 630,
+        alt: SEO_CONFIG.siteName,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: SEO_CONFIG.defaultTitle,
+    description: SEO_CONFIG.defaultDescription,
+    creator: SEO_CONFIG.twitterHandle,
+    images: ['/images/og/twitter-card.png'],
+  },
+  robots: {
+    index: APP_CONFIG.isProd,
+    follow: APP_CONFIG.isProd,
+    googleBot: {
+      index: APP_CONFIG.isProd,
+      follow: APP_CONFIG.isProd,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
+  ],
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Root Layout
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface RootLayoutProps {
+  children: React.ReactNode;
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
+  return (
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${merriweather.variable}`}
+    >
+      <head />
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Providers>
+          <div className="relative flex min-h-screen flex-col">
+            {children}
+          </div>
+        </Providers>
+      </body>
+    </html>
+  );
+}
+/**
+ * Application Configuration Constants
+ *
+ * Central configuration derived from environment variables.
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// App Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const APP_CONFIG = {
+  name: process.env['NEXT_PUBLIC_APP_NAME'] || 'Ownverso',
+  url: process.env['NEXT_PUBLIC_APP_URL'] || 'http://localhost:3000',
+  env: (process.env['NEXT_PUBLIC_APP_ENV'] || 'development') as
+    | 'development'
+    | 'staging'
+    | 'production',
+  isDev: process.env['NEXT_PUBLIC_APP_ENV'] === 'development',
+  isProd: process.env['NEXT_PUBLIC_APP_ENV'] === 'production',
+  isStaging: process.env['NEXT_PUBLIC_APP_ENV'] === 'staging',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// API Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const API_CONFIG = {
+  baseUrl: process.env['NEXT_PUBLIC_API_URL'] || 'http://localhost:3001',
+  version: process.env['NEXT_PUBLIC_API_VERSION'] || 'v1',
+  get endpoint() {
+    return `${this.baseUrl}/api/${this.version}`;
+  },
+  timeout: 30000, // 30 seconds
+  retryAttempts: 3,
+  retryDelay: 1000, // 1 second
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Authentication Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const AUTH_CONFIG = {
+  accessTokenKey: 'ownverso_access_token',
+  refreshTokenKey: 'ownverso_refresh_token',
+  accessTokenExpiry: 15 * 60 * 1000, // 15 minutes in ms (matches backend)
+  refreshTokenExpiry: 7 * 24 * 60 * 60 * 1000, // 7 days in ms (matches backend)
+  refreshThreshold: 5 * 60 * 1000, // Refresh 5 minutes before expiry
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pagination Configuration (matches backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PAGINATION_CONFIG = {
+  defaultPage: 1,
+  defaultLimit: 20,
+  maxLimit: 100,
+  minLimit: 1,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Content Limits (matches backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const CONTENT_LIMITS = {
+  maxTitleLength: 200,
+  maxSlugLength: 100,
+  maxSynopsisLength: 5000,
+  maxChapterContentLength: 500000,
+  maxCommentLength: 10000,
+  maxBioLength: 1000,
+  maxTagsPerSeries: 20,
+  maxGenresPerSeries: 5,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// File Limits (matches backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const FILE_LIMITS = {
+  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxImageSize: 5 * 1024 * 1024, // 5MB
+  maxAvatarSize: 2 * 1024 * 1024, // 2MB
+  maxFilesPerRequest: 10,
+  allowedImageTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Feature Flags
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const FEATURES = {
+  analytics: process.env['NEXT_PUBLIC_ENABLE_ANALYTICS'] === 'true',
+  sentry: process.env['NEXT_PUBLIC_ENABLE_SENTRY'] === 'true',
+  maintenanceMode: process.env['NEXT_PUBLIC_MAINTENANCE_MODE'] === 'true',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Regex Patterns (matches backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const REGEX = {
+  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  username: /^[a-zA-Z0-9_-]{3,30}$/,
+  slug: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+  uuid: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  hexColor: /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/,
+  url: /^https?:\/\/.+/,
+  phone: /^\+?[1-9]\d{1,14}$/,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEO Configuration
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SEO_CONFIG = {
+  titleTemplate: '%s | Ownverso',
+  defaultTitle: 'Ownverso - Publish Your Stories',
+  defaultDescription:
+    'The modern platform for authors to publish and monetize their stories. Create novels, comics, and more.',
+  defaultKeywords: [
+    'web novels',
+    'webcomics',
+    'self-publishing',
+    'author platform',
+    'storytelling',
+    'creative writing',
+  ] as string[],
+  twitterHandle: '@ownverso',
+  siteName: 'Ownverso',
+} as const;
+/**
+ * Route Constants
+ *
+ * Centralized route definitions to prevent typos and enable easy refactoring.
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public Routes (Marketing)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const PUBLIC_ROUTES = {
+  home: '/',
+  about: '/about',
+  pricing: '/pricing',
+  features: '/features',
+  featuresForAuthors: '/features/for-authors',
+  featuresForReaders: '/features/for-readers',
+  featuresAiTools: '/features/ai-tools',
+  blog: '/blog',
+  blogPost: (slug: string) => `/blog/${slug}`,
+  contact: '/contact',
+  careers: '/careers',
+  careerDetail: (slug: string) => `/careers/${slug}`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Legal Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const LEGAL_ROUTES = {
+  terms: '/legal/terms',
+  privacy: '/legal/privacy',
+  cookies: '/legal/cookies',
+  dmca: '/legal/dmca',
+  contentGuidelines: '/legal/content-guidelines',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Authentication Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const AUTH_ROUTES = {
+  login: '/login',
+  register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  verifyEmail: '/verify-email',
+  mfaSetup: '/mfa/setup',
+  mfaVerify: '/mfa/verify',
+  oauthCallback: (provider: string) => `/oauth/callback/${provider}`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reader Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const READER_ROUTES = {
+  discover: '/discover',
+  trending: '/discover/trending',
+  popular: '/discover/popular',
+  new: '/discover/new',
+  updated: '/discover/updated',
+  featured: '/discover/featured',
+  genres: '/genres',
+  genre: (slug: string) => `/genres/${slug}`,
+  tags: (slug: string) => `/tags/${slug}`,
+  search: '/search',
+  rankings: '/rankings',
+  rankingsDaily: '/rankings/daily',
+  rankingsWeekly: '/rankings/weekly',
+  rankingsMonthly: '/rankings/monthly',
+  authors: '/authors',
+  author: (username: string) => `/authors/${username}`,
+  forum: '/forum',
+  forumCategory: (slug: string) => `/forum/${slug}`,
+  forumPost: (id: string) => `/forum/post/${id}`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reader Dashboard Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const READER_DASHBOARD_ROUTES = {
+  library: '/library',
+  continueReading: '/library/continue-reading',
+  history: '/library/history',
+  bookmarks: '/bookmarks',
+  readingLists: '/reading-lists',
+  createReadingList: '/reading-lists/create',
+  readingList: (id: string) => `/reading-lists/${id}`,
+  editReadingList: (id: string) => `/reading-lists/${id}/edit`,
+  subscriptions: '/subscriptions',
+  subscription: (id: string) => `/subscriptions/${id}`,
+  purchases: '/purchases',
+  purchase: (id: string) => `/purchases/${id}`,
+  following: '/following',
+  notifications: '/notifications',
+  settings: '/settings',
+  settingsProfile: '/settings/profile',
+  settingsAccount: '/settings/account',
+  settingsSecurity: '/settings/security',
+  settingsReading: '/settings/reading',
+  settingsNotifications: '/settings/notifications',
+  settingsPrivacy: '/settings/privacy',
+  settingsBilling: '/settings/billing',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Author Dashboard Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const AUTHOR_ROUTES = {
+  dashboard: '/dashboard',
+  sites: '/sites',
+  createSite: '/sites/create',
+  site: (id: string) => `/sites/${id}`,
+  siteSettings: (id: string) => `/sites/${id}/settings`,
+  series: '/series',
+  createSeries: '/series/create',
+  seriesDetail: (id: string) => `/series/${id}`,
+  editSeries: (id: string) => `/series/${id}/edit`,
+  chapters: (seriesId: string) => `/series/${seriesId}/chapters`,
+  createChapter: (seriesId: string) => `/series/${seriesId}/chapters/create`,
+  editChapter: (seriesId: string, chapterId: string) =>
+    `/series/${seriesId}/chapters/${chapterId}/edit`,
+  editor: (chapterId: string) => `/editor/${chapterId}`,
+  analytics: '/analytics',
+  subscribers: '/subscribers',
+  tiers: '/tiers',
+  products: '/products',
+  payments: '/payments',
+  broadcasts: '/broadcasts',
+  calendar: '/calendar',
+  authorSettings: '/settings',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reading Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const READING_ROUTES = {
+  read: (siteSlug: string, seriesSlug: string, chapterSlug: string) =>
+    `/read/${siteSlug}/${seriesSlug}/${chapterSlug}`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Site Routes (Author's Public Site)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SITE_ROUTES = {
+  site: (slug: string) => `/s/${slug}`,
+  siteSeries: (siteSlug: string, seriesSlug: string) =>
+    `/s/${siteSlug}/series/${seriesSlug}`,
+  sitePage: (siteSlug: string, pageSlug: string) =>
+    `/s/${siteSlug}/page/${pageSlug}`,
+  siteAnnouncements: (slug: string) => `/s/${slug}/announcements`,
+  siteSubscribe: (slug: string) => `/s/${slug}/subscribe`,
+  siteShop: (slug: string) => `/s/${slug}/shop`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const ADMIN_ROUTES = {
+  admin: '/admin',
+  users: '/admin/users',
+  user: (id: string) => `/admin/users/${id}`,
+  adminSites: '/admin/sites',
+  adminSite: (id: string) => `/admin/sites/${id}`,
+  moderation: '/admin/moderation',
+  reports: '/admin/moderation/reports',
+  support: '/admin/support',
+  tickets: '/admin/support/tickets',
+  taxonomies: '/admin/taxonomies',
+  genres: '/admin/taxonomies/genres',
+  featureFlags: '/admin/feature-flags',
+  config: '/admin/config',
+  auditLogs: '/admin/audit-logs',
+  health: '/admin/health',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Support Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SUPPORT_ROUTES = {
+  help: '/help',
+  helpCategory: (slug: string) => `/help/${slug}`,
+  helpArticle: (categorySlug: string, articleSlug: string) =>
+    `/help/${categorySlug}/${articleSlug}`,
+  helpSearch: '/help/search',
+  supportTickets: '/tickets',
+  createTicket: '/tickets/create',
+  ticket: (id: string) => `/tickets/${id}`,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Checkout Routes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const CHECKOUT_ROUTES = {
+  subscriptionCheckout: (tierId: string) => `/checkout/subscription/${tierId}`,
+  productCheckout: (productId: string) => `/checkout/product/${productId}`,
+  chapterCheckout: (chapterId: string) => `/checkout/chapter/${chapterId}`,
+  giftCheckout: (tierId: string) => `/checkout/gift/${tierId}`,
+  success: '/checkout/success',
+  cancelled: '/checkout/cancelled',
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// API Routes (for frontend API calls)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const API_ROUTES = {
+  auth: {
+    login: '/auth/login',
+    register: '/auth/register',
+    logout: '/auth/logout',
+    refresh: '/auth/refresh',
+    me: '/auth/me',
+    forgotPassword: '/auth/forgot-password',
+    resetPassword: '/auth/reset-password',
+    verifyEmail: '/auth/verify-email',
+    sessions: '/auth/sessions',
+  },
+  users: {
+    base: '/users',
+    byId: (id: string) => `/users/${id}`,
+    profile: '/users/profile',
+  },
+  health: {
+    live: '/health/live',
+    ready: '/health/ready',
+  },
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Route Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Routes that don&apos;t require authentication
+ */
+export const PUBLIC_PATHS = [
+  '/',
+  '/about',
+  '/pricing',
+  '/features',
+  '/blog',
+  '/contact',
+  '/careers',
+  '/legal',
+  '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/discover',
+  '/genres',
+  '/tags',
+  '/search',
+  '/rankings',
+  '/authors',
+  '/forum',
+  '/help',
+  '/s',
+  '/read',
+] as const;
+
+/**
+ * Routes that require authentication
+ */
+export const PROTECTED_PATHS = [
+  '/library',
+  '/bookmarks',
+  '/reading-lists',
+  '/subscriptions',
+  '/purchases',
+  '/following',
+  '/notifications',
+  '/settings',
+  '/dashboard',
+  '/sites',
+  '/series',
+  '/editor',
+  '/analytics',
+  '/subscribers',
+  '/tiers',
+  '/products',
+  '/payments',
+  '/broadcasts',
+  '/calendar',
+  '/tickets',
+  '/checkout',
+] as const;
+
+/**
+ * Routes that require admin role
+ */
+export const ADMIN_PATHS = ['/admin'] as const;
+
+/**
+ * Check if a path is public
+ */
+export function isPublicPath(path: string): boolean {
+  return PUBLIC_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
+/**
+ * Check if a path is protected
+ */
+export function isProtectedPath(path: string): boolean {
+  return PROTECTED_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+
+/**
+ * Check if a path is admin-only
+ */
+export function isAdminPath(path: string): boolean {
+  return ADMIN_PATHS.some((p) => path === p || path.startsWith(`${p}/`));
+}
+/**
+ * Constants Barrel Export
+ */
+
+export * from './config';
+export * from './routes';
+export * from './error-messages';
+export * from './keys';
+/**
+ * Environment Variable Type Declarations
+ */
+
+declare namespace NodeJS {
+  interface ProcessEnv {
+    // Application
+    NEXT_PUBLIC_APP_NAME: string;
+    NEXT_PUBLIC_APP_URL: string;
+    NEXT_PUBLIC_APP_ENV: 'development' | 'staging' | 'production';
+
+    // API
+    NEXT_PUBLIC_API_URL: string;
+    NEXT_PUBLIC_API_VERSION: string;
+
+    // Authentication
+    NEXTAUTH_SECRET: string;
+    NEXTAUTH_URL: string;
+    GOOGLE_CLIENT_ID?: string;
+    GOOGLE_CLIENT_SECRET?: string;
+    GITHUB_CLIENT_ID?: string;
+    GITHUB_CLIENT_SECRET?: string;
+
+    // Feature Flags
+    NEXT_PUBLIC_ENABLE_ANALYTICS: string;
+    NEXT_PUBLIC_ENABLE_SENTRY: string;
+    NEXT_PUBLIC_MAINTENANCE_MODE: string;
+
+    // Third-Party
+    NEXT_PUBLIC_GA_MEASUREMENT_ID?: string;
+    NEXT_PUBLIC_SENTRY_DSN?: string;
+    SENTRY_AUTH_TOKEN?: string;
+  }
+}
+
+export {};
+/**
+ * API Client
+ *
+ * Axios-based HTTP client configured for the Ownverso API.
+ */
+
+import axios, {
+  type AxiosInstance,
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+  type AxiosResponse,
+} from 'axios';
+
+import { API_CONFIG, AUTH_CONFIG } from '@/lib/constants/config';
+import { getLocalStorage, setLocalStorage, removeLocalStorage } from '@/lib/utils/storage';
+import type { ErrorResponse, TokenPair } from '@/types/api';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ApiErrorData {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    statusCode: number;
+    details?: Record<string, unknown>;
+  };
+  timestamp: string;
+  requestId?: string;
+}
+
+export class ApiError extends Error {
+  public readonly code: string;
+  public readonly statusCode: number;
+  public readonly details?: Record<string, unknown>;
+  public readonly requestId?: string;
+  public readonly timestamp: string;
+
+  constructor(data: ApiErrorData) {
+    super(data.error.message);
+    this.name = 'ApiError';
+    this.code = data.error.code;
+    this.statusCode = data.error.statusCode;
+    this.details = data.error.details;
+    this.requestId = data.requestId;
+    this.timestamp = data.timestamp;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Token Management
+// ─────────────────────────────────────────────────────────────────────────────
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function subscribeTokenRefresh(callback: (token: string) => void): void {
+  refreshSubscribers.push(callback);
+}
+
+function onTokenRefreshed(token: string): void {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
+}
+
+function getAccessToken(): string | null {
+  return getLocalStorage<string | null>(AUTH_CONFIG.accessTokenKey, null);
+}
+
+function getRefreshToken(): string | null {
+  return getLocalStorage<string | null>(AUTH_CONFIG.refreshTokenKey, null);
+}
+
+function setTokens(tokens: TokenPair): void {
+  setLocalStorage(AUTH_CONFIG.accessTokenKey, tokens.accessToken);
+  setLocalStorage(AUTH_CONFIG.refreshTokenKey, tokens.refreshToken);
+}
+
+function clearTokens(): void {
+  removeLocalStorage(AUTH_CONFIG.accessTokenKey);
+  removeLocalStorage(AUTH_CONFIG.refreshTokenKey);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Axios Instance
+// ─────────────────────────────────────────────────────────────────────────────
+
+const apiClient: AxiosInstance = axios.create({
+  baseURL: API_CONFIG.endpoint,
+  timeout: API_CONFIG.timeout,
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+  withCredentials: true, // Include cookies for CORS
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Request Interceptor
+// ─────────────────────────────────────────────────────────────────────────────
+
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Add authorization header if token exists
+    const token = getAccessToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Add request ID for tracing
+    config.headers['X-Request-ID'] = crypto.randomUUID();
+
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Response Interceptor
+// ─────────────────────────────────────────────────────────────────────────────
+
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    // Return the data directly for successful responses
+    return response;
+  },
+  async (error: AxiosError<ApiErrorData>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
+
+    // Handle 401 Unauthorized - Token refresh logic
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      error.response?.data?.error?.code !== 'AUTH_INVALID_CREDENTIALS'
+    ) {
+      if (isRefreshing) {
+        // Wait for token refresh
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token: string) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(apiClient(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = getRefreshToken();
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Call refresh endpoint
+        const response = await axios.post<{ success: true; data: TokenPair }>(
+          `${API_CONFIG.endpoint}/auth/refresh`,
+          { refreshToken },
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+
+        const newTokens = response.data.data;
+        setTokens(newTokens);
+        onTokenRefreshed(newTokens.accessToken);
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
+        }
+
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - clear tokens and redirect to login
+        clearTokens();
+        refreshSubscribers = [];
+
+        // Redirect to login (only in browser)
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login?session_expired=true';
+        }
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // Transform error to ApiError
+    if (error.response?.data) {
+      const apiError = new ApiError(error.response.data);
+      return Promise.reject(apiError);
+    }
+
+    // Network or other errors
+    if (error.message === 'Network Error') {
+      return Promise.reject(
+        new ApiError({
+          success: false,
+          error: {
+            code: 'NETWORK_ERROR',
+            message: 'Unable to connect to the server. Please check your internet connection.',
+            statusCode: 0,
+          },
+          timestamp: new Date().toISOString(),
+        })
+      );
+    }
+
+    if (error.code === 'ECONNABORTED') {
+      return Promise.reject(
+        new ApiError({
+          success: false,
+          error: {
+            code: 'TIMEOUT_ERROR',
+            message: 'Request timed out. Please try again.',
+            statusCode: 408,
+          },
+          timestamp: new Date().toISOString(),
+        })
+      );
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Export
+// ─────────────────────────────────────────────────────────────────────────────
+
+export { apiClient, getAccessToken, getRefreshToken, setTokens, clearTokens };
+export default apiClient;
+/**
+ * API Error Handler
+ *
+ * Utilities for handling and displaying API errors.
+ */
+
+import { ApiError } from './client';
+import { getErrorMessage, getHttpStatusMessage } from '@/lib/constants/error-messages';
+
+export interface FormattedError {
+  code: string;
+  message: string;
+  statusCode: number;
+  field?: string;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Format an error for display
+ */
+export function formatError(error: unknown): FormattedError {
+  if (error instanceof ApiError) {
+    return {
+      code: error.code,
+      message: getErrorMessage(error.code),
+      statusCode: error.statusCode,
+      details: error.details,
+    };
+  }
+
+  if (error instanceof Error) {
+    return {
+      code: 'UNKNOWN_ERROR',
+      message: error.message || 'An unexpected error occurred.',
+      statusCode: 500,
+    };
+  }
+
+  return {
+    code: 'UNKNOWN_ERROR',
+    message: 'An unexpected error occurred.',
+    statusCode: 500,
+  };
+}
+
+/**
+ * Extract validation errors for form fields
+ */
+export function extractValidationErrors(
+  error: unknown
+): Record<string, string> | null {
+  if (!(error instanceof ApiError)) return null;
+  if (error.code !== 'GEN_VALIDATION_ERROR') return null;
+
+  const details = error.details as {
+    errors?: Array<{ field: string; message: string }>;
+  };
+
+  if (!details?.errors) return null;
+
+  const fieldErrors: Record<string, string> = {};
+  for (const err of details.errors) {
+    fieldErrors[err.field] = err.message;
+  }
+
+  return fieldErrors;
+}
+
+/**
+ * Check if error is a specific type
+ */
+export function isErrorCode(error: unknown, code: string): boolean {
+  return error instanceof ApiError && error.code === code;
+}
+
+/**
+ * Check if error is authentication related
+ */
+export function isAuthError(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  return (
+    error.code.startsWith('AUTH_') ||
+    error.statusCode === 401 ||
+    error.statusCode === 403
+  );
+}
+
+/**
+ * Check if error is a network error
+ */
+export function isNetworkError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === 'NETWORK_ERROR';
+}
+
+/**
+ * Check if error is a validation error
+ */
+export function isValidationError(error: unknown): boolean {
+  return error instanceof ApiError && error.code === 'GEN_VALIDATION_ERROR';
+}
+
+/**
+ * Get user-friendly error message
+ */
+export function getUserMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    return getErrorMessage(error.code);
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return 'An unexpected error occurred.';
+}
+/**
+ * API Module Barrel Export
+ */
+
+export * from './client';
+export * from './error-handler';
+export * from './endpoints';
+/**
+ * Authentication API Types
+ */
+
+import type { SuccessResponse, MessageResponse } from './common.types';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// User Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * User role enum (mirrors Prisma UserRole)
+ */
+export type UserRole = 'USER' | 'AUTHOR' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN';
+
+/**
+ * User account status
+ */
+export type AccountStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'BANNED' | 'DELETED';
+
+/**
+ * Authenticated user data
+ */
+export interface AuthUser {
+  id: string; // publicId from backend
+  email: string;
+  username: string;
+  displayName: string;
+  role: UserRole;
+  emailVerified: boolean;
+  avatarUrl?: string;
+  createdAt?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Token Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * JWT Token Payload
+ */
+export interface TokenPayload {
+  sub: string; // User public ID
+  email: string;
+  role: UserRole;
+  type: 'access' | 'refresh';
+  iat: number;
+  exp: number;
+  iss: string;
+  aud: string;
+}
+
+/**
+ * Token pair
+ */
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenType: 'Bearer';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Request Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Login request
+ */
+export interface LoginRequest {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+/**
+ * Register request
+ */
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+  displayName?: string;
+  acceptTerms: boolean;
+}
+
+/**
+ * Forgot password request
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/**
+ * Reset password request
+ */
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+/**
+ * Change password request
+ */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+/**
+ * Verify email request
+ */
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+/**
+ * Refresh token request
+ */
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Response Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Login response data
+ */
+export interface LoginResponseData {
+  user: AuthUser;
+  tokens: TokenPair;
+}
+
+/**
+ * Login response
+ */
+export type LoginResponse = SuccessResponse<LoginResponseData>;
+
+/**
+ * Register response data
+ */
+export interface RegisterResponseData {
+  user: AuthUser;
+  tokens: TokenPair;
+}
+
+/**
+ * Register response
+ */
+export type RegisterResponse = SuccessResponse<RegisterResponseData>;
+
+/**
+ * Current user response
+ */
+export type CurrentUserResponse = SuccessResponse<AuthUser>;
+
+/**
+ * Refresh token response
+ */
+export type RefreshTokenResponse = SuccessResponse<TokenPair>;
+
+/**
+ * Forgot password response
+ */
+export type ForgotPasswordResponse = MessageResponse;
+
+/**
+ * Reset password response
+ */
+export type ResetPasswordResponse = MessageResponse;
+
+/**
+ * Verify email response
+ */
+export type VerifyEmailResponse = MessageResponse;
+
+/**
+ * Logout response
+ */
+export type LogoutResponse = MessageResponse;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Session Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Active session
+ */
+export interface UserSession {
+  id: string;
+  userAgent: string;
+  ipAddress: string;
+  lastActiveAt: string;
+  createdAt: string;
+  isCurrent: boolean;
+}
+
+/**
+ * Sessions list response
+ */
+export type SessionsResponse = SuccessResponse<UserSession[]>;
+/**
+ * Common API Types
+ * 
+ * These types mirror the backend response structures exactly.
+ * See: backend/src/common/interfaces/response.interface.ts
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Base Response Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Base API response structure
+ */
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  timestamp: string;
+  requestId?: string;
+}
+
+/**
+ * Success response
+ */
+export interface SuccessResponse<T = unknown> extends ApiResponse<T> {
+  success: true;
+  data: T;
+}
+
+/**
+ * Error detail structure
+ */
+export interface ErrorDetail {
+  code: string;
+  message: string;
+  statusCode: number;
+  details?: Record<string, unknown>;
+}
+
+/**
+ * Error response
+ */
+export interface ErrorResponse extends ApiResponse {
+  success: false;
+  error: ErrorDetail;
+}
+
+/**
+ * List response with items
+ */
+export interface ListResponse<T> extends SuccessResponse<T[]> {
+  meta?: {
+    total?: number;
+    count: number;
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pagination Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Pagination query parameters
+ */
+export interface PaginationQuery {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Pagination metadata in response
+ */
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+/**
+ * Paginated response wrapper
+ */
+export interface PaginatedResponse<T> {
+  success: true;
+  data: T[];
+  meta: PaginationMeta;
+  timestamp: string;
+  requestId?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Filter & Sort Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sort options
+ */
+export interface SortOptions {
+  field: string;
+  order: 'asc' | 'desc';
+}
+
+/**
+ * Filter options
+ */
+export interface FilterOptions {
+  [key: string]: string | number | boolean | string[] | undefined;
+}
+
+/**
+ * Date range filter
+ */
+export interface DateRangeFilter {
+  from?: string;
+  to?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Validation Error Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Validation error field
+ */
+export interface ValidationErrorField {
+  field: string;
+  message: string;
+  value?: unknown;
+}
+
+/**
+ * Validation error response
+ */
+export interface ValidationErrorResponse extends ErrorResponse {
+  error: ErrorDetail & {
+    code: 'GEN_VALIDATION_ERROR';
+    statusCode: 422;
+    details: {
+      errors: ValidationErrorField[];
+    };
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Message Response (for simple operations)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Message response for operations that return only a message
+ */
+export interface MessageResponse {
+  success: true;
+  message: string;
+  timestamp: string;
+  requestId?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Health Check Types
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Health check response
+ */
+export interface HealthCheckResponse {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  timestamp: string;
+  version: string;
+  uptime: number;
+  checks?: {
+    [service: string]: {
+      status: 'up' | 'down';
+      latency?: number;
+      message?: string;
+    };
+  };
+}
+/**
+ * API Types Barrel Export
+ */
+
+export * from './common.types';
+export * from './auth.types';
+/**
+ * Global Type Declarations
+ */
+
+// Extend Window interface
+declare global {
+  interface Window {
+    // Analytics
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  }
+}
+
+// Make BigInt serializable
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+// Generic utility types
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+export type Nullable<T> = T | null;
+
+export type Optional<T> = T | undefined;
+
+export type AsyncReturnType<T extends (...args: unknown[]) => Promise<unknown>> =
+  T extends (...args: unknown[]) => Promise<infer R> ? R : never;
+
+export type PropsWithClassName<P = unknown> = P & {
+  className?: string;
+};
+
+export type PropsWithChildren<P = unknown> = P & {
+  children?: React.ReactNode;
+};
+
+export {};
+'use client';
+
+/**
+ * Combined Providers
+ *
+ * Wraps all providers for the application.
+ */
+
+import { QueryProvider } from './query-provider';
+import { ThemeProvider } from './theme-provider';
+import { ToastProvider } from './toast-provider';
+
+interface ProvidersProps {
+  children: React.ReactNode;
+}
+
+export function Providers({ children }: ProvidersProps) {
+  return (
+    <QueryProvider>
+      <ThemeProvider>
+        {children}
+        <ToastProvider />
+      </ThemeProvider>
+    </QueryProvider>
+  );
+}
+
+export { QueryProvider } from './query-provider';
+export { ThemeProvider } from './theme-provider';
+export { ToastProvider } from './toast-provider';
+'use client';
+
+/**
+ * React Query Provider
+ *
+ * Configures React Query for the application.
+ */
+
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+import { APP_CONFIG } from '@/lib/constants/config';
+
+interface QueryProviderProps {
+  children: React.ReactNode;
+}
+
+export function QueryProvider({ children }: QueryProviderProps) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Stale time: how long data is considered fresh
+            staleTime: 1000 * 60 * 5, // 5 minutes
+            
+            // Garbage collection time
+            gcTime: 1000 * 60 * 30, // 30 minutes
+            
+            // Retry configuration
+            retry: (failureCount, error) => {
+              // don&apos;t retry on 4xx errors except 429 (rate limit)
+              if (error instanceof Error && 'statusCode' in error) {
+                const statusCode = (error as { statusCode: number }).statusCode;
+                if (statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+                  return false;
+                }
+              }
+              return failureCount < 3;
+            },
+            retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+            
+            // Refetch configuration
+            refetchOnWindowFocus: APP_CONFIG.isProd,
+            refetchOnReconnect: true,
+            refetchOnMount: true,
+          },
+          mutations: {
+            // Retry mutations once on failure
+            retry: 1,
+            retryDelay: 1000,
+          },
+        },
+      })
+  );
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {APP_CONFIG.isDev && (
+        <ReactQueryDevtools initialIsOpen={false} position="bottom" />
+      )}
+    </QueryClientProvider>
+  );
+}
+'use client';
+
+/**
+ * Toast Provider
+ *
+ * Provides toast notifications using Sonner.
+ */
+
+import { Toaster } from 'sonner';
+import { useTheme } from 'next-themes';
+
+export function ToastProvider() {
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <Toaster
+      theme={resolvedTheme as 'light' | 'dark' | 'system'}
+      position="bottom-right"
+      toastOptions={{
+        duration: 5000,
+        classNames: {
+          toast: 'group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg',
+          description: 'group-[.toast]:text-muted-foreground',
+          actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+          cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
+          error: 'group-[.toaster]:bg-destructive group-[.toaster]:text-destructive-foreground group-[.toaster]:border-destructive',
+          success: 'group-[.toaster]:bg-success group-[.toaster]:text-success-foreground group-[.toaster]:border-success',
+          warning: 'group-[.toaster]:bg-warning group-[.toaster]:text-warning-foreground group-[.toaster]:border-warning',
+          info: 'group-[.toaster]:bg-info group-[.toaster]:text-info-foreground group-[.toaster]:border-info',
+        },
+      }}
+      closeButton
+      richColors
+      expand
+    />
+  );
+}
+/**
+ * Storage Utilities
+ *
+ * Safe localStorage/sessionStorage wrappers with SSR support.
+ */
+
+/**
+ * Check if we're in a browser environment
+ */
+export function isBrowser(): boolean {
+  return typeof window !== 'undefined';
+}
+
+/**
+ * Get item from localStorage
+ */
+export function getLocalStorage<T>(key: string, defaultValue: T): T {
+  if (!isBrowser()) return defaultValue;
+
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? (JSON.parse(item) as T) : defaultValue;
+  } catch (error) {
+    console.error(`Error reading localStorage key "${key}":`, error);
+    return defaultValue;
+  }
+}
+
+/**
+ * Set item in localStorage
+ */
+export function setLocalStorage<T>(key: string, value: T): void {
+  if (!isBrowser()) return;
+
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error setting localStorage key "${key}":`, error);
+  }
+}
+
+/**
+ * Remove item from localStorage
+ */
+export function removeLocalStorage(key: string): void {
+  if (!isBrowser()) return;
+
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Error removing localStorage key "${key}":`, error);
+  }
+}
+
+/**
+ * Get item from sessionStorage
+ */
+export function getSessionStorage<T>(key: string, defaultValue: T): T {
+  if (!isBrowser()) return defaultValue;
+
+  try {
+    const item = window.sessionStorage.getItem(key);
+    return item ? (JSON.parse(item) as T) : defaultValue;
+  } catch (error) {
+    console.error(`Error reading sessionStorage key "${key}":`, error);
+    return defaultValue;
+  }
+}
+
+/**
+ * Set item in sessionStorage
+ */
+export function setSessionStorage<T>(key: string, value: T): void {
+  if (!isBrowser()) return;
+
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error setting sessionStorage key "${key}":`, error);
+  }
+}
+
+/**
+ * Remove item from sessionStorage
+ */
+export function removeSessionStorage(key: string): void {
+  if (!isBrowser()) return;
+
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Error removing sessionStorage key "${key}":`, error);
+  }
+}
+
+/**
+ * Clear all localStorage
+ */
+export function clearLocalStorage(): void {
+  if (!isBrowser()) return;
+  window.localStorage.clear();
+}
+
+/**
+ * Clear all sessionStorage
+ */
+export function clearSessionStorage(): void {
+  if (!isBrowser()) return;
+  window.sessionStorage.clear();
+}
+/**
+ * Utils Barrel Export
+ */
+
+export * from './cn';
+export * from './format';
+export * from './date';
+export * from './storage';
+/**
+ * Class Name Utility
+ *
+ * Combines clsx and tailwind-merge for optimal class name handling.
+ */
+
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Merge class names with Tailwind CSS conflict resolution
+ *
+ * @example
+ * cn('px-2 py-1', 'px-4') // => 'py-1 px-4'
+ * cn('text-red-500', condition && 'text-blue-500')
+ */
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 210 40% 98%;
+    --info: 199 89% 48%;
+    --info-foreground: 210 40% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+    --info: 199 89% 48%;
+    --info-foreground: 210 40% 98%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus visible styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-primary/20;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Text balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+  }
+}
