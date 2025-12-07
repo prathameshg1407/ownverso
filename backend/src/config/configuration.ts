@@ -25,23 +25,27 @@ export const config = {
   /**
    * CORS configuration
    */
-  cors: {
-    origins: process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()) || [
-      'http://localhost:3000',
-      'http://localhost:5173',
-    ],
-    credentials: true, // Required for cookies
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Request-ID',
-      'X-Correlation-ID',
-      'X-Client-Type', // web, mobile, api
-    ],
-    exposedHeaders: ['X-Request-ID', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
-    maxAge: 86400, // 24 hours
-  },
+  /**
+ * CORS configuration
+ */
+cors: {
+  origins: process.env.CORS_ORIGINS?.split(',').map((o) => o.trim()) || [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://ownverso.vercel.app',  // Add this line!
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Request-ID',
+    'X-Correlation-ID',
+    'X-Client-Type',
+  ],
+  exposedHeaders: ['X-Request-ID', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
+  maxAge: 86400,
+},
 
   /**
    * Rate limiting configuration
