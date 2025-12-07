@@ -1,0 +1,1 @@
+{"version":3,"file":"get-subscription.handler.d.ts","sourceRoot":"","sources":["../../../../../../src/api/v1/author/handlers/platform-subscription/get-subscription.handler.ts"],"names":[],"mappings":"AACA;;GAEG;AAEH,OAAO,KAAK,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAI5D,wBAAsB,sBAAsB,CAC1C,OAAO,EAAE,cAAc,EACvB,KAAK,EAAE,YAAY,GAClB,OAAO,CAAC,IAAI,CAAC,CAIf"}

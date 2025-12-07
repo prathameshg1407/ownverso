@@ -1,0 +1,14 @@
+onlyBuiltDependencies:
+  - '@datadog/native-appsec'
+  - '@datadog/native-iast-taint-tracking'
+  - '@datadog/native-metrics'
+  - '@datadog/pprof'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - argon2
+  - aws-sdk
+  - dd-trace
+  - msgpackr-extract
+  - prisma
+  - protobufjs
+  - sharp

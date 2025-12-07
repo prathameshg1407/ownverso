@@ -1,0 +1,18 @@
+{
+  "watch": ["src", "config", "prisma/schema.prisma"],
+  "ext": "ts,json,prisma",
+  "ignore": [
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/__tests__/**",
+    "node_modules",
+    "dist"
+  ],
+  "exec": "ts-node -r tsconfig-paths/register src/index.ts",
+  "delay": "1000",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "legacyWatch": false,
+  "verbose": false
+}

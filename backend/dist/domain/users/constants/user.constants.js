@@ -1,0 +1,80 @@
+"use strict";
+/**
+ * User Domain Constants
+ */
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.USER_LIMITS = exports.USER_DEFAULTS = exports.VALID_LOCALES = exports.RESERVED_USERNAMES = void 0;
+exports.RESERVED_USERNAMES = [
+    'admin',
+    'administrator',
+    'root',
+    'system',
+    'support',
+    'help',
+    'info',
+    'contact',
+    'about',
+    'settings',
+    'profile',
+    'api',
+    'auth',
+    'login',
+    'logout',
+    'register',
+    'signup',
+    'ownverso',
+    'official',
+    'moderator',
+    'mod',
+    'staff',
+    'security',
+    'legal',
+    'privacy',
+    'terms',
+    'copyright',
+    'null',
+    'undefined',
+    'anonymous',
+    'guest',
+    'user',
+];
+exports.VALID_LOCALES = [
+    'en',
+    'es',
+    'fr',
+    'de',
+    'it',
+    'pt',
+    'ru',
+    'zh',
+    'ja',
+    'ko',
+    'hi',
+    'ar',
+    'bn',
+    'id',
+    'ms',
+    'th',
+    'vi',
+    'tr',
+    'pl',
+    'nl',
+];
+exports.USER_DEFAULTS = {
+    LOCALE: 'en',
+    TIMEZONE: 'UTC',
+    DATA_REGION: 'NORTH_AMERICA',
+    EMAIL_DIGEST_FREQUENCY: 'WEEKLY',
+    CONTENT_RATINGS: ['EVERYONE', 'TEEN'],
+};
+exports.USER_LIMITS = {
+    USERNAME_MIN_LENGTH: 3,
+    USERNAME_MAX_LENGTH: 30,
+    DISPLAY_NAME_MAX_LENGTH: 100,
+    BIO_MAX_LENGTH: 2000,
+    URL_MAX_LENGTH: 2048,
+    SOCIAL_HANDLE_MAX_LENGTH: 50,
+    STATUS_HISTORY_MAX_ENTRIES: 20,
+    MAX_ACTIVE_SESSIONS: 10,
+};
+//# sourceMappingURL=user.constants.js.map

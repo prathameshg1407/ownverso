@@ -1,0 +1,9 @@
+/**
+ * Enum Schema Definitions
+ */
+export declare const UserRoleSchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"READER">, import("@sinclair/typebox").TLiteral<"AUTHOR">, import("@sinclair/typebox").TLiteral<"COLLABORATOR">, import("@sinclair/typebox").TLiteral<"MODERATOR">, import("@sinclair/typebox").TLiteral<"ADMIN">, import("@sinclair/typebox").TLiteral<"SUPER_ADMIN">]>;
+export declare const UserStatusSchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"PENDING_VERIFICATION">, import("@sinclair/typebox").TLiteral<"ACTIVE">, import("@sinclair/typebox").TLiteral<"SUSPENDED">, import("@sinclair/typebox").TLiteral<"BANNED">, import("@sinclair/typebox").TLiteral<"DELETED">, import("@sinclair/typebox").TLiteral<"DEACTIVATED">]>;
+export declare const DataRegionSchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"INDIA">, import("@sinclair/typebox").TLiteral<"SOUTHEAST_ASIA">, import("@sinclair/typebox").TLiteral<"EUROPE">, import("@sinclair/typebox").TLiteral<"NORTH_AMERICA">, import("@sinclair/typebox").TLiteral<"SOUTH_AMERICA">, import("@sinclair/typebox").TLiteral<"AUSTRALIA">, import("@sinclair/typebox").TLiteral<"JAPAN">]>;
+export declare const EmailDigestFrequencySchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"INSTANT">, import("@sinclair/typebox").TLiteral<"HOURLY">, import("@sinclair/typebox").TLiteral<"DAILY">, import("@sinclair/typebox").TLiteral<"WEEKLY">, import("@sinclair/typebox").TLiteral<"NEVER">]>;
+export declare const ContentRatingSchema: import("@sinclair/typebox").TUnion<[import("@sinclair/typebox").TLiteral<"EVERYONE">, import("@sinclair/typebox").TLiteral<"TEEN">, import("@sinclair/typebox").TLiteral<"MATURE">, import("@sinclair/typebox").TLiteral<"ADULT_ONLY">]>;
+//# sourceMappingURL=enums.schema.d.ts.map

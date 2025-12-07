@@ -1,0 +1,1 @@
+{"version":3,"file":"liveness.handler.d.ts","sourceRoot":"","sources":["../../../../src/api/health/handlers/liveness.handler.ts"],"names":[],"mappings":"AAAA;;;;GAIG;AAEH,OAAO,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAEvD,wBAAsB,eAAe,CACnC,QAAQ,EAAE,cAAc,EACxB,KAAK,EAAE,YAAY,GAClB,OAAO,CAAC,IAAI,CAAC,CAKf"}

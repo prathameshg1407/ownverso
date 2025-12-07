@@ -1,0 +1,5506 @@
+// ============================================================================
+// OWNVERSO PLATFORM - PRISMA SCHEMA v3.1 (PRODUCTION-READY)
+// ============================================================================
+//
+// A comprehensive content platform for web novels, webtoons, manga, manhwa,
+// and western comics with direct payment processing, AI-powered features,
+// and multi-tier subscription management.
+//
+// ============================================================================
+// CHANGELOG v3.1 (Fixes from v3.0 Analysis)
+// ============================================================================
+//
+// CRITICAL FIXES:
+// 1. Added missing relations to ChurnPreventionAction
+// 2. Fixed Payment ON DELETE behavior for GDPR compliance
+// 3. Added version fields for optimistic locking
+// 4. Added missing indexes for critical queries
+// 5. Fixed view unique constraints
+// 6. Removed sensitive data from direct storage (use vault references)
+// 7. Split User model into role-specific extension tables
+// 8. Fixed all polymorphic associations with proper relations
+// 9. Added soft delete to all user-generated content
+// 10. Standardized currency handling
+//
+// MODERATE FIXES:
+// 11. Added missing enums for string-based type fields
+// 12. Fixed naming inconsistencies
+// 13. Added proper documentation
+// 14. Fixed temporal data handling with explicit timezones
+// 15. Added typed JSON validation hints
+//
+// MINOR FIXES:
+// 16. Optimized column types
+// 17. Added default value corrections
+// 18. Fixed enum completeness
+//
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex", "postgresqlExtensions", "views"]
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  engineType      = "binary"
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto, pg_trgm, unaccent]
+}
+
+// ############################################################################
+//
+//  SECTION 1: ENUMERATIONS
+//
+//  Organized by domain. All enums use SCREAMING_SNAKE_CASE.
+//  FIXED: Added missing enum values and new enums for string fields.
+//
+// ############################################################################
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.1 USER & AUTHENTICATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Platform user roles with escalating privileges
+enum UserRole {
+  READER // Can read content, subscribe to authors
+  AUTHOR // Can create content, manage sites
+  COLLABORATOR // Can assist authors with delegated permissions
+  MODERATOR // Can moderate content (NEW)
+  ADMIN // Platform administrator
+  SUPER_ADMIN // Full system access
+}
+
+/// User account lifecycle states
+enum UserStatus {
+  PENDING_VERIFICATION // Awaiting email verification
+  ACTIVE // Normal active account
+  SUSPENDED // Temporarily suspended (reversible)
+  BANNED // Permanently banned
+  DELETED // Soft-deleted, pending erasure
+  DEACTIVATED // Self-deactivated by user (NEW)
+}
+
+/// Supported OAuth/SSO providers
+enum AuthProvider {
+  EMAIL // Email + password
+  GOOGLE // Google OAuth 2.0
+  APPLE // Sign in with Apple
+  TWITTER // Twitter OAuth
+  DISCORD // Discord OAuth (NEW)
+  FACEBOOK // Facebook OAuth (NEW)
+}
+
+/// Team member roles for site collaboration
+enum CollaboratorRole {
+  VIEWER // Read-only access (NEW)
+  EDITOR // Create and edit content
+  TRANSLATOR // Manage translations
+  ANALYST // View analytics only
+  MANAGER // Manage site settings
+  OWNER // Full site control (NEW)
+}
+
+/// Verification token purposes
+enum VerificationTokenType {
+  EMAIL_VERIFICATION // New account verification
+  EMAIL_CHANGE // Email address change
+  PASSWORD_RESET // Password recovery
+  MFA_SETUP // Two-factor authentication setup
+  ACCOUNT_RECOVERY // Account recovery (NEW)
+  API_KEY_CREATION // API key verification (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.2 PLATFORM SUBSCRIPTION (Author tiers for Ownverso)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Author subscription tiers with feature limits
+enum PlatformTier {
+  FREE
+  STARTER
+  GROWTH
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+/// Platform subscription lifecycle states
+enum PlatformSubscriptionStatus {
+  ACTIVE // Currently active
+  TRIALING // In trial period (RENAMED from TRIAL for consistency)
+  PAST_DUE // Payment failed, in grace period
+  CANCELLED // Cancelled, access until period end
+  SUSPENDED // Suspended for policy violation
+  EXPIRED // Subscription ended (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.3 SITE & CONTENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Author site operational states
+enum SiteStatus {
+  DRAFT // Not yet published (NEW)
+  ACTIVE // Normal operation
+  MAINTENANCE // Maintenance mode with custom message
+  SUSPENDED // Suspended by platform
+  DELETED // Soft-deleted
+}
+
+/// Supported content formats
+enum ContentType {
+  WEB_NOVEL // Text-based serialized fiction
+  WEBTOON // Vertical scroll comics (Korean style)
+  MANGA // Japanese comics (RTL reading)
+  MANHWA // Korean comics (traditional format)
+  WESTERN_COMIC // Western-style comics (LTR pages)
+  LIGHT_NOVEL // Illustrated light novels (NEW)
+  AUDIO_DRAMA // Audio content (NEW)
+}
+
+/// Age-based content ratings
+enum ContentRating {
+  EVERYONE // All ages (G)
+  TEEN // 13+ with parental guidance (PG-13)
+  MATURE // 17+ adults only (R)
+  ADULT_ONLY // 18+ explicit content (NC-17) (NEW)
+}
+
+/// Series publication lifecycle
+enum SeriesStatus {
+  DRAFT // Not yet published
+  ONGOING // Actively publishing
+  HIATUS // Temporarily paused
+  COMPLETED // Finished
+  CANCELLED // Discontinued
+  LICENSED // Licensed to publisher (NEW)
+}
+
+/// Chapter publication states
+enum ChapterStatus {
+  DRAFT // Work in progress
+  SCHEDULED // Scheduled for future publication
+  PUBLISHED // Live and accessible
+  ARCHIVED // Hidden from public view
+  UNDER_REVIEW // Pending moderation (NEW)
+  REJECTED // Moderation rejected (NEW)
+}
+
+/// Chapter access control levels
+enum ChapterAccessLevel {
+  FREE // Accessible to everyone
+  REGISTERED // Requires free account (NEW)
+  SUBSCRIBERS // Any paid subscriber
+  SPECIFIC_TIER // Specific tier or higher
+  SCHEDULED_FREE // Will become free on scheduled date
+  EARLY_ACCESS // Early access for higher tiers (NEW)
+}
+
+/// Comic reading direction
+enum ReadingDirection {
+  LTR // Left to right (Western)
+  RTL // Right to left (Manga)
+  VERTICAL // Top to bottom (Webtoon)
+}
+
+/// Content warning severity levels
+enum ContentWarningSeverity {
+  MILD // Minor themes
+  MODERATE // Significant themes
+  SEVERE // Intense themes
+  EXTREME // Very intense themes (NEW)
+}
+
+/// Content warning categories
+enum ContentWarningCategory {
+  VIOLENCE
+  SEXUAL_CONTENT
+  MENTAL_HEALTH
+  SUBSTANCE_USE
+  STRONG_LANGUAGE
+  DISTURBING_IMAGERY
+  DISCRIMINATION // NEW
+  SELF_HARM // NEW
+  ANIMAL_CRUELTY // NEW
+  OTHER
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.4 MONETIZATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Reader subscription to author lifecycle
+enum ReaderSubscriptionStatus {
+  ACTIVE // Currently subscribed
+  TRIALING // In trial period (NEW)
+  PAST_DUE // Payment failed, grace period
+  CANCELLED // Cancelled but access until period end
+  EXPIRED // Access ended
+  PAUSED // Temporarily paused
+}
+
+/// Billing cycle options
+enum BillingCycle {
+  MONTHLY
+  QUARTERLY // NEW
+  BIANNUAL // NEW
+  ANNUAL
+  LIFETIME
+}
+
+/// Payment transaction states
+/// FIXED: Added missing states
+enum PaymentStatus {
+  PENDING // Initiated, awaiting processing
+  PROCESSING // Being processed by gateway
+  REQUIRES_ACTION // Requires user action (3DS, etc.) (NEW)
+  SUCCEEDED // Successfully completed
+  FAILED // Failed to process
+  EXPIRED // Payment window expired (NEW)
+  REFUNDED // Fully refunded
+  PARTIALLY_REFUNDED // Partially refunded
+  DISPUTED // Under dispute/chargeback
+  CHARGEBACK_LOST // Chargeback ruled against merchant (NEW)
+  CHARGEBACK_WON // Chargeback ruled for merchant (NEW)
+  ON_HOLD // On hold for fraud review (NEW)
+  CANCELLED // Cancelled before completion
+}
+
+/// Payment transaction types
+enum PaymentType {
+  SUBSCRIPTION // Recurring subscription
+  SUBSCRIPTION_RENEWAL // Subscription renewal (NEW)
+  ONE_TIME_PURCHASE // Single purchase
+  TIP // Voluntary tip
+  PLATFORM_FEE // Platform usage fee (Free tier)
+  REFUND // Refund transaction (NEW)
+  PAYOUT // Author payout (NEW)
+}
+
+/// Supported payment gateways
+enum PaymentGateway {
+  RAZORPAY
+  STRIPE
+  XENDIT
+  PAYPAL // NEW
+  MANUAL // Manual/offline payment (NEW)
+}
+
+/// Platform invoice states (for author billing)
+enum PlatformInvoiceStatus {
+  DRAFT // Being prepared
+  PENDING // Awaiting payment
+  PAID // Successfully paid
+  OVERDUE // Past due date
+  CANCELLED // Cancelled
+  DISPUTED // Under dispute
+  WRITTEN_OFF // Written off as uncollectable
+  REFUNDED // Refunded (NEW)
+}
+
+/// Discount code types
+enum DiscountType {
+  PERCENTAGE // X% off
+  FIXED_AMOUNT // ₹X off
+  FREE_TRIAL // X days free
+  FREE_MONTHS // X months free
+  BUNDLE // Bundle discount (NEW)
+}
+
+/// Author payout states
+enum PayoutStatus {
+  PENDING // Awaiting processing
+  SCHEDULED // Scheduled for future (NEW)
+  PROCESSING // Being processed
+  COMPLETED // Successfully completed
+  FAILED // Failed to process
+  CANCELLED // Cancelled
+  ON_HOLD // On hold for review (NEW)
+}
+
+/// Gift subscription states
+enum GiftSubscriptionStatus {
+  PENDING // Awaiting delivery
+  SCHEDULED // Scheduled for future (NEW)
+  DELIVERED // Sent to recipient
+  CLAIMED // Recipient activated
+  EXPIRED // Not claimed in time
+  REFUNDED // Refunded to giver
+  CANCELLED // Cancelled (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.5 COMMUNICATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Email template types
+enum EmailType {
+  // Transactional
+  WELCOME
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  MFA_CODE // NEW
+  NEW_CHAPTER
+  RENEWAL_REMINDER
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PAYMENT_RETRY
+  SUBSCRIPTION_CANCELLED
+  SUBSCRIPTION_EXPIRED
+  SUBSCRIPTION_PAUSED // NEW
+  SECURITY_ALERT
+  ACCOUNT_LOCKED // NEW
+  // Marketing
+  BROADCAST
+  NEWSLETTER
+  ANNOUNCEMENT
+  WIN_BACK
+  CHURN_PREVENTION
+  REFERRAL_INVITE // NEW
+  MILESTONE_ACHIEVED // NEW
+}
+
+/// Email delivery states
+enum EmailStatus {
+  QUEUED // In queue
+  SENDING // Being sent
+  SENT // Sent to provider
+  DELIVERED // Delivered to inbox
+  OPENED // Opened by recipient
+  CLICKED // Link clicked
+  BOUNCED // Bounced
+  SOFT_BOUNCED // Temporary bounce (NEW)
+  FAILED // Failed to send
+  SPAM_REPORTED // Reported as spam
+  UNSUBSCRIBED // Triggered unsubscribe
+  SUPPRESSED // Suppressed (unsubscribed/bounced) (NEW)
+}
+
+/// In-app notification types
+enum NotificationType {
+  NEW_CHAPTER
+  NEW_SERIES // NEW
+  NEW_SUBSCRIBER
+  SUBSCRIBER_CANCELLED
+  SUBSCRIBER_RENEWED // NEW
+  COMMENT
+  COMMENT_REPLY
+  MENTION
+  REVIEW
+  SUBSCRIPTION_RENEWAL
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  PAYOUT_COMPLETED // NEW
+  MILESTONE
+  ACHIEVEMENT // NEW
+  ANNOUNCEMENT
+  SYSTEM
+  SECURITY // NEW
+}
+
+/// Email digest frequency preferences
+enum EmailDigestFrequency {
+  INSTANT // Immediate delivery
+  HOURLY // Hourly digest (NEW)
+  DAILY // Daily digest
+  WEEKLY // Weekly digest
+  NEVER // No emails
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.6 MODERATION
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Content/user report reasons
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  HATE_SPEECH
+  VIOLENCE_PROMOTION
+  SEXUAL_CONTENT_UNTAGGED
+  COPYRIGHT_INFRINGEMENT
+  TRADEMARK_INFRINGEMENT // NEW
+  MISINFORMATION
+  DOXXING
+  CSAM
+  IMPERSONATION // NEW
+  SCAM // NEW
+  SELF_HARM_PROMOTION // NEW
+  OTHER
+}
+
+/// Report processing states
+enum ReportStatus {
+  PENDING // Awaiting review
+  UNDER_REVIEW // Being reviewed
+  NEEDS_MORE_INFO // Needs more information (NEW)
+  RESOLVED_ACTION_TAKEN // Resolved with action
+  RESOLVED_NO_ACTION // Resolved, no action needed
+  DISMISSED // Dismissed as invalid
+  ESCALATED // Escalated to higher authority
+  APPEALED // Under appeal (NEW)
+}
+
+/// Moderation actions
+enum ModerationAction {
+  NO_ACTION
+  WARNING_ISSUED
+  CONTENT_HIDDEN
+  CONTENT_REMOVED
+  CONTENT_AGE_RESTRICTED // NEW
+  COMMENT_DISABLED // NEW
+  USER_WARNED // NEW
+  USER_MUTED_24_HOURS // NEW
+  USER_MUTED_7_DAYS // NEW
+  USER_SUSPENDED_7_DAYS
+  USER_SUSPENDED_30_DAYS
+  USER_SUSPENDED_PERMANENT
+  USER_BANNED
+  ACCOUNT_DELETED
+  APPEAL_APPROVED // NEW
+  APPEAL_DENIED // NEW
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.7 ANALYTICS & A/B TESTING
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Analytics event types
+enum AnalyticsEventType {
+  // Page events
+  PAGE_VIEW
+  PAGE_EXIT // NEW
+  // Content events
+  CHAPTER_START
+  CHAPTER_PROGRESS
+  CHAPTER_COMPLETE
+  CHAPTER_ABANDONED // NEW
+  SERIES_VIEW
+  SERIES_FOLLOW // NEW
+  SERIES_UNFOLLOW // NEW
+  // Subscription events
+  SUBSCRIPTION_VIEW
+  SUBSCRIPTION_START
+  SUBSCRIPTION_UPGRADE // NEW
+  SUBSCRIPTION_DOWNGRADE // NEW
+  SUBSCRIPTION_CANCEL
+  SUBSCRIPTION_REACTIVATE // NEW
+  // Payment events
+  PAYMENT_INITIATED // NEW
+  PAYMENT_COMPLETED // NEW
+  PAYMENT_FAILED // NEW
+  // User events
+  SIGNUP
+  SIGNUP_COMPLETED // NEW
+  LOGIN
+  LOGOUT // NEW
+  // Engagement events
+  SEARCH
+  SEARCH_CLICK // NEW
+  SHARE
+  BOOKMARK // NEW
+  COMMENT_POSTED // NEW
+  REVIEW_POSTED // NEW
+  REACTION // NEW
+}
+
+/// A/B test states
+enum ABTestStatus {
+  DRAFT // Being configured
+  SCHEDULED // Scheduled to start (NEW)
+  RUNNING // Actively running
+  PAUSED // Temporarily paused
+  COMPLETED // Finished, results available
+  CANCELLED // Cancelled early (NEW)
+  ARCHIVED // Archived
+}
+
+/// Churn risk levels for prediction
+enum ChurnRiskLevel {
+  MINIMAL // < 10% risk (NEW)
+  LOW // 10-30% risk
+  MEDIUM // 30-60% risk
+  HIGH // 60-80% risk
+  CRITICAL // > 80% risk
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.8 SUPPORT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Support ticket states
+enum TicketStatus {
+  OPEN
+  ASSIGNED // NEW
+  IN_PROGRESS
+  WAITING_ON_CUSTOMER
+  WAITING_ON_THIRD_PARTY
+  PENDING_APPROVAL // NEW
+  RESOLVED
+  CLOSED
+  REOPENED
+}
+
+/// Support ticket priority (affects SLA)
+enum TicketPriority {
+  LOW // P4 - Best effort (7 day response)
+  MEDIUM // P3 - 48h response
+  HIGH // P2 - 24h response
+  CRITICAL // P1 - 4h response
+  URGENT // P0 - 1h response (NEW)
+}
+
+/// Support ticket categories
+enum TicketCategory {
+  ACCOUNT_ACCESS
+  ACCOUNT_SECURITY // NEW
+  BILLING
+  PAYMENT_ISSUE
+  REFUND_REQUEST // NEW
+  TECHNICAL_BUG
+  CONTENT_ISSUE
+  COPYRIGHT_CLAIM // NEW
+  FEATURE_REQUEST
+  ABUSE_REPORT
+  DATA_REQUEST // NEW (GDPR)
+  OTHER
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.9 SYSTEM & JOBS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Webhook event processing states
+enum WebhookEventStatus {
+  PENDING // Awaiting processing
+  PROCESSING // Being processed
+  PROCESSED // Successfully processed
+  FAILED // Failed to process
+  RETRYING // Scheduled for retry
+  DEAD_LETTER // Moved to dead letter queue
+  IGNORED // Intentionally ignored (NEW)
+}
+
+/// Background job states
+enum JobStatus {
+  PENDING // Awaiting execution
+  SCHEDULED // Scheduled for future
+  PROCESSING // Currently executing
+  COMPLETED // Successfully completed
+  FAILED // Failed
+  CANCELLED // Cancelled
+  RETRYING // Retrying after failure
+  STALLED // Stalled/stuck (NEW)
+  DEAD // Permanently failed (NEW)
+}
+
+/// GDPR data export states
+enum DataExportStatus {
+  PENDING // Awaiting processing
+  QUEUED // In queue (NEW)
+  PROCESSING // Being generated
+  READY // Ready for download
+  DOWNLOADED // Downloaded by user
+  EXPIRED // Expired, no longer available
+  FAILED // Failed to generate
+}
+
+/// Data export scope options
+enum DataExportType {
+  FULL_ACCOUNT // Complete account data
+  PROFILE_ONLY // Profile data only (NEW)
+  CONTENT_ONLY // Series and chapters only
+  SUBSCRIBERS // Subscriber list
+  ANALYTICS // Analytics data
+  TRANSACTIONS // Payment history
+  COMMENTS // User comments (NEW)
+  CUSTOM // Custom selection (NEW)
+}
+
+/// Export file formats
+enum DataExportFormat {
+  JSON
+  CSV
+  EPUB
+  PDF
+  MARKDOWN
+  HTML // NEW
+  DOCX // NEW
+  ZIP
+}
+
+/// Account deletion states (GDPR)
+enum AccountDeletionStatus {
+  PENDING // Request submitted
+  COOLING_OFF // 24-hour cooling off period
+  VERIFIED // Verified, awaiting processing
+  PROCESSING // Being deleted
+  COMPLETED // Deletion complete
+  CANCELLED // Cancelled by user
+  FAILED // Deletion failed (NEW)
+}
+
+/// Referral program states
+enum ReferralStatus {
+  PENDING // Invited, not signed up
+  CLICKED // Link clicked (NEW)
+  SIGNED_UP // Signed up, not converted
+  QUALIFIED // Met qualification criteria
+  REWARDED // Rewards issued
+  EXPIRED // Expired without conversion
+  FRAUDULENT // Flagged as fraudulent (NEW)
+}
+
+/// Social media post states
+enum SocialPostStatus {
+  DRAFT // Being composed
+  SCHEDULED // Scheduled for posting
+  POSTING // Being posted
+  POSTED // Successfully posted
+  FAILED // Failed to post
+  CANCELLED // Cancelled
+  DELETED // Deleted from platform (NEW)
+}
+
+/// Media file security scan states
+enum MediaScanStatus {
+  PENDING // Awaiting scan
+  SCANNING // Being scanned
+  CLEAN // No issues found
+  FLAGGED // Flagged for review
+  INFECTED // Malware detected
+  BLOCKED // Blocked content detected (NEW)
+  ERROR // Scan error
+}
+
+/// TikTok preview generation states
+enum TikTokPreviewStatus {
+  PENDING // Awaiting generation
+  QUEUED // In queue (NEW)
+  GENERATING // Being generated
+  READY // Ready for use
+  PUBLISHED // Published to platform (NEW)
+  FAILED // Generation failed
+}
+
+/// System health check states
+enum HealthStatus {
+  HEALTHY // All systems operational
+  DEGRADED // Partial functionality
+  UNHEALTHY // Critical issues
+  MAINTENANCE // Under maintenance
+  UNKNOWN // Status unknown (NEW)
+}
+
+/// Incident severity levels
+enum IncidentSeverity {
+  P1_CRITICAL // Full outage, data breach
+  P2_HIGH // Partial outage, payment failures
+  P3_MEDIUM // Performance degradation
+  P4_LOW // Minor issues
+  P5_INFO // Informational (NEW)
+}
+
+/// Incident resolution states
+enum IncidentStatus {
+  DETECTED // Auto-detected (NEW)
+  INVESTIGATING // Investigating root cause
+  IDENTIFIED // Root cause identified
+  FIXING // Fix in progress (NEW)
+  MONITORING // Fix deployed, monitoring
+  RESOLVED // Fully resolved
+  POST_MORTEM // Post-mortem in progress (NEW)
+  CLOSED // Incident closed (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.10 USER PREFERENCES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Reader theme options
+enum ReadingTheme {
+  LIGHT // Light background
+  DARK // Dark background
+  SEPIA // Sepia tones
+  AMOLED // Pure black (OLED)
+  SYSTEM // Follow system preference
+  CUSTOM // Custom colors
+}
+
+/// Page width options
+enum PageWidth {
+  NARROW // ~600px
+  MEDIUM // ~800px
+  WIDE // ~1000px
+  FULL // 100% width
+}
+
+/// Text alignment options
+enum TextAlignment {
+  LEFT
+  JUSTIFY
+  CENTER
+  RIGHT // NEW
+}
+
+/// Comic reading modes
+enum ComicReadingMode {
+  VERTICAL_SCROLL // Continuous scroll
+  PAGINATED // Page by page
+  LONG_STRIP // Long strip format
+  DOUBLE_PAGE // Two-page spread (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.11 CONTENT CALENDAR & GOALS
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Calendar entry types
+enum CalendarEntryType {
+  CHAPTER_PUBLICATION
+  CHAPTER_DEADLINE // NEW
+  ANNOUNCEMENT
+  SOCIAL_POST
+  REMINDER
+  MILESTONE
+  MEETING // NEW
+  CUSTOM
+}
+
+/// Writing goal types
+enum GoalType {
+  DAILY_WORDS
+  WEEKLY_WORDS
+  MONTHLY_WORDS
+  CHAPTERS_PER_WEEK
+  CHAPTERS_PER_MONTH
+  PAGES_PER_DAY // NEW (for comics)
+  PANELS_PER_DAY // NEW (for comics)
+  CUSTOM
+}
+
+/// Goal tracking periods
+enum GoalPeriodType {
+  DAILY
+  WEEKLY
+  BI_WEEKLY // NEW
+  MONTHLY
+  QUARTERLY // NEW
+  YEARLY
+  CUSTOM
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.12 IMPORT/EXPORT
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Content import sources
+enum ImportSourceType {
+  GOOGLE_DOCS
+  MICROSOFT_WORD
+  NOTION // NEW
+  MARKDOWN
+  EPUB
+  HTML
+  PLAIN_TEXT
+  IMAGE_ARCHIVE
+  TAPAS_EXPORT
+  ROYAL_ROAD
+  WATTPAD
+  SCRIBBLEHUB
+  WEBNOVEL // NEW
+  AO3 // NEW
+}
+
+/// Content export formats
+enum ExportFormatType {
+  EPUB
+  PDF
+  MARKDOWN
+  HTML
+  JSON
+  DOCX
+  CBZ // NEW (comic book archive)
+  ZIP
+}
+
+/// Churn prevention action types
+enum ChurnPreventionActionType {
+  RE_ENGAGEMENT_EMAIL
+  DISCOUNT_OFFER
+  PERSONAL_OUTREACH_SUGGESTION
+  CONTENT_RECOMMENDATION
+  PAYMENT_UPDATE_REMINDER
+  EXIT_SURVEY
+  WIN_BACK_CAMPAIGN // NEW
+  TIER_DOWNGRADE_OFFER // NEW
+  PAUSE_OFFER // NEW
+}
+
+/// Churn prevention action states
+enum ChurnPreventionActionStatus {
+  PENDING // Awaiting execution
+  SCHEDULED // Scheduled for future
+  SENT // Sent to user
+  OPENED // Opened by user
+  CLICKED // Link clicked
+  CONVERTED // User retained
+  FAILED // Failed to execute
+  CANCELLED // Cancelled
+  EXPIRED // Offer expired (NEW)
+}
+
+/// Data residency regions (GDPR compliance)
+enum DataRegion {
+  INDIA
+  SOUTHEAST_ASIA
+  EUROPE
+  NORTH_AMERICA
+  SOUTH_AMERICA // NEW
+  AUSTRALIA // NEW
+  JAPAN // NEW
+}
+
+/// Scheduled publication states
+enum ScheduledPublicationStatus {
+  PENDING // Awaiting scheduled time
+  PROCESSING // Being published
+  PUBLISHED // Successfully published
+  FAILED // Publication failed
+  CANCELLED // Cancelled
+  RESCHEDULED // Rescheduled (NEW)
+}
+
+/// Scheduled unlock states
+enum ScheduledUnlockStatus {
+  PENDING // Awaiting scheduled time
+  PROCESSING // Being unlocked
+  UNLOCKED // Successfully unlocked
+  CANCELLED // Cancelled
+  FAILED // Unlock failed
+}
+
+/// Cache invalidation states
+enum CacheInvalidationStatus {
+  PENDING // Awaiting processing
+  PROCESSING // Being processed
+  COMPLETED // Successfully completed
+  FAILED // Failed
+  PARTIAL // Partially completed (NEW)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1.13 NEW ENUMS (Replacing String-based Types)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Reaction types (was String)
+enum ReactionType {
+  LIKE
+  LOVE
+  LAUGH
+  CRY
+  ANGRY
+  WOW // NEW
+  SAD // NEW
+  FIRE // NEW
+  CELEBRATE // NEW
+}
+
+/// Product types (was String)
+enum ProductType {
+  DIGITAL_DOWNLOAD
+  BONUS_CONTENT
+  ART_PACK
+  WALLPAPER_PACK // NEW
+  AUDIO_CONTENT // NEW
+  EBOOK
+  BUNDLE
+  MERCHANDISE // NEW (physical)
+  COMMISSION_SLOT // NEW
+  CUSTOM
+}
+
+/// Storage provider types (was String)
+enum StorageProvider {
+  S3
+  GCS
+  AZURE_BLOB
+  CLOUDFLARE_R2
+  BUNNY_CDN // NEW
+  LOCAL // Development only
+}
+
+/// AI model types (was String)
+enum AIModel {
+  GPT_4
+  GPT_4_TURBO
+  GPT_4O
+  GPT_4O_MINI
+  CLAUDE_3_OPUS
+  CLAUDE_3_SONNET
+  CLAUDE_3_HAIKU
+  CLAUDE_3_5_SONNET
+  GEMINI_PRO
+  GEMINI_ULTRA
+  LLAMA_3
+  MISTRAL_LARGE
+  CUSTOM
+}
+
+/// AI session types (was String)
+enum AISessionType {
+  BRAINSTORMING
+  OUTLINE
+  PLOT_DEVELOPMENT
+  CHARACTER_DEVELOPMENT
+  WORLD_BUILDING
+  DIALOGUE
+  DESCRIPTION
+  EDITING
+  PROOFREADING
+  TRANSLATION
+  SUMMARIZATION
+  EXPANSION
+  TITLE_GENERATION
+  BLURB_WRITING
+  CUSTOM
+}
+
+/// Social platform types (was String)
+enum SocialPlatform {
+  TWITTER
+  DISCORD
+  BLUESKY
+  MASTODON
+  TIKTOK
+  INSTAGRAM
+  YOUTUBE
+  THREADS // NEW
+  FACEBOOK // NEW
+  REDDIT // NEW
+  TUMBLR // NEW
+}
+
+/// Reading list types (was String)
+enum ReadingListType {
+  WANT_TO_READ
+  CURRENTLY_READING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+  FAVORITES
+  REREADING // NEW
+  CUSTOM
+}
+
+/// Translation term types (was String)
+enum TranslationTermType {
+  CHARACTER_NAME
+  PLACE_NAME
+  ORGANIZATION_NAME // NEW
+  TITLE // NEW
+  TERM
+  PHRASE
+  IDIOM // NEW
+  HONORIFIC // NEW
+}
+
+/// Device types (was String)
+enum DeviceType {
+  DESKTOP
+  MOBILE
+  TABLET
+  TV // NEW
+  E_READER // NEW
+  UNKNOWN
+}
+
+/// Reading status types (was String on Review)
+enum ReadingStatusType {
+  NOT_STARTED
+  READING
+  COMPLETED
+  ON_HOLD
+  DROPPED
+}
+
+/// Author note position types (was String)
+enum AuthorNotePosition {
+  BEFORE_CONTENT
+  AFTER_CONTENT
+  BOTH
+  HIDDEN
+}
+
+/// Comment moderation mode (was String)
+enum CommentModerationMode {
+  NONE // All comments visible immediately
+  PRE_APPROVE // Approve before visible
+  POST_APPROVE // Visible but can be hidden
+  TRUSTED_ONLY // Only trusted users comment freely
+}
+
+// ############################################################################
+//
+//  SECTION 2: LOOKUP TABLES
+//
+//  Normalized reference data for currencies and languages.
+//
+// ############################################################################
+
+/// ISO 4217 currency codes
+model Currency {
+  code          String  @id @db.Char(3)
+  name          String  @db.VarChar(50)
+  symbol        String  @db.VarChar(10)
+  decimalPlaces Int     @default(2) @db.SmallInt
+  isActive      Boolean @default(true)
+
+  // Relations for referential integrity
+  payments          Payment[]
+  subscriptionTiers AuthorSubscriptionTier[]
+  products          Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("currencies")
+}
+
+/// ISO 639-1 language codes
+model Language {
+  code             String  @id @db.Char(2)
+  name             String  @db.VarChar(50)
+  nativeName       String  @db.VarChar(50)
+  script           String? @db.VarChar(20)
+  isRTL            Boolean @default(false)
+  isActive         Boolean @default(true)
+  forContent       Boolean @default(true)
+  forInterface     Boolean @default(false)
+  forAITranslation Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("languages")
+}
+
+// ############################################################################
+//
+//  SECTION 3: USER & AUTHENTICATION
+//
+//  FIXED: Split User into core + extension tables for better separation
+//
+// ############################################################################
+
+/// Core user account - minimal fields for authentication
+model User {
+  id       BigInt @id @default(autoincrement())
+  publicId String @unique @default(cuid())
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Authentication (Core)
+  // ─────────────────────────────────────────────────────────────────────────
+  email         String     @unique
+  emailVerified Boolean    @default(false)
+  passwordHash  String?
+  username      String     @unique
+  displayName   String
+  role          UserRole   @default(READER)
+  status        UserStatus @default(PENDING_VERIFICATION)
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Timestamps
+  // ─────────────────────────────────────────────────────────────────────────
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Extension Tables (1:1)
+  // ─────────────────────────────────────────────────────────────────────────
+  profile       UserProfile?
+  security      UserSecurity?
+  preferences   UserPreferences?
+  authorAccount AuthorAccount?
+  readerProfile ReaderProfile?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Authentication Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  authAccounts       AuthAccount[]
+  sessions           Session[]
+  verificationTokens VerificationToken[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Content Creation Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  sites    Site[]
+  series   Series[]
+  chapters Chapter[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Content Consumption Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  subscriptionsAsReader ReaderSubscription[]
+  purchases             Purchase[]
+  readingProgress       ReadingProgress[]
+  bookmarks             Bookmark[]
+  readingLists          ReadingList[]
+  readingListFollows    ReadingListFollow[]
+  readerSettings        ReaderSettings?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Payment Relations (FIXED: Optional for GDPR deletion)
+  // ─────────────────────────────────────────────────────────────────────────
+  paymentsAsReader Payment[] @relation("ReaderPayments")
+  paymentsAsAuthor Payment[] @relation("AuthorPayments")
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Social Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  comments       Comment[]
+  reactions      Reaction[]
+  reviews        Review[]
+  reviewVotes    ReviewVote[]
+  following      AuthorFollow[]  @relation("UserFollowing")
+  followers      AuthorFollow[]  @relation("UserFollowers")
+  forumPosts     ForumPost[]
+  forumPostLikes ForumPostLike[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Communication Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  notifications     Notification[]
+  emailLogs         EmailLog[]
+  pushSubscriptions PushSubscription[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Moderation Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  reportsSubmitted           Report[]        @relation("ReportSubmitter")
+  reportsReceived            Report[]        @relation("ReportTarget")
+  moderationActionsReceived  ModerationLog[] @relation("ModeratedUser")
+  moderationActionsPerformed ModerationLog[] @relation("Moderator")
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Support Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  supportTickets SupportTicket[]
+  ticketMessages TicketMessage[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // AI Feature Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  aiWritingSessions AIWritingSession[]
+  aiUsageRecords    AIUsageRecord[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Media Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  mediaFiles        MediaFile[]
+  storageUsage      StorageUsage?
+  socialConnections SocialConnection[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // GDPR Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  dataExportRequests     DataExportRequest[]
+  accountDeletionRequest AccountDeletionRequest?
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // API Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  apiKeys APIKey[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Referral Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  referralsAsReferrer Referral[] @relation("ReferrerUser")
+  referralAsReferee   Referral?  @relation("RefereeUser")
+  referredById        BigInt?
+  referredBy          User?      @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals           User[]     @relation("UserReferrals")
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Collaboration Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  collaborations Collaborator[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Writing Tools Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  writingGoals           WritingGoal[]
+  writingStreak          WritingStreak?
+  contentCalendarEntries ContentCalendarEntry[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Import/Export Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  importJobs ImportJob[]
+  exportJobs ExportJob[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Discount Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  discountCodeUsages DiscountCodeUsage[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Gift Subscription Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  giftSubscriptionsGiven    GiftSubscription[] @relation("GiftGiver")
+  giftSubscriptionsReceived GiftSubscription[] @relation("GiftRecipient")
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Churn Prevention Relations (FIXED: Added missing relation)
+  // ─────────────────────────────────────────────────────────────────────────
+  churnPreventionActions ChurnPreventionAction[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Engagement Score Relations
+  // ─────────────────────────────────────────────────────────────────────────
+  readerEngagementScores ReaderEngagementScore[]
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Indexes
+  // ─────────────────────────────────────────────────────────────────────────
+  @@index([email])
+  @@index([username])
+  @@index([publicId])
+  @@index([status, role])
+  @@index([referredById])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// User profile extension - biographical and preference data
+model UserProfile {
+  userId BigInt @id
+
+  avatarUrl String? @db.VarChar(2048)
+  bio       String? @db.Text
+
+  locale     String     @default("en") @db.Char(2)
+  timezone   String     @default("UTC") @db.VarChar(50)
+  dataRegion DataRegion @default(INDIA)
+
+  // Social links
+  websiteUrl      String? @db.VarChar(2048)
+  twitterHandle   String? @db.VarChar(50)
+  instagramHandle String? @db.VarChar(50)
+  tiktokHandle    String? @db.VarChar(50)
+  discordHandle   String? @db.VarChar(50)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+/// User security extension - authentication and access control
+model UserSecurity {
+  userId BigInt @id
+
+  // Email verification
+  emailVerifiedAt DateTime?
+
+  // MFA
+  mfaEnabled     Boolean  @default(false)
+  mfaSecret      String?  @db.Text // Encrypted
+  mfaBackupCodes String[] @default([]) // Encrypted
+
+  // Login tracking
+  lastLoginAt        DateTime?
+  lastLoginIp        String?   @db.VarChar(45)
+  lastLoginUserAgent String?   @db.Text
+  lastLoginDeviceId  String?
+
+  // Security
+  failedLoginCount  Int       @default(0) @db.SmallInt
+  lockedUntil       DateTime?
+  passwordChangedAt DateTime?
+
+  // Session management
+  forceLogoutAt DateTime?
+
+  // Status history (audit trail)
+  statusHistory Json @default("[]")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_security")
+}
+
+/// User preferences extension - UI and notification preferences
+model UserPreferences {
+  userId BigInt @id
+
+  // Notification preferences
+  emailNotifications   Boolean              @default(true)
+  pushNotifications    Boolean              @default(true)
+  emailDigestFrequency EmailDigestFrequency @default(DAILY)
+
+  // Content preferences
+  contentLanguages String[]        @default(["en"])
+  contentRatings   ContentRating[] @default([EVERYONE, TEEN])
+  hiddenGenres     String[]        @default([])
+  hiddenTags       String[]        @default([])
+
+  // Privacy
+  showOnlineStatus    Boolean @default(true)
+  showReadingActivity Boolean @default(true)
+  allowDirectMessages Boolean @default(true)
+
+  // Marketing
+  marketingEmails Boolean @default(false)
+  newsletterOptIn Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+/// Author account extension - platform subscription and author-specific data
+model AuthorAccount {
+  userId BigInt @id
+
+  // Author identity
+  penName String?
+  tagline String? @db.VarChar(200)
+  fullBio String? @db.Text
+
+  // Verification
+  isVerified       Boolean   @default(false)
+  verifiedAt       DateTime?
+  verificationNote String?
+
+  // Platform subscription
+  platformTier          PlatformTier               @default(FREE)
+  platformTierStatus    PlatformSubscriptionStatus @default(ACTIVE)
+  platformTierStartedAt DateTime?
+  platformTierExpiresAt DateTime?
+  platformBillingCycle  BillingCycle?
+  platformTrialEndsAt   DateTime?
+
+  // Gateway customer IDs
+  stripeCustomerId   String?
+  razorpayCustomerId String?
+  xenditCustomerId   String?
+
+  // Usage tracking (Free tier billing)
+  currentMonthRevenue   BigInt    @default(0)
+  currentMonthUsageFee  BigInt    @default(0)
+  currentMonthCurrency  String    @default("INR") @db.Char(3)
+  lastUsageFeeInvoiceAt DateTime?
+
+  // Tier limits (cached)
+  seriesCount              Int    @default(0) @db.SmallInt
+  totalChapterCount        Int    @default(0)
+  activeSubscriberCount    Int    @default(0)
+  storageUsedBytes         BigInt @default(0)
+  bandwidthUsedBytes       BigInt @default(0)
+  emailBroadcastsThisMonth Int    @default(0) @db.SmallInt
+
+  // AI usage (monthly)
+  aiTranslationWordsUsed Int      @default(0)
+  aiWritingTokensUsed    Int      @default(0)
+  aiCoverGenerationsUsed Int      @default(0) @db.SmallInt
+  aiUsageResetAt         DateTime @default(now())
+
+  // Referral
+  referralCode         String? @unique
+  referralRewardMonths Int     @default(0) @db.SmallInt
+
+  // Commissions
+  acceptingCommissions Boolean @default(false)
+  commissionInfo       String? @db.Text
+  commissionMinPrice   Int?
+  commissionMaxPrice   Int?
+  commissionCurrency   String  @default("INR") @db.Char(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                 User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentGatewayConfig PaymentGatewayConfig?
+  platformInvoices     PlatformInvoice[]
+  authorPayouts        AuthorPayout[]
+  tiersCreated         AuthorSubscriptionTier[]
+  products             Product[]
+  discountCodes        DiscountCode[]
+
+  @@index([platformTier, platformTierStatus])
+  @@index([referralCode])
+  @@map("author_accounts")
+}
+
+/// Reader profile extension - reading preferences and stats
+model ReaderProfile {
+  userId BigInt @id
+
+  // Reading preferences
+  preferredGenres       String[]      @default([])
+  preferredContentTypes ContentType[] @default([])
+
+  // Reading stats (cached)
+  totalSeriesRead    Int    @default(0)
+  totalChaptersRead  Int    @default(0)
+  totalReadTimeHours Float  @default(0)
+  totalWordsRead     BigInt @default(0)
+
+  // Engagement
+  activeSubscriptions Int    @default(0) @db.SmallInt
+  lifetimeSpent       BigInt @default(0)
+  lifetimeCurrency    String @default("INR") @db.Char(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reader_profiles")
+}
+
+/// OAuth and external authentication providers
+model AuthAccount {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  provider          AuthProvider
+  providerAccountId String
+
+  // OAuth tokens (FIXED: Use vault references, not raw tokens)
+  accessTokenRef  String? // Reference to token in vault
+  refreshTokenRef String? // Reference to token in vault
+  tokenExpiresAt  DateTime?
+  tokenScopes     String[]  @default([])
+
+  // Provider profile data
+  providerEmail  String?
+  providerName   String?
+  providerAvatar String? @db.VarChar(2048)
+
+  // Sync status
+  lastSyncedAt  DateTime?
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId, provider])
+  @@map("auth_accounts")
+}
+
+/// Active user sessions with device tracking
+model Session {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  tokenHash        String @unique
+  refreshTokenHash String @unique
+
+  // Revocation
+  isRevoked     Boolean   @default(false)
+  revokedAt     DateTime?
+  revokedReason String?
+
+  // Device info
+  userAgent  String?    @db.Text
+  ipAddress  String?    @db.VarChar(45)
+  deviceType DeviceType @default(UNKNOWN)
+  deviceOs   String?
+  browser    String?
+  country    String?    @db.Char(2)
+  city       String?
+
+  authProvider AuthProvider?
+
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRevoked])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@index([lastActiveAt])
+  @@map("sessions")
+}
+
+/// Verification tokens for email, password reset, MFA setup
+model VerificationToken {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  tokenHash String                @unique
+  type      VerificationTokenType
+  newEmail  String?
+
+  isUsed      Boolean   @default(false)
+  usedAt      DateTime?
+  requestedIp String?   @db.VarChar(45)
+  usedIp      String?   @db.VarChar(45)
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([expiresAt])
+  @@map("verification_tokens")
+}
+
+// ############################################################################
+//
+//  SECTION 4: AUTHOR & SITE MANAGEMENT
+//
+// ############################################################################
+
+/// Author's website/storefront
+model Site {
+  id       String @id @default(cuid())
+  authorId BigInt
+
+  slug        String     @unique
+  name        String     @db.VarChar(100)
+  tagline     String?    @db.VarChar(200)
+  description String?    @db.Text
+  status      SiteStatus @default(DRAFT)
+
+  // Branding
+  logoUrl       String? @db.VarChar(2048)
+  faviconUrl    String? @db.VarChar(2048)
+  coverImageUrl String? @db.VarChar(2048)
+
+  // Theme
+  themeId          String?
+  primaryColor     String? @db.Char(7)
+  secondaryColor   String? @db.Char(7)
+  accentColor      String? @db.Char(7)
+  customCss        String? @db.Text
+  customCssEnabled Boolean @default(false)
+
+  // Custom domain
+  customDomain           String?   @unique @db.VarChar(253)
+  customDomainVerified   Boolean   @default(false)
+  customDomainVerifiedAt DateTime?
+  customDomainDnsRecords Json?
+  sslEnabled             Boolean   @default(true)
+  sslExpiresAt           DateTime?
+
+  // Visibility
+  isPublic           Boolean   @default(true)
+  maintenanceMode    Boolean   @default(false)
+  maintenanceMessage String?   @db.Text
+  suspensionReason   String?
+  suspendedAt        DateTime?
+
+  // SEO
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+  ogImageUrl      String? @db.VarChar(2048)
+
+  // Analytics
+  googleAnalyticsId String?
+  analyticsEnabled  Boolean @default(true)
+
+  // Content settings
+  defaultContentRating   ContentRating         @default(EVERYONE)
+  commentsEnabled        Boolean               @default(true)
+  commentsModerationMode CommentModerationMode @default(POST_APPROVE)
+
+  lastPublishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author            User                     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  theme             Theme?                   @relation(fields: [themeId], references: [id], onDelete: SetNull)
+  series            Series[]
+  pages             Page[]
+  announcements     Announcement[]
+  collaborators     Collaborator[]
+  subscriptionTiers AuthorSubscriptionTier[]
+  discountCodes     DiscountCode[]
+  products          Product[]
+  outgoingWebhooks  OutgoingWebhook[]
+  socialConnections SocialConnection[]
+  apiKeys           APIKey[]
+  mediaFiles        MediaFile[]
+  calendarEntries   ContentCalendarEntry[]
+  importJobs        ImportJob[]
+  exportJobs        ExportJob[]
+  abTests           ABTest[]
+
+  @@unique([authorId, slug])
+  @@index([authorId])
+  @@index([slug])
+  @@index([customDomain])
+  @@index([status, isPublic])
+  @@map("sites")
+}
+
+/// Custom static pages on author site
+model Page {
+  id     String @id @default(cuid())
+  siteId String
+
+  slug        String  @db.VarChar(100)
+  title       String  @db.VarChar(100)
+  content     String  @db.Text
+  contentHtml String? @db.Text
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
+  showInNav Boolean @default(false)
+  navOrder  Int     @default(0) @db.SmallInt
+  navLabel  String? @db.VarChar(30)
+
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, slug])
+  @@index([siteId, isPublished, navOrder])
+  @@map("pages")
+}
+
+/// Site theme templates
+model Theme {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+
+  thumbnailUrl String? @db.VarChar(2048)
+  previewUrl   String? @db.VarChar(2048)
+
+  styles        Json
+  colorSchemes  Json?
+  fontOptions   Json?
+  layoutOptions Json?
+
+  isPublic     Boolean       @default(true)
+  isPremium    Boolean       @default(false)
+  requiredTier PlatformTier?
+
+  usageCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sites Site[]
+
+  @@index([slug])
+  @@index([isPublic, isPremium])
+  @@map("themes")
+}
+
+/// Team collaborators on a site
+model Collaborator {
+  id     BigInt @id @default(autoincrement())
+  siteId String
+  userId BigInt
+
+  role        CollaboratorRole
+  permissions Json             @default("{}")
+
+  invitedByEmail String?
+  inviteToken    String?   @unique
+  invitedAt      DateTime  @default(now())
+  acceptedAt     DateTime?
+  expiresAt      DateTime?
+
+  isActive          Boolean   @default(true)
+  deactivatedAt     DateTime?
+  deactivatedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, userId])
+  @@index([siteId, isActive])
+  @@map("collaborators")
+}
+
+// ############################################################################
+//
+//  SECTION 5: CONTENT MANAGEMENT
+//
+// ############################################################################
+
+/// Genre categories for content discovery
+model Genre {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String? @db.Text
+  iconUrl     String? @db.VarChar(2048)
+  color       String? @db.Char(7)
+
+  parentId String?
+
+  displayOrder Int     @default(0) @db.SmallInt
+  isActive     Boolean @default(true)
+  isFeatured   Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   Genre?        @relation("GenreHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Genre[]       @relation("GenreHierarchy")
+  series   SeriesGenre[]
+
+  @@index([slug])
+  @@index([isActive, displayOrder])
+  @@map("genres")
+}
+
+/// Tags for fine-grained content discovery
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  usageCount Int     @default(0)
+  isApproved Boolean @default(true)
+  isBlocked  Boolean @default(false)
+
+  synonyms String[] @default([])
+
+  createdAt DateTime @default(now())
+
+  series SeriesTag[]
+
+  @@index([slug])
+  @@index([usageCount(sort: Desc)])
+  @@map("tags")
+}
+
+/// A story/comic series
+model Series {
+  id       String @id @default(cuid())
+  authorId BigInt
+  siteId   String
+
+  slug     String @unique
+  title    String @db.VarChar(200)
+  synopsis String @db.Text
+
+  coverImageUrl  String? @db.VarChar(2048)
+  bannerImageUrl String? @db.VarChar(2048)
+  thumbnailUrl   String? @db.VarChar(2048)
+
+  contentType      ContentType      @default(WEB_NOVEL)
+  contentRating    ContentRating    @default(EVERYONE)
+  status           SeriesStatus     @default(DRAFT)
+  language         String           @default("en") @db.Char(2)
+  originalLanguage String           @default("en") @db.Char(2)
+  readingDirection ReadingDirection @default(LTR)
+
+  // Stats (use views for accuracy, cache for performance)
+  viewCount       BigInt @default(0)
+  subscriberCount Int    @default(0)
+  averageRating   Float? // NULL = unrated, not 0
+  ratingCount     Int    @default(0)
+
+  // Schedule
+  updateSchedule  String?
+  updateDays      Int[]     @default([])
+  lastPublishedAt DateTime?
+  nextScheduledAt DateTime?
+
+  // Monetization
+  defaultAccessLevel ChapterAccessLevel @default(FREE)
+  earlyAccessDays    Int                @default(0) @db.SmallInt
+  previewParagraphs  Int                @default(3) @db.SmallInt
+  paywallMessage     String?            @db.Text
+
+  // Discovery
+  isListed      Boolean   @default(false)
+  trendingScore Float     @default(0)
+  featuredAt    DateTime?
+  featuredUntil DateTime?
+
+  // SEO
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+
+  // Completion
+  isComplete           Boolean   @default(false)
+  completedAt          DateTime?
+  totalPlannedChapters Int?      @db.SmallInt
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  author                 User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  site                   Site                    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  chapters               Chapter[]
+  genres                 SeriesGenre[]
+  tags                   SeriesTag[]
+  reviews                Review[]
+  readingProgress        ReadingProgress[]
+  bookmarks              Bookmark[]
+  contentWarnings        SeriesContentWarning[]
+  translations           SeriesTranslation[]
+  translationGlossary    TranslationGlossary[]
+  aiWritingSessions      AIWritingSession[]
+  readingListItems       ReadingListItem[]
+  readerEngagementScores ReaderEngagementScore[]
+  writingGoals           WritingGoal[]
+  calendarEntries        ContentCalendarEntry[]
+  importJobs             ImportJob[]
+  exportJobs             ExportJob[]
+
+  @@unique([siteId, slug])
+  @@index([authorId])
+  @@index([siteId, status])
+  @@index([contentType, language, isListed])
+  @@index([isListed, status, trendingScore(sort: Desc)])
+  @@index([viewCount(sort: Desc)])
+  @@index([deletedAt])
+  @@map("series")
+}
+
+/// Many-to-many: Series <-> Genre
+model SeriesGenre {
+  seriesId  String
+  genreId   String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  genre  Genre  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, genreId])
+  @@index([genreId])
+  @@map("series_genres")
+}
+
+/// Many-to-many: Series <-> Tag
+model SeriesTag {
+  seriesId  String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, tagId])
+  @@index([tagId])
+  @@map("series_tags")
+}
+
+/// Individual chapter/episode
+model Chapter {
+  id       String @id @default(cuid())
+  authorId BigInt
+  seriesId String
+
+  slug          String
+  chapterNumber Float
+  volumeNumber  Int?    @db.SmallInt
+  title         String? @db.VarChar(200)
+
+  // Content (web novel)
+  content     String? @db.Text
+  contentHtml String? @db.Text
+  wordCount   Int     @default(0)
+
+  // Author note
+  authorNote         String?            @db.Text
+  authorNoteHtml     String?            @db.Text
+  authorNotePosition AuthorNotePosition @default(AFTER_CONTENT)
+
+  // Status
+  status      ChapterStatus @default(DRAFT)
+  scheduledAt DateTime?
+  publishedAt DateTime?
+
+  // Access control
+  accessLevel     ChapterAccessLevel @default(FREE)
+  minimumTierId   String?
+  scheduledFreeAt DateTime?
+  paywallMessage  String?            @db.Text
+
+  // One-time purchase
+  isPurchasable Boolean @default(false)
+  price         Int?
+  priceCurrency String  @default("INR") @db.Char(3)
+
+  // Stats
+  viewCount BigInt @default(0)
+
+  // Ordering
+  order Int @default(0)
+
+  // SEO
+  metaTitle       String? @db.VarChar(60)
+  metaDescription String? @db.VarChar(160)
+
+  // Versioning (FIXED: Added for optimistic locking)
+  currentVersion Int @default(1) @db.SmallInt
+  version        Int @default(1)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  author               User                    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  series               Series                  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  minimumTier          AuthorSubscriptionTier? @relation(fields: [minimumTierId], references: [id], onDelete: SetNull)
+  versions             ChapterVersion[]
+  images               ChapterImage[]
+  readingProgress      ReadingProgress[]
+  comments             Comment[]
+  bookmarks            Bookmark[]
+  contentWarnings      ChapterContentWarning[]
+  reactions            Reaction[]
+  purchases            Purchase[]
+  translations         ChapterTranslation[]
+  tiktokPreviews       TikTokPreview[]
+  socialPosts          SocialPost[]
+  aiWritingSessions    AIWritingSession[]
+  scheduledPublication ScheduledPublication?
+  scheduledUnlock      ScheduledUnlock?
+
+  @@unique([seriesId, slug])
+  @@unique([seriesId, chapterNumber, volumeNumber])
+  @@index([seriesId, status, order])
+  @@index([status, scheduledAt])
+  @@index([deletedAt])
+  @@map("chapters")
+}
+
+/// Chapter version history
+model ChapterVersion {
+  id        BigInt @id @default(autoincrement())
+  chapterId String
+
+  versionNumber Int     @db.SmallInt
+  title         String? @db.VarChar(200)
+  content       String  @db.Text
+  contentHtml   String? @db.Text
+  wordCount     Int
+  authorNote    String? @db.Text
+
+  changeNote    String? @db.VarChar(500)
+  changedById   BigInt?
+  changedByName String?
+
+  createdAt DateTime @default(now())
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterId, versionNumber])
+  @@index([chapterId, createdAt(sort: Desc)])
+  @@map("chapter_versions")
+}
+
+/// Images for comic/webtoon chapters
+model ChapterImage {
+  id        BigInt @id @default(autoincrement())
+  chapterId String
+
+  imageUrl       String  @db.VarChar(2048)
+  thumbnailUrl   String? @db.VarChar(2048)
+  placeholderUrl String? @db.VarChar(2048)
+
+  width    Int    @db.SmallInt
+  height   Int    @db.SmallInt
+  fileSize Int
+  mimeType String @db.VarChar(50)
+
+  order   Int     @db.SmallInt
+  altText String? @db.VarChar(500)
+
+  isProcessed     Boolean   @default(false)
+  processedAt     DateTime?
+  processingError String?
+
+  extractedText     String? @db.Text
+  textBoundingBoxes Json?
+
+  createdAt DateTime @default(now())
+
+  chapter          Chapter                @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  ocrJobs          OCRJob[]
+  textReplacements ComicTextReplacement[]
+
+  @@index([chapterId, order])
+  @@map("chapter_images")
+}
+
+// ############################################################################
+//
+//  SECTION 6: CONTENT WARNINGS
+//
+// ############################################################################
+
+/// Content warning definitions
+model ContentWarning {
+  id          String                 @id @default(cuid())
+  name        String                 @unique
+  slug        String                 @unique
+  description String?                @db.Text
+  severity    ContentWarningSeverity @default(MILD)
+  category    ContentWarningCategory
+  iconUrl     String?                @db.VarChar(2048)
+  color       String?                @db.Char(7)
+  isActive    Boolean                @default(true)
+  isDefault   Boolean                @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  series   SeriesContentWarning[]
+  chapters ChapterContentWarning[]
+
+  @@index([slug])
+  @@index([category])
+  @@map("content_warnings")
+}
+
+/// Series content warnings
+model SeriesContentWarning {
+  seriesId  String
+  warningId String
+  details   String?  @db.Text
+  addedAt   DateTime @default(now())
+  addedById BigInt?
+
+  series  Series         @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  warning ContentWarning @relation(fields: [warningId], references: [id], onDelete: Cascade)
+
+  @@id([seriesId, warningId])
+  @@index([warningId])
+  @@map("series_content_warnings")
+}
+
+/// Chapter content warnings
+model ChapterContentWarning {
+  chapterId String
+  warningId String
+  details   String?  @db.Text
+  addedAt   DateTime @default(now())
+  addedById BigInt?
+
+  chapter Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  warning ContentWarning @relation(fields: [warningId], references: [id], onDelete: Cascade)
+
+  @@id([chapterId, warningId])
+  @@index([warningId])
+  @@map("chapter_content_warnings")
+}
+
+// ############################################################################
+//
+//  SECTION 7: TRANSLATIONS (AI-Powered)
+//
+// ############################################################################
+
+/// Series translation metadata
+model SeriesTranslation {
+  id       BigInt @id @default(autoincrement())
+  seriesId String
+
+  language     String @db.Char(2)
+  languageName String
+
+  title    String @db.VarChar(200)
+  synopsis String @db.Text
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
+  isAIGenerated Boolean  @default(true)
+  aiModel       AIModel?
+  aiConfidence  Float?
+
+  isReviewed     Boolean   @default(false)
+  reviewedById   BigInt?
+  reviewedByName String?
+  reviewedAt     DateTime?
+  reviewNotes    String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([seriesId, language])
+  @@index([seriesId])
+  @@index([language, isPublished])
+  @@map("series_translations")
+}
+
+/// Chapter translation
+model ChapterTranslation {
+  id        BigInt @id @default(autoincrement())
+  chapterId String
+
+  language     String @db.Char(2)
+  languageName String
+
+  title       String? @db.VarChar(200)
+  content     String  @db.Text
+  contentHtml String? @db.Text
+  authorNote  String? @db.Text
+  wordCount   Int     @default(0)
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
+  isAIGenerated Boolean  @default(true)
+  aiModel       AIModel?
+  aiConfidence  Float?
+
+  isReviewed     Boolean   @default(false)
+  reviewedById   BigInt?
+  reviewedByName String?
+  reviewedAt     DateTime?
+  reviewNotes    String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterId, language])
+  @@index([chapterId])
+  @@index([language, isPublished])
+  @@map("chapter_translations")
+}
+
+/// Translation glossary for consistency
+model TranslationGlossary {
+  id       BigInt @id @default(autoincrement())
+  seriesId String
+
+  sourceText     String              @db.VarChar(500)
+  sourceLanguage String              @default("en") @db.Char(2)
+  targetText     String              @db.VarChar(500)
+  targetLanguage String              @db.Char(2)
+  termType       TranslationTermType @default(TERM)
+
+  context    String? @db.Text
+  notes      String? @db.Text
+  isApproved Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([seriesId, sourceText, targetLanguage])
+  @@index([seriesId, targetLanguage])
+  @@map("translation_glossary")
+}
+
+// ############################################################################
+//
+//  SECTION 8: MONETIZATION - AUTHOR SUBSCRIPTION TIERS
+//
+// ############################################################################
+
+/// Author-created subscription tiers
+model AuthorSubscriptionTier {
+  id       String @id @default(cuid())
+  authorId BigInt
+  siteId   String
+
+  name        String  @db.VarChar(50)
+  slug        String
+  description String? @db.Text
+
+  // Pricing (FIXED: Use Currency relation)
+  monthlyPrice  Int
+  annualPrice   Int?
+  currencyCode  String         @default("INR") @db.Char(3)
+  billingCycles BillingCycle[] @default([MONTHLY])
+
+  benefits        String[] @default([])
+  earlyAccessDays Int      @default(0) @db.SmallInt
+
+  badgeText     String? @db.VarChar(20)
+  badgeColor    String? @db.Char(7)
+  iconUrl       String? @db.VarChar(2048)
+  displayOrder  Int     @default(0) @db.SmallInt
+  isHighlighted Boolean @default(false)
+  highlightText String? @db.VarChar(30)
+
+  isActive  Boolean @default(true)
+  isPublic  Boolean @default(true)
+  isFree    Boolean @default(false)
+  isDefault Boolean @default(false)
+
+  maxSubscribers     Int? // null = unlimited
+  currentSubscribers Int  @default(0)
+
+  razorpayPlanId String?
+  stripePriceId  String?
+  xenditPlanId   String?
+
+  // FIXED: Added version for optimistic locking
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author            AuthorAccount        @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+  site              Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  currency          Currency             @relation(fields: [currencyCode], references: [code])
+  subscriptions     ReaderSubscription[]
+  chapters          Chapter[]
+  discountCodeTiers DiscountCodeTier[]
+  giftSubscriptions GiftSubscription[]
+
+  @@unique([siteId, slug])
+  @@index([authorId])
+  @@index([siteId, isActive, displayOrder])
+  @@map("author_subscription_tiers")
+}
+
+/// Reader subscription to an author tier
+model ReaderSubscription {
+  id       String @id @default(cuid())
+  readerId BigInt
+  tierId   String
+
+  status       ReaderSubscriptionStatus @default(ACTIVE)
+  billingCycle BillingCycle             @default(MONTHLY)
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  priceAtPurchase    Int
+  currencyCode       String   @db.Char(3)
+
+  gateway               PaymentGateway
+  gatewaySubscriptionId String?
+  gatewayCustomerId     String?
+
+  discountCodeId          String?
+  discountMonthsRemaining Int     @default(0) @db.SmallInt
+  originalPrice           Int?
+
+  isTrialing  Boolean   @default(false)
+  trialEndsAt DateTime?
+
+  autoRenew      Boolean   @default(true)
+  cancelledAt    DateTime?
+  cancelReason   String?   @db.VarChar(100)
+  cancelFeedback String?   @db.Text
+  expiresAt      DateTime?
+
+  renewalReminderSentAt DateTime?
+  expiryReminderSentAt  DateTime?
+
+  pausedAt    DateTime?
+  pauseEndsAt DateTime?
+  pauseCount  Int       @default(0) @db.SmallInt
+
+  // FIXED: Version for optimistic locking
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reader                 User                    @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  tier                   AuthorSubscriptionTier  @relation(fields: [tierId], references: [id], onDelete: Restrict)
+  discountCode           DiscountCode?           @relation(fields: [discountCodeId], references: [id], onDelete: SetNull)
+  payments               Payment[]
+  churnPrediction        ChurnPrediction?
+  churnPreventionActions ChurnPreventionAction[]
+
+  @@unique([readerId, tierId])
+  @@index([readerId, status])
+  @@index([tierId, status])
+  @@index([status, currentPeriodEnd])
+  // FIXED: Added index for renewal processing
+  @@index([status, autoRenew, currentPeriodEnd])
+  @@index([gateway, gatewaySubscriptionId])
+  @@map("reader_subscriptions")
+}
+
+// ############################################################################
+//
+//  SECTION 9: MONETIZATION - PAYMENTS
+//
+//  FIXED: Proper GDPR compliance with nullable user references
+//
+// ############################################################################
+
+/// Payment gateway configuration for authors
+/// FIXED: Removed sensitive data - use vault references instead
+model PaymentGatewayConfig {
+  id       BigInt @id @default(autoincrement())
+  authorId BigInt @unique
+
+  // Razorpay (India)
+  razorpayAccountId        String?
+  razorpayConnected        Boolean   @default(false)
+  razorpayConnectedAt      DateTime?
+  razorpayVerified         Boolean   @default(false)
+  razorpayVerifiedAt       DateTime?
+  razorpayWebhookSecretRef String? // Reference to vault
+
+  // Stripe (Global)
+  stripeAccountId        String?
+  stripeAccountType      String?
+  stripeConnected        Boolean   @default(false)
+  stripeConnectedAt      DateTime?
+  stripeChargesEnabled   Boolean   @default(false)
+  stripePayoutsEnabled   Boolean   @default(false)
+  stripeDetailsSubmitted Boolean   @default(false)
+  stripeWebhookSecretRef String? // Reference to vault
+
+  // Xendit (Southeast Asia)
+  xenditBusinessId      String?
+  xenditConnected       Boolean   @default(false)
+  xenditConnectedAt     DateTime?
+  xenditVerified        Boolean   @default(false)
+  xenditWebhookTokenRef String? // Reference to vault
+
+  defaultGateway PaymentGateway?
+
+  // Health monitoring
+  lastWebhookReceivedAt DateTime?
+  webhookFailureCount   Int           @default(0) @db.SmallInt
+  webhookHealthStatus   HealthStatus?
+  lastReconciliationAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author AuthorAccount @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+
+  @@map("payment_gateway_configs")
+}
+
+/// Payment transaction
+/// FIXED: Made reader/author nullable for GDPR deletion compliance
+model Payment {
+  id BigInt @id @default(autoincrement())
+
+  // FIXED: Nullable for GDPR compliance
+  readerId BigInt?
+  authorId BigInt?
+
+  subscriptionId String?
+
+  type   PaymentType
+  status PaymentStatus @default(PENDING)
+
+  // Amounts (smallest currency unit)
+  grossAmount  Int
+  gatewayFee   Int?
+  platformFee  Int?
+  netAmount    Int?
+  currencyCode String @db.Char(3)
+
+  // Gateway
+  gateway           PaymentGateway
+  gatewayPaymentId  String?
+  gatewayOrderId    String?
+  gatewayInvoiceId  String?
+  gatewayResponse   Json?
+  gatewayReceiptUrl String?        @db.VarChar(2048)
+
+  // Payment method (display only, no sensitive data)
+  cardBrand      String? @db.VarChar(20)
+  cardLast4      String? @db.Char(4)
+  paymentCountry String? @db.Char(2)
+  paymentMethod  String? @db.VarChar(50)
+
+  // Failure handling
+  failureCode    String?
+  failureMessage String?
+  failedAt       DateTime?
+  retryCount     Int       @default(0) @db.SmallInt
+  maxRetries     Int       @default(3) @db.SmallInt
+  nextRetryAt    DateTime?
+
+  // Refund
+  refundedAmount    Int?
+  refundedAt        DateTime?
+  refundReason      String?
+  refundGatewayId   String?
+  refundInitiatedBy BigInt?
+
+  // Dispute
+  disputedAt        DateTime?
+  disputeReason     String?
+  disputeStatus     String?
+  disputeEvidence   Json?
+  disputeResolvedAt DateTime?
+  disputeOutcome    String?
+
+  // Metadata
+  metadata  Json?
+  notes     String? @db.Text
+  ipAddress String? @db.VarChar(45)
+  userAgent String? @db.Text
+
+  // FIXED: Added for idempotency
+  idempotencyKey String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // FIXED: Changed to SetNull for GDPR compliance
+  reader       User?               @relation("ReaderPayments", fields: [readerId], references: [id], onDelete: SetNull)
+  author       User?               @relation("AuthorPayments", fields: [authorId], references: [id], onDelete: SetNull)
+  subscription ReaderSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  currency     Currency            @relation(fields: [currencyCode], references: [code])
+  events       PaymentEvent[]
+
+  @@unique([gateway, gatewayPaymentId])
+  @@index([readerId, status])
+  @@index([authorId, status, createdAt(sort: Desc)])
+  @@index([gateway, status])
+  // FIXED: Added missing indexes
+  @@index([status, createdAt])
+  @@index([status, nextRetryAt])
+  @@index([subscriptionId])
+  @@map("payments")
+}
+
+/// Payment state change events (event sourcing)
+model PaymentEvent {
+  id        BigInt @id @default(autoincrement())
+  paymentId BigInt
+
+  eventType      String         @db.VarChar(50)
+  previousStatus PaymentStatus?
+  newStatus      PaymentStatus
+  metadata       Json?
+
+  triggeredBy   String? // system, user, webhook, admin
+  triggeredById BigInt?
+
+  createdAt DateTime @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, createdAt(sort: Desc)])
+  @@index([eventType, createdAt])
+  @@map("payment_events")
+}
+
+/// Platform invoices (Free tier usage fees)
+model PlatformInvoice {
+  id       BigInt @id @default(autoincrement())
+  authorId BigInt
+
+  invoiceNumber   String   @unique
+  periodStart     DateTime
+  periodEnd       DateTime
+  grossRevenue    BigInt
+  usageFeePercent Float    @default(10)
+  usageFeeAmount  BigInt
+  gstPercent      Float    @default(18)
+  gstAmount       BigInt
+  totalAmount     BigInt
+  currencyCode    String   @default("INR") @db.Char(3)
+
+  status PlatformInvoiceStatus @default(PENDING)
+
+  dueDate          DateTime
+  paidAt           DateTime?
+  paymentMethod    String?
+  paymentReference String?
+
+  disputedAt        DateTime?
+  disputeReason     String?   @db.Text
+  disputeResolvedAt DateTime?
+  disputeOutcome    String?
+
+  remindersSent  Int       @default(0) @db.SmallInt
+  lastReminderAt DateTime?
+
+  invoiceUrl String? @db.VarChar(2048)
+  notes      String? @db.Text
+
+  transactionCount Int   @default(0)
+  breakdown        Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author AuthorAccount @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+
+  @@index([authorId, status])
+  @@index([status, dueDate])
+  @@index([periodStart, periodEnd])
+  @@map("platform_invoices")
+}
+
+/// Author payout records
+model AuthorPayout {
+  id       BigInt @id @default(autoincrement())
+  authorId BigInt
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  grossRevenue BigInt
+  gatewayFees  BigInt
+  platformFees BigInt
+  netPayout    BigInt
+  currencyCode String @default("INR") @db.Char(3)
+
+  gateway          PaymentGateway
+  gatewayPayoutId  String?
+  gatewayReference String?
+
+  status       PayoutStatus @default(PENDING)
+  scheduledFor DateTime?
+  processedAt  DateTime?
+  completedAt  DateTime?
+  failedAt     DateTime?
+  errorMessage String?
+  retryCount   Int          @default(0) @db.SmallInt
+
+  // Bank details reference (actual details in vault)
+  bankDetailsRef String?
+
+  invoiceNumber String?
+  invoiceUrl    String? @db.VarChar(2048)
+
+  transactionCount Int   @default(0)
+  breakdown        Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author AuthorAccount @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+
+  @@index([authorId, status])
+  @@index([status, scheduledFor])
+  @@index([periodStart])
+  @@map("author_payouts")
+}
+
+/// Gift subscription purchases
+model GiftSubscription {
+  id String @id @default(cuid())
+
+  giverId    BigInt
+  giverEmail String
+  giverName  String?
+
+  recipientEmail String
+  recipientName  String?
+  recipientId    BigInt?
+
+  tierId String
+
+  months       Int     @default(1) @db.SmallInt
+  amount       Int
+  currencyCode String  @default("INR") @db.Char(3)
+  giftMessage  String? @db.Text
+
+  deliveryDate DateTime @default(now())
+  isScheduled  Boolean  @default(false)
+
+  status      GiftSubscriptionStatus @default(PENDING)
+  deliveredAt DateTime?
+  claimedAt   DateTime?
+  expiresAt   DateTime?
+
+  claimCode String  @unique
+  claimUrl  String? @db.VarChar(2048)
+
+  paymentId        BigInt?
+  gatewayPaymentId String?
+
+  // Notifications
+  reminderSentAt DateTime?
+  thankYouSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  giver     User                   @relation("GiftGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  recipient User?                  @relation("GiftRecipient", fields: [recipientId], references: [id], onDelete: SetNull)
+  tier      AuthorSubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Restrict)
+
+  @@index([giverId])
+  @@index([recipientEmail])
+  @@index([status])
+  @@index([claimCode])
+  @@index([status, deliveryDate])
+  @@map("gift_subscriptions")
+}
+
+model Product {
+  id       String @id @default(cuid())
+  authorId BigInt
+  siteId   String
+
+  name        String      @db.VarChar(100)
+  slug        String
+  description String?     @db.Text
+  shortDesc   String?     @db.VarChar(200)
+  productType ProductType @default(DIGITAL_DOWNLOAD)
+
+  coverImageUrl String?  @db.VarChar(2048)
+  previewImages String[] @default([])
+
+  price        Int
+  comparePrice Int?
+  currencyCode String @default("INR") @db.Char(3)
+
+  // Download details (URL stored in vault)
+  downloadFileRef  String?
+  downloadFileName String?
+  downloadFileSize Int?
+  downloadMimeType String?
+  maxDownloads     Int?
+
+  isLimited     Boolean @default(false)
+  totalQuantity Int?
+  soldCount     Int     @default(0)
+
+  isActive       Boolean   @default(true)
+  availableFrom  DateTime?
+  availableUntil DateTime?
+
+  displayOrder Int     @default(0) @db.SmallInt
+  isFeatured   Boolean @default(false)
+
+  // FIXED: Added version for optimistic locking
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    AuthorAccount @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+  site      Site          @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  currency  Currency      @relation(fields: [currencyCode], references: [code])
+  purchases Purchase[]
+
+  @@unique([siteId, slug])
+  @@index([authorId])
+  @@index([siteId, isActive, displayOrder])
+  @@index([productType, isActive])
+  @@map("products")
+}
+
+/// One-time purchases
+model Purchase {
+  id       BigInt @id @default(autoincrement())
+  readerId BigInt
+
+  // FIXED: Use proper relation instead of string type
+  chapterId String?
+  productId String?
+
+  amount         Int
+  discountAmount Int    @default(0)
+  finalAmount    Int
+  currencyCode   String @db.Char(3)
+
+  discountCodeId String?
+
+  status PaymentStatus @default(PENDING)
+
+  deliveredAt    DateTime?
+  downloadCount  Int       @default(0) @db.SmallInt
+  lastDownloadAt DateTime?
+
+  refundedAt   DateTime?
+  refundReason String?
+  refundedBy   BigInt?
+
+  // Payment reference
+  paymentId BigInt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reader  User     @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([readerId, status])
+  @@index([chapterId])
+  @@index([productId])
+  @@index([status, createdAt])
+  @@map("purchases")
+}
+
+/// Discount codes
+model DiscountCode {
+  id       String @id @default(cuid())
+  authorId BigInt
+  siteId   String
+
+  code           String       @db.VarChar(30)
+  discountType   DiscountType
+  discountValue  Int
+  trialDays      Int?         @db.SmallInt
+  freeMonths     Int?         @db.SmallInt
+  durationMonths Int?         @db.SmallInt
+
+  maxUses        Int?
+  maxUsesPerUser Int  @default(1) @db.SmallInt
+  currentUses    Int  @default(0)
+
+  validFrom  DateTime  @default(now())
+  validUntil DateTime?
+  isActive   Boolean   @default(true)
+
+  firstPaymentOnly Boolean @default(true)
+  minimumAmount    Int?
+  minimumCurrency  String? @db.Char(3)
+
+  description   String? @db.VarChar(200)
+  internalNotes String? @db.Text
+
+  // FIXED: Added version for optimistic locking on currentUses
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author          AuthorAccount        @relation(fields: [authorId], references: [userId], onDelete: Cascade)
+  site            Site                 @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  subscriptions   ReaderSubscription[]
+  applicableTiers DiscountCodeTier[]
+  usages          DiscountCodeUsage[]
+
+  @@unique([siteId, code])
+  @@index([code])
+  @@index([siteId, isActive])
+  @@index([validFrom, validUntil, isActive])
+  @@map("discount_codes")
+}
+
+/// Discount code tier restrictions
+model DiscountCodeTier {
+  discountCodeId String
+  tierId         String
+
+  discountCode DiscountCode           @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  tier         AuthorSubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@id([discountCodeId, tierId])
+  @@map("discount_code_tiers")
+}
+
+/// Discount code usage tracking
+model DiscountCodeUsage {
+  id             BigInt @id @default(autoincrement())
+  discountCodeId String
+  userId         BigInt
+
+  subscriptionId String?
+  purchaseId     BigInt?
+
+  amountSaved  Int?
+  currencyCode String? @db.Char(3)
+
+  usedAt DateTime @default(now())
+
+  discountCode DiscountCode @relation(fields: [discountCodeId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([discountCodeId, userId, subscriptionId])
+  @@index([discountCodeId])
+  @@index([userId])
+  @@map("discount_code_usages")
+}
+
+model ReadingProgress {
+  id        String  @id @default(cuid())
+  userId    BigInt
+  seriesId  String
+  chapterId String?
+
+  lastChapterNumber Float @default(0)
+  progressPercent   Float @default(0)
+  scrollPosition    Int?
+  pagePosition      Int?  @db.SmallInt
+  paragraphIndex    Int?  @db.SmallInt
+
+  totalReadTimeSeconds  Int       @default(0)
+  currentSessionStart   DateTime?
+  currentSessionSeconds Int       @default(0)
+
+  chaptersCompleted Int       @default(0)
+  isSeriesComplete  Boolean   @default(false)
+  seriesCompletedAt DateTime?
+
+  firstReadAt DateTime @default(now())
+  lastReadAt  DateTime @default(now())
+
+  deviceId   String?
+  deviceType DeviceType?
+  syncedAt   DateTime    @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series  Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, seriesId])
+  @@index([userId, lastReadAt(sort: Desc)])
+  @@index([seriesId])
+  @@map("reading_progress")
+}
+
+/// Bookmarks within chapters
+/// FIXED: Added soft delete for GDPR
+model Bookmark {
+  id        String @id @default(cuid())
+  userId    BigInt
+  seriesId  String
+  chapterId String
+
+  position     Int?
+  selectedText String? @db.Text
+  note         String? @db.Text
+  color        String? @db.Char(7)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId, position])
+  @@index([userId, seriesId])
+  @@index([deletedAt])
+  @@map("bookmarks")
+}
+
+/// Custom reading lists
+model ReadingList {
+  id     String @id @default(cuid())
+  userId BigInt
+
+  name        String          @db.VarChar(100)
+  slug        String
+  description String?         @db.Text
+  coverUrl    String?         @db.VarChar(2048)
+  listType    ReadingListType @default(CUSTOM)
+
+  isPublic  Boolean @default(false)
+  isDefault Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     ReadingListItem[]
+  followers ReadingListFollow[]
+
+  @@unique([userId, slug])
+  @@index([userId, listType])
+  @@index([isPublic])
+  @@map("reading_lists")
+}
+
+/// Reading list items
+model ReadingListItem {
+  readingListId String
+  seriesId      String
+
+  order      Int     @default(0) @db.SmallInt
+  notes      String? @db.Text
+  userRating Int?    @db.SmallInt // 1-10
+
+  addedAt DateTime @default(now())
+
+  readingList ReadingList @relation(fields: [readingListId], references: [id], onDelete: Cascade)
+  series      Series      @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@id([readingListId, seriesId])
+  @@index([seriesId])
+  @@map("reading_list_items")
+}
+
+/// Reading list follows
+model ReadingListFollow {
+  readingListId String
+  userId        BigInt
+
+  createdAt DateTime @default(now())
+
+  readingList ReadingList @relation(fields: [readingListId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([readingListId, userId])
+  @@index([userId])
+  @@map("reading_list_follows")
+}
+
+/// Reader personalized settings
+model ReaderSettings {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @unique
+
+  // Typography
+  fontFamily       String @default("system")
+  fontSize         Int    @default(18) @db.SmallInt
+  lineHeight       Float  @default(1.8)
+  letterSpacing    Float  @default(0)
+  paragraphSpacing Float  @default(1)
+
+  // Layout
+  pageWidth PageWidth     @default(MEDIUM)
+  textAlign TextAlignment @default(LEFT)
+
+  // Theme
+  theme        ReadingTheme @default(SYSTEM)
+  customColors Json?
+
+  // Behavior
+  autoBookmark      Boolean @default(true)
+  showProgress      Boolean @default(true)
+  showReadingTime   Boolean @default(true)
+  enableSwipeNav    Boolean @default(true)
+  enableKeyboardNav Boolean @default(true)
+  enableScrollSync  Boolean @default(true)
+
+  // Auto-scroll
+  autoScrollEnabled Boolean @default(false)
+  autoScrollSpeed   Int     @default(50) @db.SmallInt
+
+  // Accessibility
+  reducedMotion Boolean @default(false)
+  dyslexicFont  Boolean @default(false)
+  highContrast  Boolean @default(false)
+
+  // Comic/Webtoon
+  comicReadingMode ComicReadingMode @default(VERTICAL_SCROLL)
+  comicZoomLevel   Float            @default(1.0)
+  comicPageGap     Int              @default(0) @db.SmallInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reader_settings")
+}
+
+/// Reader engagement scores
+model ReaderEngagementScore {
+  userId   BigInt
+  seriesId String
+
+  engagementScore Float @default(0)
+
+  readingScore     Float @default(0)
+  interactionScore Float @default(0)
+  loyaltyScore     Float @default(0)
+  advocacyScore    Float @default(0)
+
+  chaptersRead       Int   @default(0)
+  totalChapters      Int   @default(0)
+  completionPercent  Float @default(0)
+  avgReadTimeSeconds Int   @default(0)
+  totalReadSeconds   Int   @default(0)
+
+  commentsCount  Int @default(0)
+  reactionsCount Int @default(0)
+  reviewsCount   Int @default(0)
+  sharesCount    Int @default(0)
+
+  visitCount           Int       @default(0)
+  avgDaysBetweenVisits Float     @default(0)
+  lastVisitAt          DateTime?
+  streakDays           Int       @default(0) @db.SmallInt
+  longestStreak        Int       @default(0) @db.SmallInt
+
+  isSubscribed       Boolean @default(false)
+  subscriptionTier   String?
+  subscriptionMonths Int     @default(0) @db.SmallInt
+  lifetimeValue      Int     @default(0)
+
+  calculatedAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@id([userId, seriesId])
+  @@index([seriesId])
+  @@index([engagementScore(sort: Desc)])
+  @@map("reader_engagement_scores")
+}
+
+// ############################################################################
+//
+//  SECTION 12: SOCIAL FEATURES
+//
+//  FIXED: Added soft delete to user-generated content
+//
+// ############################################################################
+
+/// Author follow relationship
+model AuthorFollow {
+  followerId BigInt
+  authorId   BigInt
+
+  notifyNewSeries     Boolean @default(true)
+  notifyNewChapters   Boolean @default(true)
+  notifyAnnouncements Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  follower User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  author   User @relation("UserFollowers", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, authorId])
+  @@index([authorId])
+  @@map("author_follows")
+}
+
+/// Comments on chapters
+/// FIXED: Added soft delete for GDPR
+model Comment {
+  id        BigInt @id @default(autoincrement())
+  userId    BigInt
+  chapterId String
+
+  parentId BigInt?
+  depth    Int     @default(0) @db.SmallInt
+
+  content     String  @db.Text
+  contentHtml String? @db.Text
+  hasSpoiler  Boolean @default(false)
+
+  // Moderation
+  isHidden     Boolean   @default(false)
+  hiddenReason String?
+  hiddenAt     DateTime?
+  hiddenById   BigInt?
+
+  isPinned   Boolean   @default(false)
+  pinnedAt   DateTime?
+  pinnedById BigInt?
+
+  // Edit tracking
+  isEdited  Boolean   @default(false)
+  editedAt  DateTime?
+  editCount Int       @default(0) @db.SmallInt
+
+  // FIXED: Added soft delete
+  deletedAt     DateTime?
+  deletedBy     BigInt?
+  deletedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter   Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  parent    Comment?   @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]  @relation("CommentReplies")
+  reactions Reaction[]
+
+  @@index([chapterId, isHidden, deletedAt, createdAt(sort: Desc)])
+  @@index([userId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+/// Reactions to chapters or comments
+/// FIXED: Changed type from String to enum
+model Reaction {
+  id BigInt @id @default(autoincrement())
+
+  userId    BigInt
+  chapterId String?
+  commentId BigInt?
+
+  type ReactionType
+
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, chapterId, type])
+  @@unique([userId, commentId, type])
+  @@index([chapterId, type])
+  @@index([commentId, type])
+  @@map("reactions")
+}
+
+/// Series reviews
+/// FIXED: Added soft delete, fixed rating type
+model Review {
+  id       String @id @default(cuid())
+  userId   BigInt
+  seriesId String
+
+  rating        Int                @db.SmallInt // 1-10 (displayed as 0.5-5 stars)
+  title         String?            @db.VarChar(100)
+  content       String             @db.Text
+  hasSpoilers   Boolean            @default(false)
+  readingStatus ReadingStatusType?
+
+  chaptersReadAtReview Int     @default(0)
+  isVerified           Boolean @default(false)
+
+  helpfulCount   Int @default(0)
+  unhelpfulCount Int @default(0)
+
+  authorResponse   String?   @db.Text
+  authorResponseAt DateTime?
+
+  // Moderation
+  isHidden     Boolean   @default(false)
+  hiddenReason String?
+  hiddenAt     DateTime?
+  hiddenById   BigInt?
+
+  // Edit tracking
+  isEdited  Boolean   @default(false)
+  editedAt  DateTime?
+  editCount Int       @default(0) @db.SmallInt
+
+  // FIXED: Added soft delete
+  deletedAt     DateTime?
+  deletedBy     BigInt?
+  deletedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series Series       @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  votes  ReviewVote[]
+
+  @@unique([userId, seriesId])
+  @@index([seriesId, isHidden, deletedAt, rating(sort: Desc)])
+  @@index([seriesId, isHidden, deletedAt, createdAt(sort: Desc)])
+  @@map("reviews")
+}
+
+/// Review helpfulness votes
+model ReviewVote {
+  reviewId  String
+  userId    BigInt
+  isHelpful Boolean
+
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([reviewId, userId])
+  @@index([userId])
+  @@map("review_votes")
+}
+
+/// Site announcements
+model Announcement {
+  id     String @id @default(cuid())
+  siteId String
+
+  title       String  @db.VarChar(200)
+  slug        String
+  content     String  @db.Text
+  contentHtml String? @db.Text
+  excerpt     String? @db.VarChar(300)
+
+  coverImageUrl String? @db.VarChar(2048)
+
+  isPublished       Boolean   @default(false)
+  publishedAt       DateTime?
+  scheduledAt       DateTime?
+  isPinned          Boolean   @default(false)
+  showOnHomepage    Boolean   @default(true)
+  notifySubscribers Boolean   @default(false)
+
+  viewCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site        Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  socialPosts SocialPost[]
+
+  @@unique([siteId, slug])
+  @@index([siteId, isPublished, isPinned])
+  @@index([scheduledAt])
+  @@map("announcements")
+}
+
+/// Forum categories
+model ForumCategory {
+  id String @id @default(cuid())
+
+  name        String  @db.VarChar(100)
+  slug        String  @unique
+  description String? @db.Text
+  iconUrl     String? @db.VarChar(2048)
+  color       String? @db.Char(7)
+
+  parentId String?
+
+  displayOrder     Int      @default(0) @db.SmallInt
+  isActive         Boolean  @default(true)
+  isStaffOnly      Boolean  @default(false)
+  requiresApproval Boolean  @default(false)
+  moderatorIds     BigInt[] @default([])
+
+  postCount Int @default(0)
+
+  lastPostAt     DateTime?
+  lastPostId     BigInt?
+  lastPostUserId BigInt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   ForumCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children ForumCategory[] @relation("CategoryHierarchy")
+  posts    ForumPost[]
+
+  @@index([slug])
+  @@index([isActive, displayOrder])
+  @@map("forum_categories")
+}
+
+/// Forum posts
+/// FIXED: Added soft delete
+model ForumPost {
+  id         BigInt @id @default(autoincrement())
+  authorId   BigInt
+  categoryId String
+
+  title       String  @db.VarChar(200)
+  slug        String
+  content     String  @db.Text
+  contentHtml String? @db.Text
+  excerpt     String? @db.VarChar(300)
+
+  parentId BigInt?
+  depth    Int     @default(0) @db.SmallInt
+
+  viewCount  Int @default(0)
+  replyCount Int @default(0)
+  likeCount  Int @default(0)
+
+  isPinned   Boolean @default(false)
+  isLocked   Boolean @default(false)
+  isHidden   Boolean @default(false)
+  isApproved Boolean @default(true)
+
+  hiddenReason String?
+  hiddenById   BigInt?
+  hiddenAt     DateTime?
+
+  lastActivityAt  DateTime @default(now())
+  lastReplyId     BigInt?
+  lastReplyUserId BigInt?
+
+  isEdited  Boolean   @default(false)
+  editedAt  DateTime?
+  editCount Int       @default(0) @db.SmallInt
+
+  // FIXED: Added soft delete
+  deletedAt     DateTime?
+  deletedBy     BigInt?
+  deletedReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  category ForumCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  parent   ForumPost?      @relation("ForumReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  ForumPost[]     @relation("ForumReplies")
+  likes    ForumPostLike[]
+
+  @@unique([categoryId, slug])
+  @@index([authorId])
+  @@index([categoryId, isHidden, isApproved, deletedAt, isPinned(sort: Desc), lastActivityAt(sort: Desc)])
+  @@index([parentId])
+  @@map("forum_posts")
+}
+
+/// Forum post likes
+model ForumPostLike {
+  postId BigInt
+  userId BigInt
+
+  createdAt DateTime @default(now())
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId])
+  @@map("forum_post_likes")
+}
+
+model Notification {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  type    NotificationType
+  title   String           @db.VarChar(100)
+  message String           @db.Text
+
+  // FIXED: Better polymorphic handling with specific fields
+  referenceType String?
+  referenceId   String?
+  actionUrl     String? @db.VarChar(2048)
+  imageUrl      String? @db.VarChar(2048)
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  emailSent   Boolean   @default(false)
+  emailSentAt DateTime?
+  pushSent    Boolean   @default(false)
+  pushSentAt  DateTime?
+
+  groupKey String?
+
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt(sort: Desc)])
+  @@index([userId, type])
+  @@index([groupKey])
+  @@index([expiresAt])
+  @@map("notifications")
+}
+
+/// Email delivery log
+model EmailLog {
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt?
+
+  type      EmailType
+  toEmail   String
+  fromEmail String
+  fromName  String?
+  replyTo   String?
+  subject   String    @db.VarChar(998) // RFC 2822 limit
+
+  templateId   String?
+  templateData Json?
+
+  status EmailStatus @default(QUEUED)
+
+  queuedAt    DateTime  @default(now())
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  bouncedAt   DateTime?
+  failedAt    DateTime?
+
+  openCount  Int @default(0) @db.SmallInt
+  clickCount Int @default(0) @db.SmallInt
+
+  errorMessage String?
+  errorCode    String?
+  bounceType   String?
+
+  provider   String?
+  externalId String?
+
+  // Tracking
+  unsubscribeToken String? @unique
+
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([type, status])
+  @@index([toEmail])
+  @@index([status, queuedAt])
+  @@map("email_logs")
+}
+
+/// Push notification subscriptions
+model PushSubscription {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  endpoint String @unique @db.Text
+  p256dh   String @db.Text
+  auth     String @db.Text
+
+  userAgent  String?    @db.Text
+  deviceType DeviceType @default(UNKNOWN)
+  deviceName String?
+
+  isActive Boolean @default(true)
+
+  lastUsedAt    DateTime?
+  deliveryCount Int       @default(0)
+  failureCount  Int       @default(0) @db.SmallInt
+  lastFailureAt DateTime?
+  lastError     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@map("push_subscriptions")
+}
+
+model Report {
+  id         BigInt @id @default(autoincrement())
+  reporterId BigInt
+
+  // Target info
+  targetType   String // user, comment, review, series, chapter, forum_post
+  targetId     String
+  targetUserId BigInt?
+
+  reason      ReportReason
+  description String?      @db.Text
+  evidence    String[]     @default([])
+
+  status   ReportStatus @default(PENDING)
+  priority Int          @default(0) @db.SmallInt
+
+  assignedTo     String?
+  assignedToName String?
+  assignedAt     DateTime?
+
+  resolvedAt     DateTime?
+  resolvedById   BigInt?
+  resolvedByName String?
+  resolution     ModerationAction?
+  resolutionNote String?           @db.Text
+
+  // Appeal handling
+  appealedAt       DateTime?
+  appealReason     String?   @db.Text
+  appealResolvedAt DateTime?
+  appealResolvedBy BigInt?
+  appealOutcome    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reporter   User  @relation("ReportSubmitter", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetUser User? @relation("ReportTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, priority(sort: Desc)])
+  @@index([targetType, targetId])
+  @@index([reporterId])
+  @@index([assignedTo, status])
+  @@map("reports")
+}
+
+/// Moderation action log
+model ModerationLog {
+  id          BigInt @id @default(autoincrement())
+  moderatorId BigInt
+
+  targetType   String
+  targetId     String
+  targetUserId BigInt?
+
+  action        ModerationAction
+  reason        String?
+  notes         String?          @db.Text
+  internalNotes String?          @db.Text
+
+  reportId  BigInt?
+  automated Boolean @default(false)
+
+  // Snapshot for audit
+  contentSnapshot Json?
+
+  // Reversal
+  reversedAt     DateTime?
+  reversedById   BigInt?
+  reversedByName String?
+  reversalReason String?
+
+  // Duration for temporary actions
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  moderator  User  @relation("Moderator", fields: [moderatorId], references: [id], onDelete: Restrict)
+  targetUser User? @relation("ModeratedUser", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId])
+  @@index([moderatorId])
+  @@index([action])
+  @@index([targetUserId])
+  @@index([expiresAt])
+  @@map("moderation_logs")
+}
+
+model SupportTicket {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  ticketNumber String @unique
+  subject      String @db.VarChar(200)
+
+  category TicketCategory
+  priority TicketPriority @default(MEDIUM)
+  status   TicketStatus   @default(OPEN)
+
+  assignedToId   BigInt?
+  assignedToName String?
+  assignedAt     DateTime?
+
+  tags String[] @default([])
+
+  // SLA tracking
+  slaDeadline      DateTime?
+  slaBreach        Boolean   @default(false)
+  firstResponseAt  DateTime?
+  firstResponseSla Boolean?
+  resolutionSla    Boolean?
+
+  resolvedAt        DateTime?
+  resolutionTimeMin Int?
+  closedAt          DateTime?
+
+  // Feedback
+  satisfactionRating   Int?      @db.SmallInt // 1-5
+  satisfactionFeedback String?   @db.Text
+  feedbackRequestedAt  DateTime?
+
+  // Context
+  userPlatformTier  PlatformTier?
+  relatedEntityType String?
+  relatedEntityId   String?
+
+  // Escalation
+  isEscalated      Boolean   @default(false)
+  escalatedAt      DateTime?
+  escalatedBy      BigInt?
+  escalationReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages TicketMessage[]
+
+  @@index([userId])
+  @@index([status, priority])
+  @@index([ticketNumber])
+  @@index([assignedToId, status])
+  @@index([slaDeadline, slaBreach])
+  @@map("support_tickets")
+}
+
+/// Support ticket messages
+model TicketMessage {
+  id       BigInt  @id @default(autoincrement())
+  ticketId BigInt
+  userId   BigInt?
+
+  isStaff   Boolean @default(false)
+  isAI      Boolean @default(false)
+  staffName String?
+  staffId   BigInt?
+
+  content     String  @db.Text
+  contentHtml String? @db.Text
+
+  attachments Json?
+  isInternal  Boolean @default(false)
+
+  // For AI responses
+  aiConfidence Float?
+  aiModel      AIModel?
+
+  createdAt DateTime @default(now())
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId, createdAt])
+  @@map("ticket_messages")
+}
+
+model AIWritingSession {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  seriesId  String?
+  chapterId String?
+
+  sessionType  AISessionType
+  prompt       String        @db.Text
+  systemPrompt String?       @db.Text
+  response     String        @db.Text
+
+  model            AIModel
+  tokensUsed       Int
+  promptTokens     Int?
+  completionTokens Int?
+  estimatedCost    Float?
+
+  wasHelpful    Boolean?
+  helpfulRating Int?     @db.SmallInt // 1-5
+  feedback      String?  @db.Text
+
+  responseTimeMs Int?
+
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  series  Series?  @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  chapter Chapter? @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+
+  @@index([userId, sessionType])
+  @@index([seriesId])
+  @@index([model, createdAt])
+  @@map("ai_writing_sessions")
+}
+
+/// AI usage tracking (monthly)
+model AIUsageRecord {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  translationWordsUsed Int      @default(0)
+  translationRequests  Int      @default(0)
+  translationLanguages String[] @default([])
+
+  writingTokensUsed Int @default(0)
+  writingRequests   Int @default(0)
+
+  coverGenerationsUsed  Int @default(0) @db.SmallInt
+  tiktokVideosGenerated Int @default(0) @db.SmallInt
+
+  // Limits (from tier at time of record)
+  translationWordsLimit Int?
+  writingTokensLimit    Int?
+  coverGenerationsLimit Int? @db.SmallInt
+  tiktokVideosLimit     Int? @db.SmallInt
+
+  // Overage
+  translationOverage Int    @default(0)
+  writingOverage     Int    @default(0)
+  overageCharged     BigInt @default(0)
+  overageCurrency    String @default("INR") @db.Char(3)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, periodStart])
+  @@index([userId, periodStart])
+  @@map("ai_usage_records")
+}
+
+/// TikTok-style video previews
+model TikTokPreview {
+  id        String @id @default(cuid())
+  chapterId String
+
+  videoUrl     String  @db.VarChar(2048)
+  thumbnailUrl String? @db.VarChar(2048)
+  duration     Int     @db.SmallInt // seconds
+
+  width  Int @default(1080) @db.SmallInt
+  height Int @default(1920) @db.SmallInt
+
+  fileSize Int
+  mimeType String @default("video/mp4") @db.VarChar(50)
+
+  status         TikTokPreviewStatus @default(PENDING)
+  generationTime Int? // seconds
+
+  templateId String?
+  style      Json?
+
+  textContent String? @db.Text
+  textStyle   Json?
+
+  audioTrackId  String?
+  audioTrackUrl String? @db.VarChar(2048)
+  hasVoiceover  Boolean @default(false)
+  voiceId       String?
+
+  errorMessage String?
+  retryCount   Int     @default(0) @db.SmallInt
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+
+  // Social platform IDs
+  tiktokPostId    String?
+  tiktokPostUrl   String? @db.VarChar(2048)
+  instagramPostId String?
+  youtubeShortsId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([chapterId])
+  @@index([status])
+  @@map("tiktok_previews")
+}
+
+/// TikTok preview templates
+model TikTokTemplate {
+  id          String  @id @default(cuid())
+  name        String  @db.VarChar(100)
+  slug        String  @unique
+  description String? @db.Text
+
+  thumbnailUrl String? @db.VarChar(2048)
+  previewUrl   String? @db.VarChar(2048)
+
+  config       Json
+  contentTypes ContentType[] @default([])
+
+  isPublic     Boolean       @default(true)
+  isPremium    Boolean       @default(false)
+  requiredTier PlatformTier?
+
+  usageCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([isPublic, isPremium])
+  @@map("tiktok_templates")
+}
+
+model OCRJob {
+  id             BigInt @id @default(autoincrement())
+  chapterImageId BigInt
+
+  status       JobStatus @default(PENDING)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+
+  extractedText     String? @db.Text
+  textBoundingBoxes Json?
+  textRegionsCount  Int     @default(0) @db.SmallInt
+
+  detectedLanguage   String? @db.Char(2)
+  languageConfidence Float?
+
+  processingTimeMs Int?
+  modelUsed        String?
+  imageRegions     Int?    @db.SmallInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapterImage ChapterImage @relation(fields: [chapterImageId], references: [id], onDelete: Cascade)
+
+  @@index([chapterImageId])
+  @@index([status])
+  @@map("ocr_jobs")
+}
+
+/// Comic text replacements for translations
+model ComicTextReplacement {
+  id             BigInt @id @default(autoincrement())
+  chapterImageId BigInt
+
+  language String @db.Char(2)
+
+  originalText   String
+  originalBounds Json
+
+  translatedText   String
+  replacementStyle Json
+
+  isApplied      Boolean   @default(false)
+  appliedAt      DateTime?
+  resultImageId  String?
+  resultImageUrl String?   @db.VarChar(2048)
+
+  isManualEdit Boolean   @default(false)
+  editedById   BigInt?
+  editedByName String?
+  editedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapterImage ChapterImage @relation(fields: [chapterImageId], references: [id], onDelete: Cascade)
+
+  @@unique([chapterImageId, language, originalText])
+  @@index([chapterImageId, language])
+  @@map("comic_text_replacements")
+}
+
+model ChurnPrediction {
+  id             String @id @default(cuid())
+  subscriptionId String @unique
+
+  riskScore   Float
+  riskLevel   ChurnRiskLevel
+  riskFactors Json
+
+  // Behavioral signals
+  lastActivityAt     DateTime?
+  daysSinceActivity  Int       @default(0)
+  engagementScore    Float     @default(0)
+  contentConsumption Float     @default(0)
+  interactionRate    Float     @default(0)
+  activityTrend      String?
+
+  // Payment signals
+  paymentFailures   Int     @default(0) @db.SmallInt
+  latePayments      Int     @default(0) @db.SmallInt
+  paymentMethodAge  Int?
+  cardExpiryWarning Boolean @default(false)
+
+  // Subscription signals
+  tierChanges     Int @default(0) @db.SmallInt
+  pauseHistory    Int @default(0) @db.SmallInt
+  subscriptionAge Int @default(0)
+  timeToRenewal   Int @default(0)
+
+  // Cohort comparison
+  cohortAvgEngagement Float?
+  peerChurnRate       Float?
+  cohortMonth         String?
+
+  // Model info
+  modelVersion   String
+  modelType      String?
+  predictionDate DateTime @default(now())
+  confidence     Float
+
+  // Actions
+  recommendedActions Json?
+  actionsTaken       Json?
+
+  // Outcome tracking
+  actualChurned   Boolean?
+  actualChurnDate DateTime?
+  wasAccurate     Boolean?
+  savedByAction   Boolean?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscription ReaderSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([riskLevel, predictionDate])
+  @@index([riskScore(sort: Desc)])
+  @@map("churn_predictions")
+}
+
+/// Churn prevention actions
+/// FIXED: Added proper relations
+model ChurnPreventionAction {
+  id             BigInt @id @default(autoincrement())
+  subscriptionId String
+  userId         BigInt
+
+  actionType ChurnPreventionActionType
+  details    Json
+
+  triggerReason    String
+  triggerRiskLevel ChurnRiskLevel?
+  triggerScore     Float?
+  automatedAction  Boolean         @default(true)
+
+  scheduledAt DateTime?
+  executedAt  DateTime?
+  expiresAt   DateTime?
+
+  status ChurnPreventionActionStatus @default(PENDING)
+
+  // Engagement tracking
+  opened       Boolean?
+  openedAt     DateTime?
+  clicked      Boolean?
+  clickedAt    DateTime?
+  converted    Boolean?
+  convertedAt  DateTime?
+  responseData Json?
+
+  // Outcome
+  churnPrevented  Boolean?
+  revenueRetained Int?
+  revenueCurrency String?  @db.Char(3)
+
+  errorMessage String?
+  retryCount   Int     @default(0) @db.SmallInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // FIXED: Added proper relations
+  subscription ReaderSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([userId])
+  @@index([status, scheduledAt])
+  @@index([status, expiresAt])
+  @@map("churn_prevention_actions")
+}
+
+model WebhookEvent {
+  id BigInt @id @default(autoincrement())
+
+  gateway  PaymentGateway
+  authorId BigInt?
+
+  eventType String
+  eventId   String
+
+  payload Json
+  headers Json?
+
+  signatureValid Boolean?
+  signatureError String?
+
+  status       WebhookEventStatus @default(PENDING)
+  processedAt  DateTime?
+  errorMessage String?
+  retryCount   Int                @default(0) @db.SmallInt
+  maxRetries   Int                @default(5) @db.SmallInt
+  nextRetryAt  DateTime?
+
+  idempotencyKey String? @unique
+
+  receivedAt       DateTime @default(now())
+  processingTimeMs Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([gateway, status])
+  @@index([eventId])
+  @@index([status, nextRetryAt])
+  @@index([idempotencyKey])
+  @@map("webhook_events")
+}
+
+/// Outgoing webhooks to external systems
+model OutgoingWebhook {
+  id     String @id @default(cuid())
+  siteId String
+
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+  url         String  @db.VarChar(2048)
+
+  // FIXED: Secret stored as vault reference
+  secretRef String @db.VarChar(255)
+
+  events String[] @default([])
+
+  isActive     Boolean @default(true)
+  retryEnabled Boolean @default(true)
+  maxRetries   Int     @default(3) @db.SmallInt
+  timeoutMs    Int     @default(30000) @db.SmallInt
+
+  // Health tracking
+  successCount     Int       @default(0)
+  failureCount     Int       @default(0)
+  lastTriggeredAt  DateTime?
+  lastSuccessAt    DateTime?
+  lastFailureAt    DateTime?
+  isHealthy        Boolean   @default(true)
+  consecutiveFails Int       @default(0) @db.SmallInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site       Site              @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([siteId, isActive])
+  @@map("outgoing_webhooks")
+}
+
+/// Outgoing webhook delivery log
+model WebhookDelivery {
+  id        BigInt @id @default(autoincrement())
+  webhookId String
+
+  eventType String
+  payload   Json
+
+  statusCode     Int?    @db.SmallInt
+  responseBody   String? @db.Text
+  responseTimeMs Int?
+
+  success      Boolean @default(false)
+  errorMessage String?
+
+  attempt     Int       @default(1) @db.SmallInt
+  nextRetryAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  webhook OutgoingWebhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, success])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+model MediaFile {
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt
+  siteId String?
+
+  filename         String
+  originalFilename String
+  mimeType         String @db.VarChar(100)
+  fileSize         Int
+
+  storageProvider StorageProvider @default(S3)
+  storagePath     String          @db.VarChar(500)
+  storageRegion   String?
+
+  publicUrl String  @db.VarChar(2048)
+  cdnUrl    String? @db.VarChar(2048)
+
+  // Image metadata
+  width         Int?    @db.SmallInt
+  height        Int?    @db.SmallInt
+  aspectRatio   Float?
+  colorProfile  String?
+  dominantColor String? @db.Char(7)
+
+  // Variants
+  thumbnailUrl   String? @db.VarChar(2048)
+  placeholderUrl String? @db.VarChar(2048)
+
+  // Processing
+  isProcessed     Boolean   @default(false)
+  processedAt     DateTime?
+  processingError String?
+
+  // Optimization
+  isOptimized      Boolean @default(false)
+  originalSize     Int?
+  optimizedSize    Int?
+  compressionRatio Float?
+
+  // Accessibility
+  altText String? @db.VarChar(500)
+  caption String? @db.Text
+
+  // Usage
+  usageCount Int       @default(0)
+  lastUsedAt DateTime?
+
+  // Security
+  scanStatus    MediaScanStatus @default(PENDING)
+  scannedAt     DateTime?
+  scanResult    String?
+  isQuarantined Boolean         @default(false)
+
+  // Organization
+  folder String?
+  tags   String[] @default([])
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site Site? @relation(fields: [siteId], references: [id], onDelete: SetNull)
+
+  @@index([userId, folder])
+  @@index([siteId])
+  @@index([scanStatus])
+  @@index([deletedAt])
+  @@map("media_files")
+}
+
+/// Storage usage tracking
+model StorageUsage {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @unique
+
+  totalBytes    BigInt @default(0)
+  imageBytes    BigInt @default(0)
+  documentBytes BigInt @default(0)
+  videoBytes    BigInt @default(0)
+  otherBytes    BigInt @default(0)
+
+  totalFiles    Int @default(0)
+  imageFiles    Int @default(0)
+  documentFiles Int @default(0)
+  videoFiles    Int @default(0)
+
+  bandwidthUsedBytes BigInt   @default(0)
+  bandwidthResetAt   DateTime
+
+  storageLimitBytes   BigInt
+  bandwidthLimitBytes BigInt
+
+  storageWarningAt   DateTime?
+  bandwidthWarningAt DateTime?
+
+  calculatedAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("storage_usage")
+}
+
+model SocialConnection {
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt
+  siteId String?
+
+  platform SocialPlatform
+
+  platformUserId      String?
+  platformUsername    String?
+  platformDisplayName String?
+  platformAvatarUrl   String? @db.VarChar(2048)
+
+  // FIXED: Token references instead of actual tokens
+  accessTokenRef  String?
+  refreshTokenRef String?
+  tokenExpiresAt  DateTime?
+  tokenScopes     String[]  @default([])
+
+  // Discord specific
+  webhookUrl String? @db.Text
+  webhookId  String?
+
+  isActive Boolean @default(true)
+  autoPost Boolean @default(true)
+
+  postTemplate String? @db.Text
+  includeImage Boolean @default(true)
+  includeTags  Boolean @default(true)
+
+  // Stats
+  lastPostAt       DateTime?
+  lastPostId       String?
+  totalPosts       Int       @default(0)
+  failedPosts      Int       @default(0)
+  lastErrorAt      DateTime?
+  lastError        String?
+  consecutiveFails Int       @default(0) @db.SmallInt
+  isHealthy        Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site  Site?        @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  posts SocialPost[]
+
+  @@unique([userId, platform, siteId])
+  @@index([userId, isActive])
+  @@map("social_connections")
+}
+
+/// Social media post log
+model SocialPost {
+  id           BigInt @id @default(autoincrement())
+  connectionId BigInt
+
+  chapterId      String?
+  announcementId String?
+
+  platform      SocialPlatform
+  postContent   String         @db.Text
+  postMediaUrls String[]       @default([])
+
+  postUrl        String? @db.VarChar(2048)
+  platformPostId String?
+
+  status       SocialPostStatus @default(DRAFT)
+  errorMessage String?
+  errorCode    String?
+
+  scheduledFor DateTime?
+  postedAt     DateTime?
+
+  // Engagement metrics
+  likes    Int?
+  shares   Int?
+  comments Int?
+  views    Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  connection   SocialConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  chapter      Chapter?         @relation(fields: [chapterId], references: [id], onDelete: SetNull)
+  announcement Announcement?    @relation(fields: [announcementId], references: [id], onDelete: SetNull)
+
+  @@index([connectionId])
+  @@index([status, scheduledFor])
+  @@index([platform, postedAt])
+  @@map("social_posts")
+}
+
+model ScheduledPublication {
+  id        BigInt @id @default(autoincrement())
+  chapterId String @unique
+
+  scheduledFor DateTime
+  timezone     String   @default("UTC") @db.VarChar(50)
+
+  status       ScheduledPublicationStatus @default(PENDING)
+  publishedAt  DateTime?
+  errorMessage String?
+  retryCount   Int                        @default(0) @db.SmallInt
+
+  notifySubscribers  Boolean @default(true)
+  socialPost         Boolean @default(true)
+  emailBroadcast     Boolean @default(false)
+  subscriberNotified Boolean @default(false)
+  socialPosted       Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledFor])
+  @@map("scheduled_publications")
+}
+
+/// Scheduled paywall unlocks
+model ScheduledUnlock {
+  id        BigInt @id @default(autoincrement())
+  chapterId String @unique
+
+  unlockAt DateTime
+  timezone String   @default("UTC") @db.VarChar(50)
+
+  originalAccessLevel   ChapterAccessLevel
+  originalMinimumTierId String?
+
+  status       ScheduledUnlockStatus @default(PENDING)
+  unlockedAt   DateTime?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@index([status, unlockAt])
+  @@map("scheduled_unlocks")
+}
+
+/// Content calendar entries
+model ContentCalendarEntry {
+  id       BigInt  @id @default(autoincrement())
+  authorId BigInt
+  siteId   String
+  seriesId String?
+
+  entryType   CalendarEntryType
+  title       String            @db.VarChar(200)
+  description String?           @db.Text
+  color       String?           @db.Char(7)
+
+  scheduledDate DateTime  @db.Date
+  scheduledTime DateTime?
+  timezone      String    @default("UTC") @db.VarChar(50)
+  isAllDay      Boolean   @default(false)
+
+  // Recurrence
+  isRecurring          Boolean    @default(false)
+  recurrenceRule       String? // iCal RRULE format
+  recurrenceEndAt      DateTime?
+  recurrenceExceptions DateTime[] @default([])
+
+  // Status
+  isCompleted Boolean   @default(false)
+  completedAt DateTime?
+  isCancelled Boolean   @default(false)
+
+  // Linked entities
+  linkedChapterId      String?
+  linkedAnnouncementId String?
+  linkedProductId      String?
+
+  // Reminders
+  reminderMinutes Int[]     @default([])
+  remindersSent   Int       @default(0) @db.SmallInt
+  lastReminderAt  DateTime?
+
+  notes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  site   Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  series Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  @@index([authorId, scheduledDate])
+  @@index([siteId, scheduledDate])
+  @@index([seriesId])
+  @@map("content_calendar_entries")
+}
+
+model WritingGoal {
+  id       BigInt  @id @default(autoincrement())
+  authorId BigInt
+  seriesId String?
+
+  name        String?  @db.VarChar(100)
+  goalType    GoalType
+  targetValue Int
+  targetUnit  String   @db.VarChar(50)
+
+  periodType GoalPeriodType
+  startDate  DateTime       @db.Date
+  endDate    DateTime?      @db.Date
+
+  currentValue Int       @default(0)
+  isCompleted  Boolean   @default(false)
+  completedAt  DateTime?
+
+  // Streak tracking
+  currentStreak  Int       @default(0) @db.SmallInt
+  longestStreak  Int       @default(0) @db.SmallInt
+  lastProgressAt DateTime?
+  streakBrokenAt DateTime?
+
+  // Reminders
+  reminderEnabled Boolean @default(true)
+  reminderTime    String? @db.VarChar(5) // HH:MM format
+  reminderDays    Int[]   @default([])
+
+  isActive Boolean   @default(true)
+  isPaused Boolean   @default(false)
+  pausedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User                  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  series   Series?               @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  progress WritingGoalProgress[]
+
+  @@index([authorId, isActive])
+  @@index([seriesId])
+  @@map("writing_goals")
+}
+
+/// Daily writing goal progress
+model WritingGoalProgress {
+  goalId BigInt
+  date   DateTime @db.Date
+
+  value           Int     @default(0)
+  targetMet       Boolean @default(false)
+  percentComplete Float   @default(0)
+
+  wordCount    Int?
+  chapterId    String?
+  chapterTitle String?
+  seriesId     String?
+
+  notes String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  goal WritingGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@id([goalId, date])
+  @@index([date(sort: Desc)])
+  @@map("writing_goal_progress")
+}
+
+/// Writing streaks
+model WritingStreak {
+  id       BigInt @id @default(autoincrement())
+  authorId BigInt @unique
+
+  currentStreak      Int       @default(0)
+  currentStreakStart DateTime?
+  lastActivityDate   DateTime? @db.Date
+  lastActivityType   String?
+
+  longestStreak      Int       @default(0)
+  longestStreakStart DateTime?
+  longestStreakEnd   DateTime?
+
+  // Lifetime stats
+  totalDaysWritten     Int    @default(0)
+  totalWordsWritten    BigInt @default(0)
+  avgWordsPerDay       Float  @default(0)
+  totalChaptersWritten Int    @default(0)
+
+  milestones Json?
+
+  // Settings
+  streakResetHour Int     @default(4) @db.SmallInt // Hour in user's timezone
+  minimumWords    Int     @default(100)
+  countPublishing Boolean @default(true)
+
+  // Freeze
+  freezeDaysRemaining Int       @default(0) @db.SmallInt
+  freezeUsedThisMonth Int       @default(0) @db.SmallInt
+  lastFreezeAt        DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("writing_streaks")
+}
+
+model ImportJob {
+  id       BigInt  @id @default(autoincrement())
+  userId   BigInt
+  siteId   String
+  seriesId String?
+
+  sourceType ImportSourceType
+  sourceUrl  String?          @db.Text
+  sourceFile String?          @db.VarChar(500)
+
+  status       JobStatus @default(PENDING)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?   @db.Text
+
+  totalItems     Int @default(0)
+  processedItems Int @default(0)
+  failedItems    Int @default(0)
+  skippedItems   Int @default(0)
+
+  importedSeriesId   String?
+  importedChapterIds String[] @default([])
+  importLog          Json?
+
+  options Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site   Site    @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  series Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@index([siteId])
+  @@map("import_jobs")
+}
+
+/// Content export jobs
+model ExportJob {
+  id       BigInt  @id @default(autoincrement())
+  userId   BigInt
+  siteId   String?
+  seriesId String?
+
+  exportType String
+  format     ExportFormatType
+
+  status       JobStatus @default(PENDING)
+  startedAt    DateTime?
+  completedAt  DateTime?
+  errorMessage String?
+
+  totalItems     Int @default(0)
+  processedItems Int @default(0)
+
+  downloadUrl    String?   @db.VarChar(2048)
+  fileSizeBytes  BigInt?
+  expiresAt      DateTime?
+  downloadCount  Int       @default(0) @db.SmallInt
+  lastDownloadAt DateTime?
+
+  options Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site   Site?   @relation(fields: [siteId], references: [id], onDelete: SetNull)
+  series Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@map("export_jobs")
+}
+
+model DataExportRequest {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt
+
+  exportType DataExportType
+  format     DataExportFormat @default(JSON)
+
+  includeContent      Boolean   @default(true)
+  includeSubscribers  Boolean   @default(true)
+  includeAnalytics    Boolean   @default(true)
+  includeTransactions Boolean   @default(true)
+  includeComments     Boolean   @default(true)
+  dateRangeStart      DateTime?
+  dateRangeEnd        DateTime?
+
+  status DataExportStatus @default(PENDING)
+
+  progress    Int     @default(0) @db.SmallInt
+  currentStep String?
+
+  downloadUrl   String? @db.VarChar(2048)
+  fileSizeBytes BigInt?
+  fileCount     Int?
+
+  startedAt    DateTime?
+  completedAt  DateTime?
+  expiresAt    DateTime?
+  downloadedAt DateTime?
+
+  errorMessage String?
+
+  downloadToken String?  @unique
+  downloadCount Int      @default(0) @db.SmallInt
+  maxDownloads  Int      @default(5) @db.SmallInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([downloadToken])
+  @@map("data_export_requests")
+}
+
+/// GDPR account deletion requests
+model AccountDeletionRequest {
+  id     BigInt @id @default(autoincrement())
+  userId BigInt @unique
+
+  verificationToken String    @unique
+  verifiedAt        DateTime?
+  verificationIp    String?   @db.VarChar(45)
+
+  reason   String?
+  feedback String? @db.Text
+
+  status AccountDeletionStatus @default(PENDING)
+
+  coolingOffEndsAt    DateTime
+  scheduledDeletionAt DateTime
+
+  startedAt       DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  cancelledReason String?
+
+  // Backup before deletion
+  backupCreated   Boolean   @default(false)
+  backupUrl       String?   @db.VarChar(2048)
+  backupExpiresAt DateTime?
+
+  deletionLog Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledDeletionAt])
+  @@index([verificationToken])
+  @@map("account_deletion_requests")
+}
+
+model APIKey {
+  id     BigInt  @id @default(autoincrement())
+  userId BigInt
+  siteId String?
+
+  keyHash     String  @unique
+  keyPrefix   String  @db.VarChar(12)
+  name        String  @db.VarChar(100)
+  description String? @db.VarChar(500)
+
+  permissions String[] @default([])
+  scopes      String[] @default([])
+
+  rateLimit       Int @default(1000)
+  rateLimitWindow Int @default(3600) // seconds
+
+  allowedIps     String[] @default([])
+  allowedOrigins String[] @default([])
+
+  isActive Boolean @default(true)
+
+  lastUsedAt DateTime?
+  usageCount BigInt    @default(0)
+
+  expiresAt   DateTime?
+  createdByIp String?   @db.VarChar(45)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  site        Site?           @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  requestLogs APIRequestLog[]
+
+  @@index([userId, isActive])
+  @@index([keyHash])
+  @@index([siteId])
+  @@map("api_keys")
+}
+
+/// API request log
+model APIRequestLog {
+  id       BigInt  @id @default(autoincrement())
+  apiKeyId BigInt?
+
+  method      String @db.VarChar(10)
+  endpoint    String @db.VarChar(500)
+  queryParams Json?
+
+  // don&apos;t store full request body for security
+  requestSize Int?
+
+  statusCode     Int  @db.SmallInt
+  responseSize   Int?
+  responseTimeMs Int
+
+  ipAddress String? @db.VarChar(45)
+  userAgent String? @db.VarChar(500)
+
+  errorMessage String?
+  errorCode    String?
+
+  rateLimitRemaining Int?
+  rateLimitReset     DateTime?
+
+  createdAt DateTime @default(now())
+
+  apiKey APIKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@index([apiKeyId, createdAt(sort: Desc)])
+  @@index([endpoint, statusCode])
+  @@index([createdAt])
+  @@map("api_request_logs")
+}
+
+model Referral {
+  id BigInt @id @default(autoincrement())
+
+  referrerId   BigInt
+  referrerCode String
+
+  refereeId BigInt @unique
+
+  status ReferralStatus @default(PENDING)
+
+  // Qualification
+  qualifiedAt         DateTime?
+  qualificationEvent  String?
+  qualificationReason String?
+
+  // Rewards
+  referrerReward          String?
+  referrerRewardValue     Int?
+  referrerRewardCurrency  String?   @db.Char(3)
+  referrerRewardAppliedAt DateTime?
+
+  refereeReward          String?
+  refereeRewardValue     Int?
+  refereeRewardCurrency  String?   @db.Char(3)
+  refereeRewardAppliedAt DateTime?
+
+  // Attribution
+  landingPage String? @db.VarChar(2048)
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  referrerUrl String? @db.VarChar(2048)
+
+  // Timeline
+  clickedAt   DateTime?
+  signedUpAt  DateTime?
+  convertedAt DateTime?
+  expiresAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  referrer User @relation("ReferrerUser", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("RefereeUser", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@index([referrerId, status])
+  @@index([referrerCode])
+  @@index([status])
+  @@map("referrals")
+}
+
+model AnalyticsAggregate {
+  id BigInt @id @default(autoincrement())
+
+  entityType String   @db.VarChar(20)
+  entityId   String
+  date       DateTime @db.Date
+
+  // Common metrics
+  pageViews      Int @default(0)
+  uniqueVisitors Int @default(0)
+  sessions       Int @default(0)
+
+  // Entity-specific metrics in JSONB
+  // Structure documented in application code with Zod schemas
+  metrics Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([entityType, entityId, date])
+  @@index([entityType, entityId])
+  @@index([date])
+  @@index([entityType, date])
+  @@map("analytics_aggregates")
+}
+
+/// Raw analytics events
+/// Consider partitioning by month for large installations
+model AnalyticsEvent {
+  id BigInt @id @default(autoincrement())
+
+  userId      BigInt?
+  sessionId   String?
+  anonymousId String?
+
+  eventType AnalyticsEventType
+
+  siteId    String?
+  seriesId  String?
+  chapterId String?
+
+  properties Json?
+
+  // Device info
+  deviceType     DeviceType?
+  browser        String?
+  browserVersion String?
+  os             String?
+  osVersion      String?
+  screenSize     String?
+
+  // Location
+  country String? @db.Char(2)
+  region  String?
+  city    String?
+
+  // Attribution
+  referrer    String? @db.VarChar(2048)
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+
+  timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([siteId, eventType, timestamp])
+  @@index([seriesId, eventType, timestamp])
+  @@index([chapterId, eventType, timestamp])
+  @@index([eventType, timestamp])
+  @@index([timestamp(sort: Desc)])
+  @@map("analytics_events")
+}
+
+model ABTest {
+  id     String @id @default(cuid())
+  siteId String
+
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+
+  testElement    String // What's being tested
+  variants       Json // Array of variant configurations
+  trafficPercent Int    @default(100) @db.SmallInt
+
+  successMetric    String // Primary success metric
+  secondaryMetrics String[] @default([])
+
+  minSampleSize       Int   @default(1000)
+  confidenceThreshold Float @default(0.95)
+
+  status ABTestStatus @default(DRAFT)
+
+  scheduledStartAt DateTime?
+  startedAt        DateTime?
+  pausedAt         DateTime?
+  endedAt          DateTime?
+
+  winningVariant    String?
+  results           Json?
+  currentSampleSize Int     @default(0)
+  isSignificant     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  site        Site               @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  assignments ABTestAssignment[]
+
+  @@index([siteId, status])
+  @@index([status, scheduledStartAt])
+  @@map("ab_tests")
+}
+
+/// A/B test assignments
+model ABTestAssignment {
+  testId    String
+  visitorId String
+
+  variantId String
+
+  converted       Boolean   @default(false)
+  convertedAt     DateTime?
+  conversionValue Float?
+
+  exposedAt DateTime @default(now())
+  exposures Int      @default(1) @db.SmallInt
+
+  assignedAt DateTime @default(now())
+
+  test ABTest @relation(fields: [testId], references: [id], onDelete: Cascade)
+
+  @@id([testId, visitorId])
+  @@index([variantId])
+  @@index([converted])
+  @@index([testId, converted])
+  @@map("ab_test_assignments")
+}
+
+model AuditLog {
+  id BigInt @id @default(autoincrement())
+
+  userId    BigInt?
+  userEmail String?
+  userRole  String?
+  ipAddress String? @db.VarChar(45)
+  userAgent String? @db.VarChar(500)
+
+  action       String
+  actionType   String? // create, read, update, delete
+  resourceType String
+  resourceId   String?
+  resourceName String?
+
+  // Change tracking
+  oldValue Json?
+  newValue Json?
+  changes  Json?
+
+  metadata Json?
+
+  success      Boolean @default(true)
+  errorMessage String?
+  errorCode    String?
+
+  requestId  String?
+  sessionId  String?
+  durationMs Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([resourceType, resourceId])
+  @@index([action, createdAt(sort: Desc)])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Feature flags for gradual rollouts
+model FeatureFlag {
+  id String @id @default(cuid())
+
+  key         String  @unique
+  name        String  @db.VarChar(100)
+  description String? @db.Text
+
+  isEnabled Boolean @default(false)
+
+  // Targeting
+  enabledForTiers  PlatformTier[] @default([])
+  enabledForUsers  BigInt[]       @default([])
+  disabledForUsers BigInt[]       @default([])
+  enabledPercent   Int            @default(0) @db.SmallInt
+
+  // Scheduling
+  enableAt  DateTime?
+  disableAt DateTime?
+
+  category String?
+  tags     String[] @default([])
+
+  lastModifiedBy     BigInt?
+  lastModifiedByName String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@index([isEnabled])
+  @@index([category])
+  @@map("feature_flags")
+}
+
+/// Background job queue
+model JobQueue {
+  id BigInt @id @default(autoincrement())
+
+  queue   String
+  jobType String
+  jobId   String @unique
+
+  payload Json
+
+  status   JobStatus @default(PENDING)
+  priority Int       @default(0) @db.SmallInt
+
+  scheduledFor DateTime?
+  startedAt    DateTime?
+  completedAt  DateTime?
+
+  attempts    Int       @default(0) @db.SmallInt
+  maxAttempts Int       @default(3) @db.SmallInt
+  lastError   String?   @db.Text
+  nextRetryAt DateTime?
+  retryDelay  Int       @default(60) // seconds
+
+  progress        Int?    @db.SmallInt
+  progressMessage String?
+  progressData    Json?
+
+  result Json?
+
+  timeoutSeconds Int @default(300)
+
+  createdBy BigInt?
+  metadata  Json?
+
+  // Locking
+  lockedAt    DateTime?
+  lockedBy    String?
+  lockTimeout DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([queue, status, priority(sort: Desc)])
+  @@index([status, scheduledFor])
+  @@index([status, nextRetryAt])
+  @@index([jobId])
+  @@index([lockedAt])
+  @@map("job_queue")
+}
+
+/// Rate limiting
+model RateLimit {
+  id BigInt @id @default(autoincrement())
+
+  key      String
+  endpoint String?
+
+  requestCount   Int      @default(0)
+  windowStart    DateTime
+  windowDuration Int // seconds
+
+  maxRequests Int
+
+  blockedUntil  DateTime?
+  blockReason   String?
+  totalBlocked  Int       @default(0)
+  lastBlockedAt DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, endpoint])
+  @@index([blockedUntil])
+  @@index([windowStart])
+  @@map("rate_limits")
+}
+
+/// Cache invalidation tracking
+model CacheInvalidation {
+  id BigInt @id @default(autoincrement())
+
+  cacheKey String
+  pattern  String?
+
+  reason       String
+  triggeredBy  String?
+  triggerEvent String?
+
+  status CacheInvalidationStatus @default(PENDING)
+
+  processedAt     DateTime?
+  keysInvalidated Int?
+  durationMs      Int?
+  errorMessage    String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([cacheKey])
+  @@index([createdAt])
+  @@map("cache_invalidations")
+}
+
+model HealthCheck {
+  id BigInt @id @default(autoincrement())
+
+  service   String
+  endpoint  String?
+  checkType String? // http, tcp, database, redis, etc.
+
+  status         HealthStatus
+  responseTimeMs Int?
+
+  details      Json?
+  errorMessage String?
+  errorCode    String?
+
+  expectedResponseMs Int?
+  isWithinThreshold  Boolean?
+
+  checkedAt DateTime @default(now())
+
+  @@index([service, checkedAt(sort: Desc)])
+  @@index([status])
+  @@index([checkedAt])
+  @@map("health_checks")
+}
+
+/// Incident tracking
+model Incident {
+  id String @id @default(cuid())
+
+  title       String           @db.VarChar(200)
+  description String           @db.Text
+  severity    IncidentSeverity
+
+  affectedServices String[] @default([])
+  affectedRegions  String[] @default([])
+
+  status IncidentStatus @default(INVESTIGATING)
+
+  // Timeline
+  startedAt    DateTime
+  detectedAt   DateTime  @default(now())
+  identifiedAt DateTime?
+  mitigatedAt  DateTime?
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+
+  durationMinutes Int?
+  downtimeMinutes Int?
+
+  lastUpdateAt DateTime?
+  updateCount  Int       @default(0) @db.SmallInt
+
+  // Resolution
+  rootCause       String?   @db.Text
+  resolution      String?   @db.Text
+  lessonsLearned  String?   @db.Text
+  actionItems     Json?
+  postMortemUrl   String?   @db.VarChar(2048)
+  postMortemDueAt DateTime?
+
+  // Team
+  commanderId   BigInt?
+  commanderName String?
+  responders    BigInt[] @default([])
+
+  // Communication
+  statusPageUpdated Boolean @default(false)
+  customersNotified Boolean @default(false)
+  notificationsSent Int     @default(0) @db.SmallInt
+
+  // External tracking
+  externalTicketId  String?
+  externalTicketUrl String? @db.VarChar(2048)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  updates IncidentUpdate[]
+
+  @@index([status, severity])
+  @@index([startedAt(sort: Desc)])
+  @@index([commanderId])
+  @@map("incidents")
+}
+
+/// Incident status updates
+model IncidentUpdate {
+  id         BigInt @id @default(autoincrement())
+  incidentId String
+
+  status  IncidentStatus
+  message String         @db.Text
+
+  authorId   BigInt?
+  authorName String?
+
+  isPublic   Boolean @default(true)
+  notifySent Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@index([incidentId, createdAt])
+  @@map("incident_updates")
+}
+
+model PlatformConfig {
+  id String @id @default(cuid())
+
+  key       String @unique
+  value     String @db.Text
+  valueType String // string, number, boolean, json, encrypted
+
+  category    String
+  description String? @db.Text
+
+  // Tier-specific overrides
+  tierOverrides Json?
+
+  // Validation
+  validationRule String?
+  allowedValues  String[] @default([])
+  minValue       Float?
+  maxValue       Float?
+
+  isSecret   Boolean @default(false)
+  isEditable Boolean @default(true)
+  isSystem   Boolean @default(false)
+
+  lastModifiedBy     BigInt?
+  lastModifiedByName String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([key])
+  @@map("platform_config")
+}
+
+/// Tier-based feature limits
+model TierLimits {
+  id   String       @id @default(cuid())
+  tier PlatformTier @unique
+
+  // Content limits
+  maxSeries            Int
+  maxChaptersPerSeries Int
+  maxTotalChapters     Int?
+
+  // Subscriber limits
+  maxSubscribers       Int
+  maxSubscriptionTiers Int @db.SmallInt
+
+  // Storage limits (bytes)
+  storageLimit   BigInt
+  bandwidthLimit BigInt
+
+  // Communication limits
+  emailBroadcastsPerMonth Int
+  newsletterSubscribers   Int?
+
+  // AI limits
+  translationLanguages     Int  @db.SmallInt
+  translationWordsPerMonth Int
+  writingTokensPerMonth    Int
+  coverGenerationsPerMonth Int  @db.SmallInt
+  tiktokVideosPerMonth     Int? @db.SmallInt
+
+  // Feature access
+  hasCustomDomain        Boolean @default(false)
+  customDomainCount      Int     @default(0) @db.SmallInt
+  hasScheduledPublishing Boolean @default(false)
+  hasOneTimePurchases    Boolean @default(false)
+  hasAdvancedDiscounts   Boolean @default(false)
+  hasAdvancedAnalytics   Boolean @default(false)
+  hasCohortAnalysis      Boolean @default(false)
+  hasChurnPrediction     Boolean @default(false)
+  hasABTesting           Boolean @default(false)
+  hasAPIAccess           Boolean @default(false)
+  apiRateLimit           Int?
+  hasFeaturedPlacement   Boolean @default(false)
+  featuredSlotsPerMonth  Int     @default(0) @db.SmallInt
+
+  // Support
+  supportResponseHours Int?
+  hasPrioritySupport   Boolean @default(false)
+  hasDedicatedManager  Boolean @default(false)
+  hasOnboardingCall    Boolean @default(false)
+  onboardingMinutes    Int?    @db.SmallInt
+
+  // Version history
+  versionHistoryDays Int @default(30)
+
+  // Platform fees
+  platformFeePercent Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tier_limits")
+}
+
+model InterfaceTranslation {
+  id BigInt @id @default(autoincrement())
+
+  languageCode String @db.Char(2)
+  key          String
+  value        String @db.Text
+
+  namespace String @default("common")
+
+  isVerified Boolean   @default(false)
+  verifiedBy BigInt?
+  verifiedAt DateTime?
+
+  context    String? @db.Text
+  screenshot String? @db.VarChar(2048)
+
+  pluralForm String? // zero, one, two, few, many, other
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([languageCode, namespace, key, pluralForm])
+  @@index([languageCode, namespace])
+  @@index([key])
+  @@map("interface_translations")
+}
+
+model SearchIndex {
+  id BigInt @id @default(autoincrement())
+
+  entityType String // series, chapter, author, product
+  entityId   String
+
+  title   String
+  content String  @db.Text
+  excerpt String? @db.VarChar(500)
+
+  authorId   BigInt?
+  authorName String?
+  siteId     String?
+  siteName   String?
+  seriesId   String?
+  seriesName String?
+
+  contentType ContentType?
+  genres      String[]     @default([])
+  tags        String[]     @default([])
+  language    String?      @db.Char(2)
+
+  // Ranking factors
+  popularity Float    @default(0)
+  quality    Float    @default(0)
+  recency    DateTime
+  relevance  Float    @default(0)
+
+  isPublic Boolean @default(true)
+  isActive Boolean @default(true)
+
+  metadata Json?
+
+  // Search vector (populated by trigger)
+  // searchVector tsvector @default(dbgenerated())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType])
+  @@index([isPublic, isActive])
+  @@index([popularity(sort: Desc)])
+  @@index([recency(sort: Desc)])
+  @@index([contentType, language, isPublic])
+  @@index([authorId])
+  @@index([siteId])
+  @@map("search_index")
+}
+
+view PopularSeries {
+  id              String      @unique
+  title           String
+  slug            String
+  coverImageUrl   String?
+  contentType     ContentType
+  language        String
+  averageRating   Float?
+  ratingCount     Int
+  subscriberCount Int
+  viewCount       BigInt
+  chapterCount    Int
+  trendingScore   Float
+  authorId        BigInt
+  authorUsername  String
+  authorName      String
+  siteId          String
+  siteSlug        String
+  lastPublishedAt DateTime?
+
+  @@map("popular_series")
+}
+
+/// Series statistics view
+view SeriesStats {
+  id                    String  @unique
+  chapterCount          Int
+  publishedChapterCount Int
+  totalWordCount        BigInt
+  commentCount          Int
+  reviewCount           Int
+  bookmarkCount         Int
+  uniqueReaders7d       Int
+  uniqueReaders30d      Int
+  revenueThisMonth      BigInt?
+
+  @@map("series_stats")
+}
+
+/// Active subscriptions view
+view ActiveSubscriptions {
+  id               String                   @unique
+  readerId         BigInt
+  readerUsername   String
+  readerEmail      String
+  tierId           String
+  tierName         String
+  tierPrice        Int
+  status           ReaderSubscriptionStatus
+  billingCycle     BillingCycle
+  currentPeriodEnd DateTime
+  autoRenew        Boolean
+  siteId           String
+  siteName         String
+  authorId         BigInt
+  authorName       String
+  createdAt        DateTime
+
+  @@map("active_subscriptions")
+}
+
+/// Author revenue summary view (monthly)
+/// FIXED: Proper composite unique key
+view AuthorMonthlyRevenue {
+  id                  String   @unique // Composite: {authorId}_{month}
+  authorId            BigInt
+  month               DateTime @db.Date
+  totalRevenue        BigInt
+  subscriptionRevenue BigInt
+  purchaseRevenue     BigInt
+  tipRevenue          BigInt
+  gatewayFees         BigInt
+  platformFees        BigInt
+  netRevenue          BigInt
+  transactionCount    Int
+  newSubscribers      Int
+  churnedSubscribers  Int
+  currencyCode        String
+
+  @@map("author_monthly_revenue")
+}
+
+/// Site statistics view
+view SiteStats {
+  id                 String @unique
+  siteName           String
+  authorId           BigInt
+  totalSeries        Int
+  activeSeries       Int
+  totalChapters      Int
+  publishedChapters  Int
+  totalSubscribers   Int
+  activeSubscribers  Int
+  totalViews         BigInt
+  viewsThisMonth     BigInt
+  revenueThisMonth   BigInt
+  revenueLastMonth   BigInt
+  avgChaptersPerWeek Float
+
+  @@map("site_stats")
+}
+
+/// Reader activity summary view
+view ReaderActivitySummary {
+  id                  String    @unique
+  userId              BigInt
+  totalSeriesRead     Int
+  totalChaptersRead   Int
+  totalTimeSpentHours Float
+  activeSubscriptions Int
+  lifetimeSpent       BigInt
+  lastActivityAt      DateTime?
+  favoriteGenre       String?
+  favoriteAuthorId    BigInt?
+
+  @@map("reader_activity_summary")
+}

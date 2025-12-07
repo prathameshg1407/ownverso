@@ -1,0 +1,2334 @@
+# Ownverso Platform - Complete Backend Folder Structure
+
+A production-ready, scalable, and maintainable backend architecture for the Ownverso platform.
+
+```
+backend/
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml                          # Continuous Integration
+│   │   ├── cd-staging.yml                  # Deploy to staging
+│   │   ├── cd-production.yml               # Deploy to production
+│   │   ├── codeql-analysis.yml             # Security scanning
+│   │   ├── dependency-review.yml           # Dependency vulnerability check
+│   │   └── pr-checks.yml                   # Pull request checks
+│   ├── ISSUE_TEMPLATE/
+│   │   ├── bug_report.md
+│   │   ├── feature_request.md
+│   │   └── config.yml
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── CODEOWNERS
+│   └── dependabot.yml
+│
+├── .husky/
+│   ├── pre-commit                          # Lint-staged hook
+│   ├── pre-push                            # Test hook
+│   └── commit-msg                          # Commit message validation
+│
+├── .vscode/
+│   ├── settings.json                       # VS Code workspace settings
+│   ├── extensions.json                     # Recommended extensions
+│   ├── launch.json                         # Debug configurations
+│   └── tasks.json                          # Task configurations
+│
+├── config/
+│   ├── default.ts                          # Default configuration
+│   ├── development.ts                      # Development overrides
+│   ├── staging.ts                          # Staging overrides
+│   ├── production.ts                       # Production overrides
+│   ├── test.ts                             # Test configuration
+│   └── custom-environment-variables.ts     # Env var mappings
+│
+├── docker/
+│   ├── Dockerfile                          # Production Dockerfile
+│   ├── Dockerfile.dev                      # Development Dockerfile
+│   ├── docker-compose.yml                  # Local development stack
+│   ├── docker-compose.test.yml             # Test environment
+│   ├── docker-compose.prod.yml             # Production compose
+│   ├── nginx/
+│   │   ├── nginx.conf                      # Nginx configuration
+│   │   └── ssl/                            # SSL certificates (gitignored)
+│   └── scripts/
+│       ├── entrypoint.sh                   # Container entrypoint
+│       ├── wait-for-it.sh                  # Service dependency wait
+│       └── healthcheck.sh                  # Container health check
+│
+├── docs/
+│   ├── api/
+│   │   ├── openapi.yaml                    # OpenAPI specification
+│   │   ├── postman/
+│   │   │   ├── Ownverso.postman_collection.json
+│   │   │   └── environments/
+│   │   │       ├── local.postman_environment.json
+│   │   │       ├── staging.postman_environment.json
+│   │   │       └── production.postman_environment.json
+│   │   └── examples/                       # API request/response examples
+│   ├── architecture/
+│   │   ├── README.md                       # Architecture overview
+│   │   ├── diagrams/                       # Architecture diagrams
+│   │   ├── adr/                            # Architecture Decision Records
+│   │   │   ├── 001-fastify-framework.md
+│   │   │   ├── 002-prisma-orm.md
+│   │   │   ├── 003-redis-caching.md
+│   │   │   └── template.md
+│   │   └── security.md                     # Security guidelines
+│   ├── deployment/
+│   │   ├── aws.md                          # AWS deployment guide
+│   │   ├── kubernetes.md                   # K8s deployment
+│   │   └── monitoring.md                   # Monitoring setup
+│   ├── development/
+│   │   ├── getting-started.md              # Developer onboarding
+│   │   ├── coding-standards.md             # Coding conventions
+│   │   ├── testing.md                      # Testing guidelines
+│   │   └── debugging.md                    # Debugging tips
+│   └── runbooks/
+│       ├── incident-response.md            # Incident handling
+│       ├── database-operations.md          # DB maintenance
+│       └── scaling.md                      # Scaling procedures
+│
+├── prisma/
+│   ├── schema.prisma                       # Main Prisma schema
+│   ├── migrations/                         # Database migrations
+│   │   └── .gitkeep
+│   ├── seeds/
+│   │   ├── index.ts                        # Main seed orchestrator
+│   │   ├── currencies.seed.ts              # Currency data
+│   │   ├── languages.seed.ts               # Language data
+│   │   ├── genres.seed.ts                  # Genre data
+│   │   ├── tags.seed.ts                    # Initial tags
+│   │   ├── content-warnings.seed.ts        # Content warnings
+│   │   ├── tier-limits.seed.ts             # Platform tier limits
+│   │   ├── platform-config.seed.ts         # Platform configuration
+│   │   ├── feature-flags.seed.ts           # Feature flags
+│   │   ├── themes.seed.ts                  # Default themes
+│   │   ├── forum-categories.seed.ts        # Forum categories
+│   │   ├── tiktok-templates.seed.ts        # TikTok templates
+│   │   └── development/
+│   │       ├── users.seed.ts               # Test users
+│   │       ├── sites.seed.ts               # Test sites
+│   │       └── content.seed.ts             # Test content
+│   ├── views/
+│   │   ├── popular-series.sql              # Popular series view
+│   │   ├── series-stats.sql                # Series statistics view
+│   │   ├── active-subscriptions.sql        # Active subscriptions view
+│   │   ├── author-monthly-revenue.sql      # Monthly revenue view
+│   │   ├── site-stats.sql                  # Site statistics view
+│   │   └── reader-activity-summary.sql     # Reader activity view
+│   ├── indexes/
+│   │   ├── full-text-search.sql            # FTS indexes
+│   │   ├── trigram.sql                     # Trigram indexes
+│   │   └── partial.sql                     # Partial indexes
+│   ├── triggers/
+│   │   ├── search-vector-update.sql        # Search vector trigger
+│   │   ├── updated-at.sql                  # Auto update timestamps
+│   │   └── counter-cache.sql               # Counter cache triggers
+│   ├── functions/
+│   │   ├── calculate-trending-score.sql    # Trending score function
+│   │   ├── calculate-engagement-score.sql  # Engagement score function
+│   │   └── generate-slug.sql               # Slug generation function
+│   └── extensions.sql                      # PostgreSQL extensions
+│
+├── scripts/
+│   ├── build/
+│   │   ├── build.ts                        # Build script
+│   │   ├── clean.ts                        # Clean build artifacts
+│   │   └── bundle-analyze.ts               # Bundle analysis
+│   ├── db/
+│   │   ├── backup.ts                       # Database backup
+│   │   ├── restore.ts                      # Database restore
+│   │   ├── reset.ts                        # Reset database
+│   │   ├── migrate.ts                      # Run migrations
+│   │   └── seed.ts                         # Run seeds
+│   ├── deploy/
+│   │   ├── pre-deploy.ts                   # Pre-deployment checks
+│   │   ├── post-deploy.ts                  # Post-deployment tasks
+│   │   └── rollback.ts                     # Rollback script
+│   ├── maintenance/
+│   │   ├── cleanup-sessions.ts             # Clean expired sessions
+│   │   ├── cleanup-tokens.ts               # Clean expired tokens
+│   │   ├── cleanup-analytics.ts            # Archive old analytics
+│   │   ├── refresh-views.ts                # Refresh materialized views
+│   │   └── update-trending.ts              # Update trending scores
+│   ├── generate/
+│   │   ├── generate-api-docs.ts            # Generate API documentation
+│   │   ├── generate-types.ts               # Generate TypeScript types
+│   │   ├── generate-sdk.ts                 # Generate client SDKs
+│   │   └── generate-mocks.ts               # Generate test mocks
+│   └── utils/
+│       ├── encrypt-secrets.ts              # Encrypt secrets
+│       ├── decrypt-secrets.ts              # Decrypt secrets
+│       └── check-env.ts                    # Validate environment
+│
+├── src/
+│   ├── index.ts                            # Application entry point
+│   ├── app.ts                              # Fastify app setup
+│   ├── server.ts                           # Server bootstrap
+│   │
+│   ├── @types/
+│   │   ├── fastify.d.ts                    # Fastify type extensions
+│   │   ├── global.d.ts                     # Global type declarations
+│   │   ├── environment.d.ts                # Environment type definitions
+│   │   └── modules.d.ts                    # Module declarations
+│   │
+│   ├── api/
+│   │   ├── index.ts                        # API routes aggregator
+│   │   │
+│   │   ├── v1/
+│   │   │   ├── index.ts                    # V1 route registration
+│   │   │   │
+│   │   │   ├── auth/
+│   │   │   │   ├── index.ts                # Auth routes
+│   │   │   │   ├── auth.controller.ts      # Auth controller
+│   │   │   │   ├── auth.service.ts         # Auth business logic
+│   │   │   │   ├── auth.schema.ts          # Request/response schemas
+│   │   │   │   ├── auth.test.ts            # Auth tests
+│   │   │   │   ├── strategies/
+│   │   │   │   │   ├── local.strategy.ts   # Email/password auth
+│   │   │   │   │   ├── google.strategy.ts  # Google OAuth
+│   │   │   │   │   ├── apple.strategy.ts   # Apple OAuth
+│   │   │   │   │   ├── twitter.strategy.ts # Twitter OAuth
+│   │   │   │   │   └── discord.strategy.ts # Discord OAuth
+│   │   │   │   ├── guards/
+│   │   │   │   │   ├── auth.guard.ts       # Authentication guard
+│   │   │   │   │   ├── roles.guard.ts      # Role-based guard
+│   │   │   │   │   ├── permissions.guard.ts # Permission guard
+│   │   │   │   │   └── rate-limit.guard.ts # Rate limiting guard
+│   │   │   │   └── handlers/
+│   │   │   │       ├── register.handler.ts
+│   │   │   │       ├── login.handler.ts
+│   │   │   │       ├── logout.handler.ts
+│   │   │   │       ├── refresh.handler.ts
+│   │   │   │       ├── forgot-password.handler.ts
+│   │   │   │       ├── reset-password.handler.ts
+│   │   │   │       ├── verify-email.handler.ts
+│   │   │   │       ├── mfa-setup.handler.ts
+│   │   │   │       ├── mfa-verify.handler.ts
+│   │   │   │       └── oauth-callback.handler.ts
+│   │   │   │
+│   │   │   ├── users/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── users.controller.ts
+│   │   │   │   ├── users.service.ts
+│   │   │   │   ├── users.schema.ts
+│   │   │   │   ├── users.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── get-me.handler.ts
+│   │   │   │       ├── update-me.handler.ts
+│   │   │   │       ├── update-profile.handler.ts
+│   │   │   │       ├── update-preferences.handler.ts
+│   │   │   │       ├── update-security.handler.ts
+│   │   │   │       ├── upload-avatar.handler.ts
+│   │   │   │       ├── delete-avatar.handler.ts
+│   │   │   │       ├── get-public-profile.handler.ts
+│   │   │   │       └── get-sessions.handler.ts
+│   │   │   │
+│   │   │   ├── author/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── author.controller.ts
+│   │   │   │   ├── author.service.ts
+│   │   │   │   ├── author.schema.ts
+│   │   │   │   ├── author.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── register-author.handler.ts
+│   │   │   │       ├── get-account.handler.ts
+│   │   │   │       ├── update-account.handler.ts
+│   │   │   │       ├── get-dashboard.handler.ts
+│   │   │   │       ├── get-stats.handler.ts
+│   │   │   │       ├── subscription/
+│   │   │   │       │   ├── get-subscription.handler.ts
+│   │   │   │       │   ├── list-plans.handler.ts
+│   │   │   │       │   ├── subscribe.handler.ts
+│   │   │   │       │   ├── change-plan.handler.ts
+│   │   │   │       │   ├── cancel.handler.ts
+│   │   │   │       │   ├── reactivate.handler.ts
+│   │   │   │       │   ├── get-usage.handler.ts
+│   │   │   │       │   └── list-invoices.handler.ts
+│   │   │   │       └── payment-config/
+│   │   │   │           ├── get-config.handler.ts
+│   │   │   │           ├── connect-razorpay.handler.ts
+│   │   │   │           ├── connect-stripe.handler.ts
+│   │   │   │           ├── connect-xendit.handler.ts
+│   │   │   │           └── disconnect.handler.ts
+│   │   │   │
+│   │   │   ├── sites/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── sites.controller.ts
+│   │   │   │   ├── sites.service.ts
+│   │   │   │   ├── sites.schema.ts
+│   │   │   │   ├── sites.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── list-sites.handler.ts
+│   │   │   │       ├── create-site.handler.ts
+│   │   │   │       ├── get-site.handler.ts
+│   │   │   │       ├── update-site.handler.ts
+│   │   │   │       ├── delete-site.handler.ts
+│   │   │   │       ├── get-site-stats.handler.ts
+│   │   │   │       ├── settings/
+│   │   │   │       │   ├── get-settings.handler.ts
+│   │   │   │       │   ├── update-branding.handler.ts
+│   │   │   │       │   ├── update-theme.handler.ts
+│   │   │   │       │   ├── update-seo.handler.ts
+│   │   │   │       │   └── update-comments.handler.ts
+│   │   │   │       ├── domain/
+│   │   │   │       │   ├── get-domain.handler.ts
+│   │   │   │       │   ├── add-domain.handler.ts
+│   │   │   │       │   ├── verify-domain.handler.ts
+│   │   │   │       │   ├── remove-domain.handler.ts
+│   │   │   │       │   └── provision-ssl.handler.ts
+│   │   │   │       ├── pages/
+│   │   │   │       │   ├── list-pages.handler.ts
+│   │   │   │       │   ├── create-page.handler.ts
+│   │   │   │       │   ├── get-page.handler.ts
+│   │   │   │       │   ├── update-page.handler.ts
+│   │   │   │       │   ├── delete-page.handler.ts
+│   │   │   │       │   └── reorder-pages.handler.ts
+│   │   │   │       └── collaborators/
+│   │   │   │           ├── list-collaborators.handler.ts
+│   │   │   │           ├── invite-collaborator.handler.ts
+│   │   │   │           ├── update-collaborator.handler.ts
+│   │   │   │           ├── remove-collaborator.handler.ts
+│   │   │   │           └── accept-invite.handler.ts
+│   │   │   │
+│   │   │   ├── series/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── series.controller.ts
+│   │   │   │   ├── series.service.ts
+│   │   │   │   ├── series.schema.ts
+│   │   │   │   ├── series.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── list-series.handler.ts
+│   │   │   │       ├── create-series.handler.ts
+│   │   │   │       ├── get-series.handler.ts
+│   │   │   │       ├── update-series.handler.ts
+│   │   │   │       ├── delete-series.handler.ts
+│   │   │   │       ├── change-status.handler.ts
+│   │   │   │       ├── get-stats.handler.ts
+│   │   │   │       ├── upload-cover.handler.ts
+│   │   │   │       ├── update-genres.handler.ts
+│   │   │   │       ├── update-tags.handler.ts
+│   │   │   │       └── update-warnings.handler.ts
+│   │   │   │
+│   │   │   ├── chapters/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── chapters.controller.ts
+│   │   │   │   ├── chapters.service.ts
+│   │   │   │   ├── chapters.schema.ts
+│   │   │   │   ├── chapters.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── list-chapters.handler.ts
+│   │   │   │       ├── create-chapter.handler.ts
+│   │   │   │       ├── get-chapter.handler.ts
+│   │   │   │       ├── update-chapter.handler.ts
+│   │   │   │       ├── delete-chapter.handler.ts
+│   │   │   │       ├── reorder-chapters.handler.ts
+│   │   │   │       ├── publish-chapter.handler.ts
+│   │   │   │       ├── unpublish-chapter.handler.ts
+│   │   │   │       ├── schedule-chapter.handler.ts
+│   │   │   │       ├── versions/
+│   │   │   │       │   ├── list-versions.handler.ts
+│   │   │   │       │   ├── get-version.handler.ts
+│   │   │   │       │   ├── restore-version.handler.ts
+│   │   │   │       │   └── compare-versions.handler.ts
+│   │   │   │       ├── images/
+│   │   │   │       │   ├── list-images.handler.ts
+│   │   │   │       │   ├── upload-images.handler.ts
+│   │   │   │       │   ├── reorder-images.handler.ts
+│   │   │   │       │   ├── delete-image.handler.ts
+│   │   │   │       │   └── update-image.handler.ts
+│   │   │   │       └── access/
+│   │   │   │           ├── get-access.handler.ts
+│   │   │   │           ├── update-access.handler.ts
+│   │   │   │           ├── schedule-unlock.handler.ts
+│   │   │   │           └── cancel-unlock.handler.ts
+│   │   │   │
+│   │   │   ├── translations/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── translations.controller.ts
+│   │   │   │   ├── translations.service.ts
+│   │   │   │   ├── translations.schema.ts
+│   │   │   │   ├── translations.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── series/
+│   │   │   │       │   ├── list-translations.handler.ts
+│   │   │   │       │   ├── create-translation.handler.ts
+│   │   │   │       │   ├── get-translation.handler.ts
+│   │   │   │       │   ├── update-translation.handler.ts
+│   │   │   │       │   ├── delete-translation.handler.ts
+│   │   │   │       │   ├── publish-translation.handler.ts
+│   │   │   │       │   └── ai-generate.handler.ts
+│   │   │   │       ├── chapters/
+│   │   │   │       │   ├── list-translations.handler.ts
+│   │   │   │       │   ├── create-translation.handler.ts
+│   │   │   │       │   ├── get-translation.handler.ts
+│   │   │   │       │   ├── update-translation.handler.ts
+│   │   │   │       │   ├── delete-translation.handler.ts
+│   │   │   │       │   ├── ai-generate.handler.ts
+│   │   │   │       │   └── review-translation.handler.ts
+│   │   │   │       └── glossary/
+│   │   │   │           ├── list-terms.handler.ts
+│   │   │   │           ├── add-term.handler.ts
+│   │   │   │           ├── update-term.handler.ts
+│   │   │   │           ├── delete-term.handler.ts
+│   │   │   │           ├── import-glossary.handler.ts
+│   │   │   │           └── export-glossary.handler.ts
+│   │   │   │
+│   │   │   ├── subscriptions/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── subscriptions.controller.ts
+│   │   │   │   ├── subscriptions.service.ts
+│   │   │   │   ├── subscriptions.schema.ts
+│   │   │   │   ├── subscriptions.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── tiers/
+│   │   │   │       │   ├── list-tiers.handler.ts
+│   │   │   │       │   ├── create-tier.handler.ts
+│   │   │   │       │   ├── get-tier.handler.ts
+│   │   │   │       │   ├── update-tier.handler.ts
+│   │   │   │       │   ├── delete-tier.handler.ts
+│   │   │   │       │   ├── reorder-tiers.handler.ts
+│   │   │   │       │   └── get-tier-subscribers.handler.ts
+│   │   │   │       ├── reader/
+│   │   │   │       │   ├── list-subscriptions.handler.ts
+│   │   │   │       │   ├── subscribe.handler.ts
+│   │   │   │       │   ├── get-subscription.handler.ts
+│   │   │   │       │   ├── change-tier.handler.ts
+│   │   │   │       │   ├── change-billing-cycle.handler.ts
+│   │   │   │       │   ├── cancel.handler.ts
+│   │   │   │       │   ├── reactivate.handler.ts
+│   │   │   │       │   ├── pause.handler.ts
+│   │   │   │       │   ├── resume.handler.ts
+│   │   │   │       │   └── get-invoices.handler.ts
+│   │   │   │       ├── author/
+│   │   │   │       │   ├── list-subscribers.handler.ts
+│   │   │   │       │   ├── get-subscriber.handler.ts
+│   │   │   │       │   ├── export-subscribers.handler.ts
+│   │   │   │       │   ├── get-subscriber-stats.handler.ts
+│   │   │   │       │   └── get-churn-analytics.handler.ts
+│   │   │   │       └── gifts/
+│   │   │   │           ├── purchase-gift.handler.ts
+│   │   │   │           ├── list-sent-gifts.handler.ts
+│   │   │   │           ├── list-received-gifts.handler.ts
+│   │   │   │           ├── claim-gift.handler.ts
+│   │   │   │           ├── get-gift.handler.ts
+│   │   │   │           └── cancel-gift.handler.ts
+│   │   │   │
+│   │   │   ├── payments/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── payments.controller.ts
+│   │   │   │   ├── payments.service.ts
+│   │   │   │   ├── payments.schema.ts
+│   │   │   │   ├── payments.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── reader/
+│   │   │   │       │   ├── list-payments.handler.ts
+│   │   │   │       │   ├── get-payment.handler.ts
+│   │   │   │       │   ├── get-receipt.handler.ts
+│   │   │   │       │   ├── retry-payment.handler.ts
+│   │   │   │       │   ├── list-payment-methods.handler.ts
+│   │   │   │       │   ├── add-payment-method.handler.ts
+│   │   │   │       │   ├── remove-payment-method.handler.ts
+│   │   │   │       │   └── set-default-method.handler.ts
+│   │   │   │       ├── author/
+│   │   │   │       │   ├── list-payments.handler.ts
+│   │   │   │       │   ├── get-payment.handler.ts
+│   │   │   │       │   ├── get-payment-stats.handler.ts
+│   │   │   │       │   ├── export-payments.handler.ts
+│   │   │   │       │   ├── list-payouts.handler.ts
+│   │   │   │       │   ├── get-payout.handler.ts
+│   │   │   │       │   ├── get-pending-earnings.handler.ts
+│   │   │   │       │   ├── get-payout-schedule.handler.ts
+│   │   │   │       │   └── update-bank-details.handler.ts
+│   │   │   │       └── discounts/
+│   │   │   │           ├── list-codes.handler.ts
+│   │   │   │           ├── create-code.handler.ts
+│   │   │   │           ├── get-code.handler.ts
+│   │   │   │           ├── update-code.handler.ts
+│   │   │   │           ├── delete-code.handler.ts
+│   │   │   │           ├── get-usage-stats.handler.ts
+│   │   │   │           └── validate-code.handler.ts
+│   │   │   │
+│   │   │   ├── products/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── products.controller.ts
+│   │   │   │   ├── products.service.ts
+│   │   │   │   ├── products.schema.ts
+│   │   │   │   ├── products.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── list-products.handler.ts
+│   │   │   │       ├── create-product.handler.ts
+│   │   │   │       ├── get-product.handler.ts
+│   │   │   │       ├── update-product.handler.ts
+│   │   │   │       ├── delete-product.handler.ts
+│   │   │   │       ├── upload-cover.handler.ts
+│   │   │   │       ├── purchases/
+│   │   │   │       │   ├── list-purchases.handler.ts
+│   │   │   │       │   ├── make-purchase.handler.ts
+│   │   │   │       │   ├── get-purchase.handler.ts
+│   │   │   │       │   ├── download-product.handler.ts
+│   │   │   │       │   └── request-refund.handler.ts
+│   │   │   │       └── author/
+│   │   │   │           ├── list-sales.handler.ts
+│   │   │   │           ├── get-sales-stats.handler.ts
+│   │   │   │           └── get-product-sales.handler.ts
+│   │   │   │
+│   │   │   ├── reading/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── reading.controller.ts
+│   │   │   │   ├── reading.service.ts
+│   │   │   │   ├── reading.schema.ts
+│   │   │   │   ├── reading.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── progress/
+│   │   │   │       │   ├── list-progress.handler.ts
+│   │   │   │       │   ├── get-progress.handler.ts
+│   │   │   │       │   ├── update-progress.handler.ts
+│   │   │   │       │   ├── clear-progress.handler.ts
+│   │   │   │       │   ├── sync-progress.handler.ts
+│   │   │   │       │   └── get-continue-reading.handler.ts
+│   │   │   │       ├── bookmarks/
+│   │   │   │       │   ├── list-bookmarks.handler.ts
+│   │   │   │       │   ├── get-series-bookmarks.handler.ts
+│   │   │   │       │   ├── create-bookmark.handler.ts
+│   │   │   │       │   ├── update-bookmark.handler.ts
+│   │   │   │       │   └── delete-bookmark.handler.ts
+│   │   │   │       ├── reading-lists/
+│   │   │   │       │   ├── list-reading-lists.handler.ts
+│   │   │   │       │   ├── create-reading-list.handler.ts
+│   │   │   │       │   ├── get-reading-list.handler.ts
+│   │   │   │       │   ├── update-reading-list.handler.ts
+│   │   │   │       │   ├── delete-reading-list.handler.ts
+│   │   │   │       │   ├── add-to-list.handler.ts
+│   │   │   │       │   ├── remove-from-list.handler.ts
+│   │   │   │       │   ├── reorder-list.handler.ts
+│   │   │   │       │   ├── follow-list.handler.ts
+│   │   │   │       │   └── unfollow-list.handler.ts
+│   │   │   │       ├── settings/
+│   │   │   │       │   ├── get-settings.handler.ts
+│   │   │   │       │   ├── update-settings.handler.ts
+│   │   │   │       │   ├── update-typography.handler.ts
+│   │   │   │       │   ├── update-theme.handler.ts
+│   │   │   │       │   └── reset-settings.handler.ts
+│   │   │   │       └── history/
+│   │   │   │           ├── get-history.handler.ts
+│   │   │   │           ├── clear-history.handler.ts
+│   │   │   │           └── remove-from-history.handler.ts
+│   │   │   │
+│   │   │   ├── social/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── social.controller.ts
+│   │   │   │   ├── social.service.ts
+│   │   │   │   ├── social.schema.ts
+│   │   │   │   ├── social.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── following/
+│   │   │   │       │   ├── list-following.handler.ts
+│   │   │   │       │   ├── follow-author.handler.ts
+│   │   │   │       │   ├── unfollow-author.handler.ts
+│   │   │   │       │   ├── update-notifications.handler.ts
+│   │   │   │       │   ├── list-followers.handler.ts
+│   │   │   │       │   └── get-follower-stats.handler.ts
+│   │   │   │       ├── comments/
+│   │   │   │       │   ├── list-comments.handler.ts
+│   │   │   │       │   ├── create-comment.handler.ts
+│   │   │   │       │   ├── get-comment.handler.ts
+│   │   │   │       │   ├── update-comment.handler.ts
+│   │   │   │       │   ├── delete-comment.handler.ts
+│   │   │   │       │   ├── get-replies.handler.ts
+│   │   │   │       │   ├── create-reply.handler.ts
+│   │   │   │       │   ├── pin-comment.handler.ts
+│   │   │   │       │   └── hide-comment.handler.ts
+│   │   │   │       ├── reactions/
+│   │   │   │       │   ├── add-chapter-reaction.handler.ts
+│   │   │   │       │   ├── remove-chapter-reaction.handler.ts
+│   │   │   │       │   ├── get-chapter-reactions.handler.ts
+│   │   │   │       │   ├── add-comment-reaction.handler.ts
+│   │   │   │       │   └── remove-comment-reaction.handler.ts
+│   │   │   │       ├── reviews/
+│   │   │   │       │   ├── list-reviews.handler.ts
+│   │   │   │       │   ├── create-review.handler.ts
+│   │   │   │       │   ├── get-review.handler.ts
+│   │   │   │       │   ├── update-review.handler.ts
+│   │   │   │       │   ├── delete-review.handler.ts
+│   │   │   │       │   ├── vote-review.handler.ts
+│   │   │   │       │   ├── respond-to-review.handler.ts
+│   │   │   │       │   ├── list-my-reviews.handler.ts
+│   │   │   │       │   └── list-author-reviews.handler.ts
+│   │   │   │       └── forum/
+│   │   │   │           ├── list-categories.handler.ts
+│   │   │   │           ├── get-category.handler.ts
+│   │   │   │           ├── list-posts.handler.ts
+│   │   │   │           ├── create-post.handler.ts
+│   │   │   │           ├── get-post.handler.ts
+│   │   │   │           ├── update-post.handler.ts
+│   │   │   │           ├── delete-post.handler.ts
+│   │   │   │           ├── reply-to-post.handler.ts
+│   │   │   │           ├── like-post.handler.ts
+│   │   │   │           ├── unlike-post.handler.ts
+│   │   │   │           └── search-forum.handler.ts
+│   │   │   │
+│   │   │   ├── communication/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── communication.controller.ts
+│   │   │   │   ├── communication.service.ts
+│   │   │   │   ├── communication.schema.ts
+│   │   │   │   ├── communication.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── notifications/
+│   │   │   │       │   ├── list-notifications.handler.ts
+│   │   │   │       │   ├── get-unread-count.handler.ts
+│   │   │   │       │   ├── mark-read.handler.ts
+│   │   │   │       │   ├── mark-all-read.handler.ts
+│   │   │   │       │   ├── delete-notification.handler.ts
+│   │   │   │       │   ├── clear-all.handler.ts
+│   │   │   │       │   ├── get-settings.handler.ts
+│   │   │   │       │   └── update-settings.handler.ts
+│   │   │   │       ├── push/
+│   │   │   │       │   ├── list-subscriptions.handler.ts
+│   │   │   │       │   ├── subscribe.handler.ts
+│   │   │   │       │   ├── unsubscribe.handler.ts
+│   │   │   │       │   └── send-test.handler.ts
+│   │   │   │       ├── broadcasts/
+│   │   │   │       │   ├── list-broadcasts.handler.ts
+│   │   │   │       │   ├── create-broadcast.handler.ts
+│   │   │   │       │   ├── get-broadcast.handler.ts
+│   │   │   │       │   ├── update-broadcast.handler.ts
+│   │   │   │       │   ├── delete-broadcast.handler.ts
+│   │   │   │       │   ├── send-broadcast.handler.ts
+│   │   │   │       │   ├── schedule-broadcast.handler.ts
+│   │   │   │       │   ├── get-broadcast-stats.handler.ts
+│   │   │   │       │   └── preview-broadcast.handler.ts
+│   │   │   │       └── email/
+│   │   │   │           ├── get-preferences.handler.ts
+│   │   │   │           ├── update-preferences.handler.ts
+│   │   │   │           ├── unsubscribe.handler.ts
+│   │   │   │           ├── list-subscriptions.handler.ts
+│   │   │   │           └── update-site-subscription.handler.ts
+│   │   │   │
+│   │   │   ├── moderation/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── moderation.controller.ts
+│   │   │   │   ├── moderation.service.ts
+│   │   │   │   ├── moderation.schema.ts
+│   │   │   │   ├── moderation.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── reports/
+│   │   │   │       │   ├── submit-report.handler.ts
+│   │   │   │       │   ├── list-my-reports.handler.ts
+│   │   │   │       │   ├── get-report-status.handler.ts
+│   │   │   │       │   └── appeal-decision.handler.ts
+│   │   │   │       └── admin/
+│   │   │   │           ├── list-reports.handler.ts
+│   │   │   │           ├── get-report.handler.ts
+│   │   │   │           ├── assign-report.handler.ts
+│   │   │   │           ├── resolve-report.handler.ts
+│   │   │   │           ├── escalate-report.handler.ts
+│   │   │   │           ├── get-moderation-logs.handler.ts
+│   │   │   │           ├── get-moderation-queue.handler.ts
+│   │   │   │           ├── hide-content.handler.ts
+│   │   │   │           ├── unhide-content.handler.ts
+│   │   │   │           ├── remove-content.handler.ts
+│   │   │   │           ├── restore-content.handler.ts
+│   │   │   │           ├── warn-user.handler.ts
+│   │   │   │           ├── mute-user.handler.ts
+│   │   │   │           ├── suspend-user.handler.ts
+│   │   │   │           ├── ban-user.handler.ts
+│   │   │   │           └── unban-user.handler.ts
+│   │   │   │
+│   │   │   ├── support/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── support.controller.ts
+│   │   │   │   ├── support.service.ts
+│   │   │   │   ├── support.schema.ts
+│   │   │   │   ├── support.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── user/
+│   │   │   │       │   ├── list-tickets.handler.ts
+│   │   │   │       │   ├── create-ticket.handler.ts
+│   │   │   │       │   ├── get-ticket.handler.ts
+│   │   │   │       │   ├── update-ticket.handler.ts
+│   │   │   │       │   ├── close-ticket.handler.ts
+│   │   │   │       │   ├── reopen-ticket.handler.ts
+│   │   │   │       │   ├── list-messages.handler.ts
+│   │   │   │       │   ├── add-message.handler.ts
+│   │   │   │       │   └── add-attachment.handler.ts
+│   │   │   │       ├── admin/
+│   │   │   │       │   ├── list-all-tickets.handler.ts
+│   │   │   │       │   ├── get-ticket-details.handler.ts
+│   │   │   │       │   ├── assign-ticket.handler.ts
+│   │   │   │       │   ├── change-priority.handler.ts
+│   │   │   │       │   ├── change-status.handler.ts
+│   │   │   │       │   ├── add-staff-message.handler.ts
+│   │   │   │       │   └── get-stats.handler.ts
+│   │   │   │       └── help/
+│   │   │   │           ├── list-articles.handler.ts
+│   │   │   │           ├── get-article.handler.ts
+│   │   │   │           ├── search-help.handler.ts
+│   │   │   │           └── list-categories.handler.ts
+│   │   │   │
+│   │   │   ├── ai/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── ai.controller.ts
+│   │   │   │   ├── ai.service.ts
+│   │   │   │   ├── ai.schema.ts
+│   │   │   │   ├── ai.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── writing/
+│   │   │   │       │   ├── brainstorm.handler.ts
+│   │   │   │       │   ├── outline.handler.ts
+│   │   │   │       │   ├── expand.handler.ts
+│   │   │   │       │   ├── dialogue.handler.ts
+│   │   │   │       │   ├── describe.handler.ts
+│   │   │   │       │   ├── edit.handler.ts
+│   │   │   │       │   ├── proofread.handler.ts
+│   │   │   │       │   ├── summarize.handler.ts
+│   │   │   │       │   ├── title.handler.ts
+│   │   │   │       │   ├── blurb.handler.ts
+│   │   │   │       │   ├── list-sessions.handler.ts
+│   │   │   │       │   ├── get-session.handler.ts
+│   │   │   │       │   └── submit-feedback.handler.ts
+│   │   │   │       ├── translation/
+│   │   │   │       │   ├── translate.handler.ts
+│   │   │   │       │   ├── translate-chapter.handler.ts
+│   │   │   │       │   ├── detect-language.handler.ts
+│   │   │   │       │   └── list-languages.handler.ts
+│   │   │   │       ├── cover/
+│   │   │   │       │   ├── generate-cover.handler.ts
+│   │   │   │       │   ├── list-styles.handler.ts
+│   │   │   │       │   └── generate-variations.handler.ts
+│   │   │   │       ├── tiktok/
+│   │   │   │       │   ├── get-preview.handler.ts
+│   │   │   │       │   ├── generate-preview.handler.ts
+│   │   │   │       │   ├── update-preview.handler.ts
+│   │   │   │       │   ├── delete-preview.handler.ts
+│   │   │   │       │   ├── publish-preview.handler.ts
+│   │   │   │       │   └── list-templates.handler.ts
+│   │   │   │       ├── ocr/
+│   │   │   │       │   ├── extract-text.handler.ts
+│   │   │   │       │   ├── get-job-status.handler.ts
+│   │   │   │       │   ├── translate-text.handler.ts
+│   │   │   │       │   ├── create-replacement.handler.ts
+│   │   │   │       │   ├── list-replacements.handler.ts
+│   │   │   │       │   └── update-replacement.handler.ts
+│   │   │   │       └── usage/
+│   │   │   │           ├── get-usage.handler.ts
+│   │   │   │           ├── get-usage-history.handler.ts
+│   │   │   │           └── get-limits.handler.ts
+│   │   │   │
+│   │   │   ├── media/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── media.controller.ts
+│   │   │   │   ├── media.service.ts
+│   │   │   │   ├── media.schema.ts
+│   │   │   │   ├── media.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── upload/
+│   │   │   │       │   ├── upload-file.handler.ts
+│   │   │   │       │   ├── get-presigned-url.handler.ts
+│   │   │   │       │   ├── confirm-upload.handler.ts
+│   │   │   │       │   ├── initiate-multipart.handler.ts
+│   │   │   │       │   ├── upload-part.handler.ts
+│   │   │   │       │   └── complete-multipart.handler.ts
+│   │   │   │       ├── library/
+│   │   │   │       │   ├── list-files.handler.ts
+│   │   │   │       │   ├── get-file.handler.ts
+│   │   │   │       │   ├── update-file.handler.ts
+│   │   │   │       │   ├── delete-file.handler.ts
+│   │   │   │       │   ├── move-file.handler.ts
+│   │   │   │       │   ├── list-folders.handler.ts
+│   │   │   │       │   ├── create-folder.handler.ts
+│   │   │   │       │   └── delete-folder.handler.ts
+│   │   │   │       ├── usage/
+│   │   │   │       │   ├── get-usage.handler.ts
+│   │   │   │       │   └── get-breakdown.handler.ts
+│   │   │   │       └── processing/
+│   │   │   │           ├── optimize-image.handler.ts
+│   │   │   │           ├── resize-image.handler.ts
+│   │   │   │           ├── crop-image.handler.ts
+│   │   │   │           └── get-variants.handler.ts
+│   │   │   │
+│   │   │   ├── social-connections/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── social-connections.controller.ts
+│   │   │   │   ├── social-connections.service.ts
+│   │   │   │   ├── social-connections.schema.ts
+│   │   │   │   ├── social-connections.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── connections/
+│   │   │   │       │   ├── list-connections.handler.ts
+│   │   │   │       │   ├── connect-platform.handler.ts
+│   │   │   │       │   ├── disconnect-platform.handler.ts
+│   │   │   │       │   ├── check-status.handler.ts
+│   │   │   │       │   └── refresh-token.handler.ts
+│   │   │   │       ├── posts/
+│   │   │   │       │   ├── list-posts.handler.ts
+│   │   │   │       │   ├── create-post.handler.ts
+│   │   │   │       │   ├── get-post.handler.ts
+│   │   │   │       │   ├── update-post.handler.ts
+│   │   │   │       │   ├── delete-post.handler.ts
+│   │   │   │       │   ├── publish-post.handler.ts
+│   │   │   │       │   ├── schedule-post.handler.ts
+│   │   │   │       │   └── get-post-stats.handler.ts
+│   │   │   │       └── settings/
+│   │   │   │           ├── get-settings.handler.ts
+│   │   │   │           ├── update-settings.handler.ts
+│   │   │   │           └── update-templates.handler.ts
+│   │   │   │
+│   │   │   ├── scheduling/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── scheduling.controller.ts
+│   │   │   │   ├── scheduling.service.ts
+│   │   │   │   ├── scheduling.schema.ts
+│   │   │   │   ├── scheduling.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── publications/
+│   │   │   │       │   ├── list-scheduled.handler.ts
+│   │   │   │       │   ├── schedule-chapter.handler.ts
+│   │   │   │       │   ├── get-scheduled.handler.ts
+│   │   │   │       │   ├── update-schedule.handler.ts
+│   │   │   │       │   └── cancel-schedule.handler.ts
+│   │   │   │       ├── unlocks/
+│   │   │   │       │   ├── list-unlocks.handler.ts
+│   │   │   │       │   ├── schedule-unlock.handler.ts
+│   │   │   │       │   ├── update-unlock.handler.ts
+│   │   │   │       │   └── cancel-unlock.handler.ts
+│   │   │   │       └── calendar/
+│   │   │   │           ├── get-entries.handler.ts
+│   │   │   │           ├── create-entry.handler.ts
+│   │   │   │           ├── get-entry.handler.ts
+│   │   │   │           ├── update-entry.handler.ts
+│   │   │   │           ├── delete-entry.handler.ts
+│   │   │   │           ├── mark-complete.handler.ts
+│   │   │   │           ├── get-upcoming.handler.ts
+│   │   │   │           └── export-calendar.handler.ts
+│   │   │   │
+│   │   │   ├── writing-tools/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── writing-tools.controller.ts
+│   │   │   │   ├── writing-tools.service.ts
+│   │   │   │   ├── writing-tools.schema.ts
+│   │   │   │   ├── writing-tools.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── goals/
+│   │   │   │       │   ├── list-goals.handler.ts
+│   │   │   │       │   ├── create-goal.handler.ts
+│   │   │   │       │   ├── get-goal.handler.ts
+│   │   │   │       │   ├── update-goal.handler.ts
+│   │   │   │       │   ├── delete-goal.handler.ts
+│   │   │   │       │   ├── log-progress.handler.ts
+│   │   │   │       │   ├── get-progress-history.handler.ts
+│   │   │   │       │   ├── pause-goal.handler.ts
+│   │   │   │       │   └── resume-goal.handler.ts
+│   │   │   │       ├── streaks/
+│   │   │   │       │   ├── get-streak.handler.ts
+│   │   │   │       │   ├── log-activity.handler.ts
+│   │   │   │       │   ├── use-freeze.handler.ts
+│   │   │   │       │   ├── get-history.handler.ts
+│   │   │   │       │   └── get-milestones.handler.ts
+│   │   │   │       └── stats/
+│   │   │   │           ├── get-stats.handler.ts
+│   │   │   │           ├── get-daily.handler.ts
+│   │   │   │           ├── get-weekly.handler.ts
+│   │   │   │           └── get-monthly.handler.ts
+│   │   │   │
+│   │   │   ├── import-export/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── import-export.controller.ts
+│   │   │   │   ├── import-export.service.ts
+│   │   │   │   ├── import-export.schema.ts
+│   │   │   │   ├── import-export.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── import/
+│   │   │   │       │   ├── list-sources.handler.ts
+│   │   │   │       │   ├── create-job.handler.ts
+│   │   │   │       │   ├── list-jobs.handler.ts
+│   │   │   │       │   ├── get-job-status.handler.ts
+│   │   │   │       │   ├── cancel-job.handler.ts
+│   │   │   │       │   └── preview-import.handler.ts
+│   │   │   │       ├── export/
+│   │   │   │       │   ├── list-formats.handler.ts
+│   │   │   │       │   ├── create-job.handler.ts
+│   │   │   │       │   ├── list-jobs.handler.ts
+│   │   │   │       │   ├── get-job-status.handler.ts
+│   │   │   │       │   └── download-export.handler.ts
+│   │   │   │       └── backup/
+│   │   │   │           ├── create-backup.handler.ts
+│   │   │   │           ├── list-backups.handler.ts
+│   │   │   │           └── download-backup.handler.ts
+│   │   │   │
+│   │   │   ├── analytics/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── analytics.controller.ts
+│   │   │   │   ├── analytics.service.ts
+│   │   │   │   ├── analytics.schema.ts
+│   │   │   │   ├── analytics.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── site/
+│   │   │   │       │   ├── get-analytics.handler.ts
+│   │   │   │       │   ├── get-overview.handler.ts
+│   │   │   │       │   ├── get-traffic.handler.ts
+│   │   │   │       │   ├── get-geography.handler.ts
+│   │   │   │       │   ├── get-devices.handler.ts
+│   │   │   │       │   └── get-referrers.handler.ts
+│   │   │   │       ├── series/
+│   │   │   │       │   ├── get-analytics.handler.ts
+│   │   │   │       │   ├── get-readers.handler.ts
+│   │   │   │       │   ├── get-engagement.handler.ts
+│   │   │   │       │   ├── get-chapters.handler.ts
+│   │   │   │       │   └── get-retention.handler.ts
+│   │   │   │       ├── chapters/
+│   │   │   │       │   ├── get-analytics.handler.ts
+│   │   │   │       │   ├── get-reading-patterns.handler.ts
+│   │   │   │       │   └── get-dropoff.handler.ts
+│   │   │   │       ├── revenue/
+│   │   │   │       │   ├── get-analytics.handler.ts
+│   │   │   │       │   ├── get-breakdown.handler.ts
+│   │   │   │       │   ├── get-forecast.handler.ts
+│   │   │   │       │   ├── get-subscribers.handler.ts
+│   │   │   │       │   └── get-churn.handler.ts
+│   │   │   │       ├── reader/
+│   │   │   │       │   ├── get-analytics.handler.ts
+│   │   │   │       │   ├── get-genres.handler.ts
+│   │   │   │       │   └── get-time.handler.ts
+│   │   │   │       └── realtime/
+│   │   │   │           ├── get-realtime.handler.ts
+│   │   │   │           └── live-stream.handler.ts
+│   │   │   │
+│   │   │   ├── ab-testing/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── ab-testing.controller.ts
+│   │   │   │   ├── ab-testing.service.ts
+│   │   │   │   ├── ab-testing.schema.ts
+│   │   │   │   ├── ab-testing.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── tests/
+│   │   │   │       │   ├── list-tests.handler.ts
+│   │   │   │       │   ├── create-test.handler.ts
+│   │   │   │       │   ├── get-test.handler.ts
+│   │   │   │       │   ├── update-test.handler.ts
+│   │   │   │       │   ├── delete-test.handler.ts
+│   │   │   │       │   ├── start-test.handler.ts
+│   │   │   │       │   ├── pause-test.handler.ts
+│   │   │   │       │   ├── stop-test.handler.ts
+│   │   │   │       │   └── get-results.handler.ts
+│   │   │   │       └── assignment/
+│   │   │   │           ├── get-assignment.handler.ts
+│   │   │   │           └── track-conversion.handler.ts
+│   │   │   │
+│   │   │   ├── webhooks/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── webhooks.controller.ts
+│   │   │   │   ├── webhooks.service.ts
+│   │   │   │   ├── webhooks.schema.ts
+│   │   │   │   ├── webhooks.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── outgoing/
+│   │   │   │       │   ├── list-webhooks.handler.ts
+│   │   │   │       │   ├── create-webhook.handler.ts
+│   │   │   │       │   ├── get-webhook.handler.ts
+│   │   │   │       │   ├── update-webhook.handler.ts
+│   │   │   │       │   ├── delete-webhook.handler.ts
+│   │   │   │       │   ├── test-webhook.handler.ts
+│   │   │   │       │   ├── list-deliveries.handler.ts
+│   │   │   │       │   └── retry-delivery.handler.ts
+│   │   │   │       ├── events/
+│   │   │   │       │   ├── list-events.handler.ts
+│   │   │   │       │   └── get-event-schema.handler.ts
+│   │   │   │       └── incoming/
+│   │   │   │           ├── razorpay.handler.ts
+│   │   │   │           ├── stripe.handler.ts
+│   │   │   │           └── xendit.handler.ts
+│   │   │   │
+│   │   │   ├── gdpr/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── gdpr.controller.ts
+│   │   │   │   ├── gdpr.service.ts
+│   │   │   │   ├── gdpr.schema.ts
+│   │   │   │   ├── gdpr.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── export/
+│   │   │   │       │   ├── list-requests.handler.ts
+│   │   │   │       │   ├── create-request.handler.ts
+│   │   │   │       │   ├── get-status.handler.ts
+│   │   │   │       │   └── download-export.handler.ts
+│   │   │   │       ├── deletion/
+│   │   │   │       │   ├── request-deletion.handler.ts
+│   │   │   │       │   ├── get-status.handler.ts
+│   │   │   │       │   ├── verify-deletion.handler.ts
+│   │   │   │       │   └── cancel-deletion.handler.ts
+│   │   │   │       └── privacy/
+│   │   │   │           ├── get-settings.handler.ts
+│   │   │   │           ├── update-settings.handler.ts
+│   │   │   │           ├── get-consents.handler.ts
+│   │   │   │           └── update-consents.handler.ts
+│   │   │   │
+│   │   │   ├── admin/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── admin.controller.ts
+│   │   │   │   ├── admin.service.ts
+│   │   │   │   ├── admin.schema.ts
+│   │   │   │   ├── admin.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── dashboard/
+│   │   │   │       │   ├── get-dashboard.handler.ts
+│   │   │   │       │   ├── get-stats.handler.ts
+│   │   │   │       │   └── get-health.handler.ts
+│   │   │   │       ├── users/
+│   │   │   │       │   ├── list-users.handler.ts
+│   │   │   │       │   ├── get-user.handler.ts
+│   │   │   │       │   ├── update-user.handler.ts
+│   │   │   │       │   ├── delete-user.handler.ts
+│   │   │   │       │   └── impersonate.handler.ts
+│   │   │   │       ├── content/
+│   │   │   │       │   ├── list-sites.handler.ts
+│   │   │   │       │   ├── list-series.handler.ts
+│   │   │   │       │   ├── list-chapters.handler.ts
+│   │   │   │       │   ├── update-site-status.handler.ts
+│   │   │   │       │   └── update-series-status.handler.ts
+│   │   │   │       ├── taxonomies/
+│   │   │   │       │   ├── genres/
+│   │   │   │       │   │   ├── create-genre.handler.ts
+│   │   │   │       │   │   ├── update-genre.handler.ts
+│   │   │   │       │   │   └── delete-genre.handler.ts
+│   │   │   │       │   └── tags/
+│   │   │   │       │       ├── create-tag.handler.ts
+│   │   │   │       │       ├── update-tag.handler.ts
+│   │   │   │       │       ├── delete-tag.handler.ts
+│   │   │   │       │       └── merge-tags.handler.ts
+│   │   │   │       ├── themes/
+│   │   │   │       │   ├── create-theme.handler.ts
+│   │   │   │       │   ├── update-theme.handler.ts
+│   │   │   │       │   └── delete-theme.handler.ts
+│   │   │   │       ├── feature-flags/
+│   │   │   │       │   ├── list-flags.handler.ts
+│   │   │   │       │   ├── create-flag.handler.ts
+│   │   │   │       │   ├── update-flag.handler.ts
+│   │   │   │       │   └── delete-flag.handler.ts
+│   │   │   │       ├── config/
+│   │   │   │       │   ├── get-config.handler.ts
+│   │   │   │       │   ├── update-config.handler.ts
+│   │   │   │       │   ├── get-tier-limits.handler.ts
+│   │   │   │       │   └── update-tier-limits.handler.ts
+│   │   │   │       ├── audit/
+│   │   │   │       │   ├── list-logs.handler.ts
+│   │   │   │       │   ├── get-log.handler.ts
+│   │   │   │       │   └── export-logs.handler.ts
+│   │   │   │       ├── jobs/
+│   │   │   │       │   ├── list-jobs.handler.ts
+│   │   │   │       │   ├── get-job.handler.ts
+│   │   │   │       │   ├── retry-job.handler.ts
+│   │   │   │       │   ├── cancel-job.handler.ts
+│   │   │   │       │   └── get-stats.handler.ts
+│   │   │   │       ├── incidents/
+│   │   │   │       │   ├── list-incidents.handler.ts
+│   │   │   │       │   ├── create-incident.handler.ts
+│   │   │   │       │   ├── get-incident.handler.ts
+│   │   │   │       │   ├── update-incident.handler.ts
+│   │   │   │       │   ├── add-update.handler.ts
+│   │   │   │       │   └── resolve-incident.handler.ts
+│   │   │   │       └── health/
+│   │   │   │           ├── list-checks.handler.ts
+│   │   │   │           ├── get-services.handler.ts
+│   │   │   │           ├── restart-service.handler.ts
+│   │   │   │           └── get-metrics.handler.ts
+│   │   │   │
+│   │   │   ├── public/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── public.controller.ts
+│   │   │   │   ├── public.service.ts
+│   │   │   │   ├── public.schema.ts
+│   │   │   │   ├── public.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── sites/
+│   │   │   │       │   ├── get-site.handler.ts
+│   │   │   │       │   ├── list-series.handler.ts
+│   │   │   │       │   ├── get-page.handler.ts
+│   │   │   │       │   ├── list-announcements.handler.ts
+│   │   │   │       │   └── list-tiers.handler.ts
+│   │   │   │       ├── series/
+│   │   │   │       │   ├── get-series.handler.ts
+│   │   │   │       │   ├── list-chapters.handler.ts
+│   │   │   │       │   ├── get-chapter.handler.ts
+│   │   │   │       │   └── get-reviews.handler.ts
+│   │   │   │       ├── discovery/
+│   │   │   │       │   ├── get-feed.handler.ts
+│   │   │   │       │   ├── get-trending.handler.ts
+│   │   │   │       │   ├── get-popular.handler.ts
+│   │   │   │       │   ├── get-new.handler.ts
+│   │   │   │       │   ├── get-updated.handler.ts
+│   │   │   │       │   ├── browse-genre.handler.ts
+│   │   │   │       │   ├── browse-tag.handler.ts
+│   │   │   │       │   ├── get-featured.handler.ts
+│   │   │   │       │   └── get-recommendations.handler.ts
+│   │   │   │       ├── search/
+│   │   │   │       │   ├── global-search.handler.ts
+│   │   │   │       │   ├── search-series.handler.ts
+│   │   │   │       │   ├── search-authors.handler.ts
+│   │   │   │       │   ├── get-suggestions.handler.ts
+│   │   │   │       │   └── advanced-search.handler.ts
+│   │   │   │       ├── rankings/
+│   │   │   │       │   ├── get-rankings.handler.ts
+│   │   │   │       │   ├── get-daily.handler.ts
+│   │   │   │       │   ├── get-weekly.handler.ts
+│   │   │   │       │   ├── get-monthly.handler.ts
+│   │   │   │       │   ├── get-all-time.handler.ts
+│   │   │   │       │   └── get-by-type.handler.ts
+│   │   │   │       ├── authors/
+│   │   │   │       │   ├── get-profile.handler.ts
+│   │   │   │       │   ├── get-series.handler.ts
+│   │   │   │       │   └── get-sites.handler.ts
+│   │   │   │       └── taxonomies/
+│   │   │   │           ├── list-genres.handler.ts
+│   │   │   │           ├── get-genre.handler.ts
+│   │   │   │           ├── list-tags.handler.ts
+│   │   │   │           └── list-content-warnings.handler.ts
+│   │   │   │
+│   │   │   ├── api-keys/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── api-keys.controller.ts
+│   │   │   │   ├── api-keys.service.ts
+│   │   │   │   ├── api-keys.schema.ts
+│   │   │   │   ├── api-keys.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── list-keys.handler.ts
+│   │   │   │       ├── create-key.handler.ts
+│   │   │   │       ├── get-key.handler.ts
+│   │   │   │       ├── update-key.handler.ts
+│   │   │   │       ├── delete-key.handler.ts
+│   │   │   │       ├── regenerate-key.handler.ts
+│   │   │   │       └── get-logs.handler.ts
+│   │   │   │
+│   │   │   ├── referrals/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── referrals.controller.ts
+│   │   │   │   ├── referrals.service.ts
+│   │   │   │   ├── referrals.schema.ts
+│   │   │   │   ├── referrals.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── get-referrals.handler.ts
+│   │   │   │       ├── get-code.handler.ts
+│   │   │   │       ├── regenerate-code.handler.ts
+│   │   │   │       ├── get-stats.handler.ts
+│   │   │   │       ├── get-rewards.handler.ts
+│   │   │   │       └── send-invite.handler.ts
+│   │   │   │
+│   │   │   ├── churn/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── churn.controller.ts
+│   │   │   │   ├── churn.service.ts
+│   │   │   │   ├── churn.schema.ts
+│   │   │   │   ├── churn.test.ts
+│   │   │   │   └── handlers/
+│   │   │   │       ├── get-predictions.handler.ts
+│   │   │   │       ├── list-at-risk.handler.ts
+│   │   │   │       ├── get-analysis.handler.ts
+│   │   │   │       ├── list-actions.handler.ts
+│   │   │   │       ├── create-action.handler.ts
+│   │   │   │       ├── get-action.handler.ts
+│   │   │   │       ├── update-action.handler.ts
+│   │   │   │   │   │       ├── cancel-action.handler.ts
+│   │   │   │       └── get-templates.handler.ts
+│   │   │   │
+│   │   │   └── external/
+│   │   │       ├── index.ts
+│   │   │       ├── external.controller.ts
+│   │   │       ├── external.service.ts
+│   │   │       ├── external.schema.ts
+│   │   │       ├── external.test.ts
+│   │   │       └── handlers/
+│   │   │           ├── get-site.handler.ts
+│   │   │           ├── list-series.handler.ts
+│   │   │           ├── get-series.handler.ts
+│   │   │           ├── list-chapters.handler.ts
+│   │   │           ├── list-subscribers.handler.ts
+│   │   │           ├── list-payments.handler.ts
+│   │   │           ├── create-chapter.handler.ts
+│   │   │           └── update-chapter.handler.ts
+│   │   │
+│   │   └── health/
+│   │       ├── index.ts
+│   │       ├── health.controller.ts
+│   │       └── handlers/
+│   │           ├── liveness.handler.ts
+│   │           ├── readiness.handler.ts
+│   │           └── detailed.handler.ts
+│   │
+│   ├── common/
+│   │   ├── index.ts
+│   │   │
+│   │   ├── constants/
+│   │   │   ├── index.ts
+│   │   │   ├── app.constants.ts                 # Application constants
+│   │   │   ├── http-status.constants.ts         # HTTP status codes
+│   │   │   ├── error-codes.constants.ts         # Error codes
+│   │   │   ├── cache-keys.constants.ts          # Cache key prefixes
+│   │   │   ├── queue-names.constants.ts         # Queue names
+│   │   │   ├── event-names.constants.ts         # Event names
+│   │   │   ├── rate-limits.constants.ts         # Rate limit configs
+│   │   │   ├── file-types.constants.ts          # Allowed file types
+│   │   │   ├── regex.constants.ts               # Common regex patterns
+│   │   │   └── tier-limits.constants.ts         # Platform tier limits
+│   │   │
+│   │   ├── decorators/
+│   │   │   ├── index.ts
+│   │   │   ├── auth.decorator.ts                # Authentication decorator
+│   │   │   ├── roles.decorator.ts               # Role-based access
+│   │   │   ├── permissions.decorator.ts         # Permission-based access
+│   │   │   ├── rate-limit.decorator.ts          # Rate limiting
+│   │   │   ├── cache.decorator.ts               # Response caching
+│   │   │   ├── validate.decorator.ts            # Request validation
+│   │   │   ├── audit.decorator.ts               # Audit logging
+│   │   │   ├── idempotent.decorator.ts          # Idempotency
+│   │   │   └── feature-flag.decorator.ts        # Feature flag check
+│   │   │
+│   │   ├── dto/
+│   │   │   ├── index.ts
+│   │   │   ├── pagination.dto.ts                # Pagination request/response
+│   │   │   ├── sort.dto.ts                      # Sorting options
+│   │   │   ├── filter.dto.ts                    # Filter options
+│   │   │   ├── date-range.dto.ts                # Date range filter
+│   │   │   ├── id-param.dto.ts                  # ID parameter validation
+│   │   │   ├── slug-param.dto.ts                # Slug parameter validation
+│   │   │   └── bulk-operation.dto.ts            # Bulk operation request
+│   │   │
+│   │   ├── enums/
+│   │   │   ├── index.ts
+│   │   │   ├── user.enums.ts                    # User-related enums
+│   │   │   ├── content.enums.ts                 # Content-related enums
+│   │   │   ├── payment.enums.ts                 # Payment-related enums
+│   │   │   ├── subscription.enums.ts            # Subscription enums
+│   │   │   ├── notification.enums.ts            # Notification enums
+│   │   │   ├── moderation.enums.ts              # Moderation enums
+│   │   │   ├── analytics.enums.ts               # Analytics enums
+│   │   │   └── system.enums.ts                  # System enums
+│   │   │
+│   │   ├── errors/
+│   │   │   ├── index.ts
+│   │   │   ├── base.error.ts                    # Base error class
+│   │   │   ├── http.errors.ts                   # HTTP errors
+│   │   │   ├── validation.error.ts              # Validation errors
+│   │   │   ├── auth.errors.ts                   # Authentication errors
+│   │   │   ├── authorization.error.ts           # Authorization errors
+│   │   │   ├── not-found.error.ts               # Not found errors
+│   │   │   ├── conflict.error.ts                # Conflict errors
+│   │   │   ├── rate-limit.error.ts              # Rate limit errors
+│   │   │   ├── payment.errors.ts                # Payment errors
+│   │   │   ├── subscription.errors.ts           # Subscription errors
+│   │   │   ├── quota.errors.ts                  # Quota/limit errors
+│   │   │   ├── external-service.error.ts        # External service errors
+│   │   │   └── database.error.ts                # Database errors
+│   │   │
+│   │   ├── filters/
+│   │   │   ├── index.ts
+│   │   │   ├── global-exception.filter.ts       # Global exception handler
+│   │   │   ├── http-exception.filter.ts         # HTTP exception handler
+│   │   │   ├── validation-exception.filter.ts   # Validation exception handler
+│   │   │   ├── prisma-exception.filter.ts       # Prisma exception handler
+│   │   │   └── not-found-exception.filter.ts    # 404 handler
+│   │   │
+│   │   ├── guards/
+│   │   │   ├── index.ts
+│   │   │   ├── auth.guard.ts                    # Authentication guard
+│   │   │   ├── jwt.guard.ts                     # JWT validation guard
+│   │   │   ├── api-key.guard.ts                 # API key validation guard
+│   │   │   ├── roles.guard.ts                   # Role-based access guard
+│   │   │   ├── permissions.guard.ts             # Permission-based guard
+│   │   │   ├── rate-limit.guard.ts              # Rate limiting guard
+│   │   │   ├── feature-flag.guard.ts            # Feature flag guard
+│   │   │   ├── tier-access.guard.ts             # Tier-based access guard
+│   │   │   ├── ownership.guard.ts               # Resource ownership guard
+│   │   │   ├── site-access.guard.ts             # Site access guard
+│   │   │   ├── collaborator.guard.ts            # Collaborator access guard
+│   │   │   ├── subscription-access.guard.ts     # Subscription access guard
+│   │   │   └── chapter-access.guard.ts          # Chapter access guard
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── index.ts
+│   │   │   ├── on-request.hook.ts               # Request hook
+│   │   │   ├── pre-handler.hook.ts              # Pre-handler hook
+│   │   │   ├── pre-serialization.hook.ts        # Pre-serialization hook
+│   │   │   ├── on-send.hook.ts                  # Response hook
+│   │   │   ├── on-response.hook.ts              # After response hook
+│   │   │   ├── on-error.hook.ts                 # Error hook
+│   │   │   └── on-close.hook.ts                 # Close hook
+│   │   │
+│   │   ├── interceptors/
+│   │   │   ├── index.ts
+│   │   │   ├── logging.interceptor.ts           # Request/response logging
+│   │   │   ├── timing.interceptor.ts            # Request timing
+│   │   │   ├── transform.interceptor.ts         # Response transformation
+│   │   │   ├── cache.interceptor.ts             # Response caching
+│   │   │   ├── compression.interceptor.ts       # Response compression
+│   │   │   ├── correlation-id.interceptor.ts    # Correlation ID injection
+│   │   │   ├── audit.interceptor.ts             # Audit logging
+│   │   │   └── sensitive-data.interceptor.ts    # Mask sensitive data
+│   │   │
+│   │   ├── interfaces/
+│   │   │   ├── index.ts
+│   │   │   ├── request.interface.ts             # Extended request interface
+│   │   │   ├── response.interface.ts            # Response interface
+│   │   │   ├── pagination.interface.ts          # Pagination interface
+│   │   │   ├── service.interface.ts             # Base service interface
+│   │   │   ├── repository.interface.ts          # Base repository interface
+│   │   │   ├── cache.interface.ts               # Cache interface
+│   │   │   ├── queue.interface.ts               # Queue interface
+│   │   │   ├── event.interface.ts               # Event interface
+│   │   │   └── config.interface.ts              # Config interface
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── index.ts
+│   │   │   ├── request-id.middleware.ts         # Request ID generation
+│   │   │   ├── correlation.middleware.ts        # Correlation ID
+│   │   │   ├── logger.middleware.ts             # Request logging
+│   │   │   ├── auth.middleware.ts               # Authentication
+│   │   │   ├── rate-limit.middleware.ts         # Rate limiting
+│   │   │   ├── tenant.middleware.ts             # Multi-tenancy
+│   │   │   ├── locale.middleware.ts             # Locale detection
+│   │   │   ├── security.middleware.ts           # Security headers
+│   │   │   └── maintenance.middleware.ts        # Maintenance mode
+│   │   │
+│   │   ├── pipes/
+│   │   │   ├── index.ts
+│   │   │   ├── validation.pipe.ts               # Request validation
+│   │   │   ├── parse-int.pipe.ts                # Integer parsing
+│   │   │   ├── parse-uuid.pipe.ts               # UUID parsing
+│   │   │   ├── parse-bool.pipe.ts               # Boolean parsing
+│   │   │   ├── parse-date.pipe.ts               # Date parsing
+│   │   │   ├── trim.pipe.ts                     # String trimming
+│   │   │   ├── lowercase.pipe.ts                # Lowercase transformation
+│   │   │   ├── sanitize.pipe.ts                 # HTML sanitization
+│   │   │   └── file-validation.pipe.ts          # File validation
+│   │   │
+│   │   └── utils/
+│   │       ├── index.ts
+│   │       ├── string.utils.ts                  # String utilities
+│   │       ├── number.utils.ts                  # Number utilities
+│   │       ├── date.utils.ts                    # Date utilities
+│   │       ├── array.utils.ts                   # Array utilities
+│   │       ├── object.utils.ts                  # Object utilities
+│   │       ├── crypto.utils.ts                  # Cryptography utilities
+│   │       ├── hash.utils.ts                    # Hashing utilities
+│   │       ├── token.utils.ts                   # Token utilities
+│   │       ├── slug.utils.ts                    # Slug generation
+│   │       ├── pagination.utils.ts              # Pagination utilities
+│   │       ├── validation.utils.ts              # Validation utilities
+│   │       ├── file.utils.ts                    # File utilities
+│   │       ├── image.utils.ts                   # Image utilities
+│   │       ├── url.utils.ts                     # URL utilities
+│   │       ├── ip.utils.ts                      # IP address utilities
+│   │       ├── user-agent.utils.ts              # User agent parsing
+│   │       ├── money.utils.ts                   # Money/currency utilities
+│   │       ├── retry.utils.ts                   # Retry logic utilities
+│   │       └── async.utils.ts                   # Async utilities
+│   │
+│   ├── config/
+│   │   ├── index.ts
+│   │   ├── configuration.ts                     # Main configuration loader
+│   │   ├── validation.ts                        # Config validation schema
+│   │   ├── app.config.ts                        # Application config
+│   │   ├── database.config.ts                   # Database config
+│   │   ├── redis.config.ts                      # Redis config
+│   │   ├── jwt.config.ts                        # JWT config
+│   │   ├── oauth.config.ts                      # OAuth providers config
+│   │   ├── email.config.ts                      # Email config
+│   │   ├── storage.config.ts                    # Storage config (S3, etc.)
+│   │   ├── queue.config.ts                      # Queue config
+│   │   ├── cache.config.ts                      # Cache config
+│   │   ├── payment.config.ts                    # Payment gateways config
+│   │   ├── ai.config.ts                         # AI services config
+│   │   ├── search.config.ts                     # Search config
+│   │   ├── sms.config.ts                        # SMS config
+│   │   ├── monitoring.config.ts                 # Monitoring config
+│   │   └── cors.config.ts                       # CORS config
+│   │
+│   ├── core/
+│   │   ├── index.ts
+│   │   │
+│   │   ├── database/
+│   │   │   ├── index.ts
+│   │   │   ├── prisma.service.ts                # Prisma client service
+│   │   │   ├── prisma.module.ts                 # Prisma module
+│   │   │   ├── transaction.service.ts           # Transaction manager
+│   │   │   ├── soft-delete.extension.ts         # Soft delete extension
+│   │   │   ├── audit.extension.ts               # Audit logging extension
+│   │   │   └── query-builder/
+│   │   │       ├── index.ts
+│   │   │       ├── base.query-builder.ts        # Base query builder
+│   │   │       ├── filter.query-builder.ts      # Filter query builder
+│   │   │       ├── sort.query-builder.ts        # Sort query builder
+│   │   │       └── pagination.query-builder.ts  # Pagination builder
+│   │   │
+│   │   ├── cache/
+│   │   │   ├── index.ts
+│   │   │   ├── cache.service.ts                 # Cache service
+│   │   │   ├── cache.module.ts                  # Cache module
+│   │   │   ├── redis.service.ts                 # Redis client service
+│   │   │   ├── cache-key.builder.ts             # Cache key builder
+│   │   │   ├── strategies/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── memory.strategy.ts           # In-memory cache
+│   │   │   │   ├── redis.strategy.ts            # Redis cache
+│   │   │   │   └── multi-tier.strategy.ts       # Multi-tier cache
+│   │   │   └── decorators/
+│   │   │       ├── cacheable.decorator.ts       # Cacheable method
+│   │   │       ├── cache-evict.decorator.ts     # Cache eviction
+│   │   │       └── cache-put.decorator.ts       # Cache update
+│   │   │
+│   │   ├── queue/
+│   │   │   ├── index.ts
+│   │   │   ├── queue.service.ts                 # Queue service
+│   │   │   ├── queue.module.ts                  # Queue module
+│   │   │   ├── bull.config.ts                   # Bull configuration
+│   │   │   ├── processors/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── email.processor.ts           # Email processor
+│   │   │   │   ├── notification.processor.ts    # Notification processor
+│   │   │   │   ├── webhook.processor.ts         # Webhook processor
+│   │   │   │   ├── payment.processor.ts         # Payment processor
+│   │   │   │   ├── subscription.processor.ts    # Subscription processor
+│   │   │   │   ├── analytics.processor.ts       # Analytics processor
+│   │   │   │   ├── media.processor.ts           # Media processing
+│   │   │   │   ├── ai.processor.ts              # AI tasks processor
+│   │   │   │   ├── import.processor.ts          # Import processor
+│   │   │   │   ├── export.processor.ts          # Export processor
+│   │   │   │   ├── search-index.processor.ts    # Search indexing
+│   │   │   │   ├── scheduled.processor.ts       # Scheduled tasks
+│   │   │   │   └── cleanup.processor.ts         # Cleanup tasks
+│   │   │   └── jobs/
+│   │   │       ├── index.ts
+│   │   │       ├── base.job.ts                  # Base job class
+│   │   │       ├── email/
+│   │   │       │   ├── send-email.job.ts
+│   │   │       │   ├── send-broadcast.job.ts
+│   │   │       │   └── send-digest.job.ts
+│   │   │       ├── notification/
+│   │   │       │   ├── send-push.job.ts
+│   │   │       │   ├── send-in-app.job.ts
+│   │   │       │   └── batch-notifications.job.ts
+│   │   │       ├── payment/
+│   │   │       │   ├── process-payment.job.ts
+│   │   │       │   ├── retry-payment.job.ts
+│   │   │       │   ├── process-refund.job.ts
+│   │   │       │   └── process-payout.job.ts
+│   │   │       ├── subscription/
+│   │   │       │   ├── renew-subscription.job.ts
+│   │   │       │   ├── expire-subscription.job.ts
+│   │   │       │   ├── send-reminder.job.ts
+│   │   │       │   └── process-churn.job.ts
+│   │   │       ├── content/
+│   │   │       │   ├── publish-chapter.job.ts
+│   │   │       │   ├── unlock-chapter.job.ts
+│   │   │       │   ├── update-trending.job.ts
+│   │   │       │   └── recalculate-stats.job.ts
+│   │   │       ├── media/
+│   │   │       │   ├── process-image.job.ts
+│   │   │       │   ├── generate-thumbnails.job.ts
+│   │   │       │   ├── scan-media.job.ts
+│   │   │       │   └── optimize-image.job.ts
+│   │   │       ├── ai/
+│   │   │       │   ├── translate-content.job.ts
+│   │   │       │   ├── generate-cover.job.ts
+│   │   │       │   ├── generate-tiktok.job.ts
+│   │   │       │   └── process-ocr.job.ts
+│   │   │       ├── analytics/
+│   │   │       │   ├── aggregate-analytics.job.ts
+│   │   │       │   ├── calculate-engagement.job.ts
+│   │   │       │   └── refresh-views.job.ts
+│   │   │       └── maintenance/
+│   │   │           ├── cleanup-sessions.job.ts
+│   │   │           ├── cleanup-tokens.job.ts
+│   │   │           ├── cleanup-analytics.job.ts
+│   │   │           ├── backup-database.job.ts
+│   │   │           └── health-check.job.ts
+│   │   │
+│   │   ├── events/
+│   │   │   ├── index.ts
+│   │   │   ├── event-emitter.service.ts         # Event emitter service
+│   │   │   ├── event.module.ts                  # Event module
+│   │   │   ├── events/
+│   │   │   │   ├── index.ts
+│   │   │   │   ├── user.events.ts               # User events
+│   │   │   │   ├── auth.events.ts               # Auth events
+│   │   │   │   ├── content.events.ts            # Content events
+│   │   │   │   ├── subscription.events.ts       # Subscription events
+│   │   │   │   ├── payment.events.ts            # Payment events
+│   │   │   │   ├── comment.events.ts            # Comment events
+│   │   │   │   └── notification.events.ts       # Notification events
+│   │   │   └── handlers/
+│   │   │       ├── index.ts
+│   │   │       ├── user-event.handler.ts
+│   │   │       ├── auth-event.handler.ts
+│   │   │       ├── content-event.handler.ts
+│   │   │       ├── subscription-event.handler.ts
+│   │   │       ├── payment-event.handler.ts
+│   │   │       ├── comment-event.handler.ts
+│   │   │       └── notification-event.handler.ts
+│   │   │
+│   │   ├── logger/
+│   │   │   ├── index.ts
+│   │   │   ├── logger.service.ts                # Logger service
+│   │   │   ├── logger.module.ts                 # Logger module
+│   │   │   ├── transports/
+│   │   │   │   ├── console.transport.ts         # Console transport
+│   │   │   │   ├── file.transport.ts            # File transport
+│   │   │   │   ├── cloudwatch.transport.ts      # CloudWatch transport
+│   │   │   │   └── datadog.transport.ts         # Datadog transport
+│   │   │   └── formatters/
+│   │   │       ├── json.formatter.ts            # JSON formatter
+│   │   │       └── pretty.formatter.ts          # Pretty formatter
+│   │   │
+│   │   ├── health/
+│   │   │   ├── index.ts
+│   │   │   ├── health.service.ts                # Health check service
+│   │   │   ├── health.module.ts                 # Health module
+│   │   │   └── indicators/
+│   │   │       ├── database.indicator.ts        # Database health
+│   │   │       ├── redis.indicator.ts           # Redis health
+│   │   │       ├── queue.indicator.ts           # Queue health
+│   │   │       ├── storage.indicator.ts         # Storage health
+│   │   │       ├── email.indicator.ts           # Email service health
+│   │   │       └── external.indicator.ts        # External APIs health
+│   │   │
+│   │   └── security/
+│   │       ├── index.ts
+│   │       ├── encryption.service.ts            # Encryption service
+│   │       ├── hashing.service.ts               # Hashing service
+│   │       ├── jwt.service.ts                   # JWT service
+│   │       ├── api-key.service.ts               # API key service
+│   │       ├── csrf.service.ts                  # CSRF protection
+│   │       ├── xss.service.ts                   # XSS protection
+│   │       ├── rate-limiter.service.ts          # Rate limiter
+│   │       └── vault.service.ts                 # Secrets vault client
+│   │
+│   ├── domain/
+│   │   ├── index.ts
+│   │   │
+│   │   ├── users/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── user.entity.ts
+│   │   │   │   ├── user-profile.entity.ts
+│   │   │   │   ├── user-security.entity.ts
+│   │   │   │   └── user-preferences.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── user.repository.ts
+│   │   │   │   └── user.repository.interface.ts
+│   │   │   ├── services/
+│   │   │   │   ├── user.service.ts
+│   │   │   │   ├── user-profile.service.ts
+│   │   │   │   └── user-security.service.ts
+│   │   │   ├── validators/
+│   │   │   │   ├── user.validator.ts
+│   │   │   │   └── username.validator.ts
+│   │   │   └── events/
+│   │   │       ├── user-created.event.ts
+│   │   │       ├── user-updated.event.ts
+│   │   │       └── user-deleted.event.ts
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── session.entity.ts
+│   │   │   │   ├── auth-account.entity.ts
+│   │   │   │   └── verification-token.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── session.repository.ts
+│   │   │   │   ├── auth-account.repository.ts
+│   │   │   │   └── verification-token.repository.ts
+│   │   │   ├── services/
+│   │   │   │   ├── auth.service.ts
+│   │   │   │   ├── session.service.ts
+│   │   │   │   ├── token.service.ts
+│   │   │   │   ├── password.service.ts
+│   │   │   │   ├── mfa.service.ts
+│   │   │   │   └── oauth.service.ts
+│   │   │   └── strategies/
+│   │   │       ├── jwt.strategy.ts
+│   │   │       └── oauth/
+│   │   │           ├── google.strategy.ts
+│   │   │           ├── apple.strategy.ts
+│   │   │           ├── twitter.strategy.ts
+│   │   │           └── discord.strategy.ts
+│   │   │
+│   │   ├── authors/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── author-account.entity.ts
+│   │   │   │   └── payment-gateway-config.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── author-account.repository.ts
+│   │   │   │   └── payment-gateway-config.repository.ts
+│   │   │   └── services/
+│   │   │       ├── author.service.ts
+│   │   │       ├── author-subscription.service.ts
+│   │   │       └── author-stats.service.ts
+│   │   │
+│   │   ├── sites/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── site.entity.ts
+│   │   │   │   ├── page.entity.ts
+│   │   │   │   ├── theme.entity.ts
+│   │   │   │   └── collaborator.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── site.repository.ts
+│   │   │   │   ├── page.repository.ts
+│   │   │   │   ├── theme.repository.ts
+│   │   │   │   └── collaborator.repository.ts
+│   │   │   └── services/
+│   │   │       ├── site.service.ts
+│   │   │       ├── page.service.ts
+│   │   │       ├── theme.service.ts
+│   │   │       ├── collaborator.service.ts
+│   │   │       └── custom-domain.service.ts
+│   │   │
+│   │   ├── series/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── series.entity.ts
+│   │   │   │   ├── series-genre.entity.ts
+│   │   │   │   ├── series-tag.entity.ts
+│   │   │   │   └── series-content-warning.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   └── series.repository.ts
+│   │   │   └── services/
+│   │   │       ├── series.service.ts
+│   │   │       ├── series-stats.service.ts
+│   │   │       └── series-discovery.service.ts
+│   │   │
+│   │   ├── chapters/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── chapter.entity.ts
+│   │   │   │   ├── chapter-version.entity.ts
+│   │   │   │   ├── chapter-image.entity.ts
+│   │   │   │   └── chapter-content-warning.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── chapter.repository.ts
+│   │   │   │   ├── chapter-version.repository.ts
+│   │   │   │   └── chapter-image.repository.ts
+│   │   │   └── services/
+│   │   │       ├── chapter.service.ts
+│   │   │       ├── chapter-version.service.ts
+│   │   │       ├── chapter-image.service.ts
+│   │   │       ├── chapter-access.service.ts
+│   │   │       └── chapter-publishing.service.ts
+│   │   │
+│   │   ├── taxonomies/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── genre.entity.ts
+│   │   │   │   ├── tag.entity.ts
+│   │   │   │   └── content-warning.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── genre.repository.ts
+│   │   │   │   ├── tag.repository.ts
+│   │   │   │   └── content-warning.repository.ts
+│   │   │   └── services/
+│   │   │       ├── genre.service.ts
+│   │   │       ├── tag.service.ts
+│   │   │       └── content-warning.service.ts
+│   │   │
+│   │   ├── translations/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── series-translation.entity.ts
+│   │   │   │   ├── chapter-translation.entity.ts
+│   │   │   │   └── translation-glossary.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── series-translation.repository.ts
+│   │   │   │   ├── chapter-translation.repository.ts
+│   │   │   │   └── translation-glossary.repository.ts
+│   │   │   └── services/
+│   │   │       ├── translation.service.ts
+│   │   │       ├── ai-translation.service.ts
+│   │   │       └── glossary.service.ts
+│   │   │
+│   │   ├── subscriptions/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── subscription-tier.entity.ts
+│   │   │   │   ├── reader-subscription.entity.ts
+│   │   │   │   └── gift-subscription.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── subscription-tier.repository.ts
+│   │   │   │   ├── reader-subscription.repository.ts
+│   │   │   │   └── gift-subscription.repository.ts
+│   │   │   └── services/
+│   │   │       ├── subscription-tier.service.ts
+│   │   │       ├── reader-subscription.service.ts
+│   │   │       ├── subscription-billing.service.ts
+│   │   │       └── gift-subscription.service.ts
+│   │   │
+│   │   ├── payments/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── payment.entity.ts
+│   │   │   │   ├── payment-event.entity.ts
+│   │   │   │   ├── platform-invoice.entity.ts
+│   │   │   │   ├── author-payout.entity.ts
+│   │   │   │   └── discount-code.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── payment.repository.ts
+│   │   │   │   ├── payment-event.repository.ts
+│   │   │   │   ├── platform-invoice.repository.ts
+│   │   │   │   ├── author-payout.repository.ts
+│   │   │   │   └── discount-code.repository.ts
+│   │   │   └── services/
+│   │   │       ├── payment.service.ts
+│   │   │       ├── payment-processing.service.ts
+│   │   │       ├── refund.service.ts
+│   │   │       ├── payout.service.ts
+│   │   │       ├── invoice.service.ts
+│   │   │       └── discount-code.service.ts
+│   │   │
+│   │   ├── products/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── product.entity.ts
+│   │   │   │   └── purchase.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── product.repository.ts
+│   │   │   │   └── purchase.repository.ts
+│   │   │   └── services/
+│   │   │       ├── product.service.ts
+│   │   │       └── purchase.service.ts
+│   │   │
+│   │   ├── reading/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── reading-progress.entity.ts
+│   │   │   │   ├── bookmark.entity.ts
+│   │   │   │   ├── reading-list.entity.ts
+│   │   │   │   └── reader-settings.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── reading-progress.repository.ts
+│   │   │   │   ├── bookmark.repository.ts
+│   │   │   │   ├── reading-list.repository.ts
+│   │   │   │   └── reader-settings.repository.ts
+│   │   │   └── services/
+│   │   │       ├── reading-progress.service.ts
+│   │   │       ├── bookmark.service.ts
+│   │   │       ├── reading-list.service.ts
+│   │   │       └── reader-settings.service.ts
+│   │   │
+│   │   ├── social/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── author-follow.entity.ts
+│   │   │   │   ├── comment.entity.ts
+│   │   │   │   ├── reaction.entity.ts
+│   │   │   │   ├── review.entity.ts
+│   │   │   │   ├── forum-category.entity.ts
+│   │   │   │   └── forum-post.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── author-follow.repository.ts
+│   │   │   │   ├── comment.repository.ts
+│   │   │   │   ├── reaction.repository.ts
+│   │   │   │   ├── review.repository.ts
+│   │   │   │   ├── forum-category.repository.ts
+│   │   │   │   └── forum-post.repository.ts
+│   │   │   └── services/
+│   │   │       ├── follow.service.ts
+│   │   │       ├── comment.service.ts
+│   │   │       ├── reaction.service.ts
+│   │   │       ├── review.service.ts
+│   │   │       └── forum.service.ts
+│   │   │
+│   │   ├── communication/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── notification.entity.ts
+│   │   │   │   ├── email-log.entity.ts
+│   │   │   │   ├── push-subscription.entity.ts
+│   │   │   │   └── announcement.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── notification.repository.ts
+│   │   │   │   ├── email-log.repository.ts
+│   │   │   │   ├── push-subscription.repository.ts
+│   │   │   │   └── announcement.repository.ts
+│   │   │   └── services/
+│   │   │       ├── notification.service.ts
+│   │   │       ├── email.service.ts
+│   │   │       ├── push.service.ts
+│   │   │       ├── broadcast.service.ts
+│   │   │       └── announcement.service.ts
+│   │   │
+│   │   ├── moderation/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── report.entity.ts
+│   │   │   │   └── moderation-log.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── report.repository.ts
+│   │   │   │   └── moderation-log.repository.ts
+│   │   │   └── services/
+│   │   │       ├── report.service.ts
+│   │   │       ├── moderation.service.ts
+│   │   │       └── content-filter.service.ts
+│   │   │
+│   │   ├── support/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── support-ticket.entity.ts
+│   │   │   │   └── ticket-message.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── support-ticket.repository.ts
+│   │   │   │   └── ticket-message.repository.ts
+│   │   │   └── services/
+│   │   │       ├── support-ticket.service.ts
+│   │   │       └── ticket-message.service.ts
+│   │   │
+│   │   ├── ai/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── ai-writing-session.entity.ts
+│   │   │   │   ├── ai-usage-record.entity.ts
+│   │   │   │   ├── tiktok-preview.entity.ts
+│   │   │   │   ├── ocr-job.entity.ts
+│   │   │   │   └── comic-text-replacement.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── ai-writing-session.repository.ts
+│   │   │   │   ├── ai-usage-record.repository.ts
+│   │   │   │   ├── tiktok-preview.repository.ts
+│   │   │   │   ├── ocr-job.repository.ts
+│   │   │   │   └── comic-text-replacement.repository.ts
+│   │   │   └── services/
+│   │   │       ├── ai-writing.service.ts
+│   │   │       ├── ai-translation.service.ts
+│   │   │       ├── ai-cover.service.ts
+│   │   │       ├── ai-usage.service.ts
+│   │   │       ├── tiktok-preview.service.ts
+│   │   │       └── ocr.service.ts
+│   │   │
+│   │   ├── media/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── media-file.entity.ts
+│   │   │   │   └── storage-usage.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── media-file.repository.ts
+│   │   │   │   └── storage-usage.repository.ts
+│   │   │   └── services/
+│   │   │       ├── media.service.ts
+│   │   │       ├── upload.service.ts
+│   │   │       ├── image-processing.service.ts
+│   │   │       └── storage-usage.service.ts
+│   │   │
+│   │   ├── social-connections/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── social-connection.entity.ts
+│   │   │   │   └── social-post.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── social-connection.repository.ts
+│   │   │   │   └── social-post.repository.ts
+│   │   │   └── services/
+│   │   │       ├── social-connection.service.ts
+│   │   │       ├── social-posting.service.ts
+│   │   │       └── platforms/
+│   │   │           ├── twitter.service.ts
+│   │   │           ├── discord.service.ts
+│   │   │           ├── tiktok.service.ts
+│   │   │           └── instagram.service.ts
+│   │   │
+│   │   ├── scheduling/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── scheduled-publication.entity.ts
+│   │   │   │   ├── scheduled-unlock.entity.ts
+│   │   │   │   └── content-calendar-entry.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── scheduled-publication.repository.ts
+│   │   │   │   ├── scheduled-unlock.repository.ts
+│   │   │   │   └── content-calendar-entry.repository.ts
+│   │   │   └── services/
+│   │   │       ├── publication-scheduler.service.ts
+│   │   │       ├── unlock-scheduler.service.ts
+│   │   │       └── content-calendar.service.ts
+│   │   │
+│   │   ├── writing-tools/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── writing-goal.entity.ts
+│   │   │   │   ├── writing-goal-progress.entity.ts
+│   │   │   │   └── writing-streak.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── writing-goal.repository.ts
+│   │   │   │   ├── writing-goal-progress.repository.ts
+│   │   │   │   └── writing-streak.repository.ts
+│   │   │   └── services/
+│   │   │       ├── writing-goal.service.ts
+│   │   │       ├── writing-progress.service.ts
+│   │   │       └── writing-streak.service.ts
+│   │   │
+│   │   ├── import-export/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── import-job.entity.ts
+│   │   │   │   └── export-job.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── import-job.repository.ts
+│   │   │   │   └── export-job.repository.ts
+│   │   │   ├── services/
+│   │   │   │   ├── import.service.ts
+│   │   │   │   ├── export.service.ts
+│   │   │   │   └── backup.service.ts
+│   │   │   ├── importers/
+│   │   │   │   ├── base.importer.ts
+│   │   │   │   ├── google-docs.importer.ts
+│   │   │   │   ├── word.importer.ts
+│   │   │   │   ├── markdown.importer.ts
+│   │   │   │   ├── epub.importer.ts
+│   │   │   │   ├── royal-road.importer.ts
+│   │   │   │   └── wattpad.importer.ts
+│   │   │   └── exporters/
+│   │   │       ├── base.exporter.ts
+│   │   │       ├── epub.exporter.ts
+│   │   │       ├── pdf.exporter.ts
+│   │   │       ├── markdown.exporter.ts
+│   │   │       ├── html.exporter.ts
+│   │   │       └── json.exporter.ts
+│   │   │
+│   │   ├── analytics/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── analytics-aggregate.entity.ts
+│   │   │   │   ├── analytics-event.entity.ts
+│   │   │   │   ├── reader-engagement-score.entity.ts
+│   │   │   │   └── churn-prediction.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── analytics-aggregate.repository.ts
+│   │   │   │   ├── analytics-event.repository.ts
+│   │   │   │   ├── reader-engagement-score.repository.ts
+│   │   │   │   └── churn-prediction.repository.ts
+│   │   │   └── services/
+│   │   │       ├── analytics.service.ts
+│   │   │       ├── event-tracking.service.ts
+│   │   │       ├── engagement.service.ts
+│   │   │       ├── churn-prediction.service.ts
+│   │   │       └── trending.service.ts
+│   │   │
+│   │   ├── ab-testing/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── ab-test.entity.ts
+│   │   │   │   └── ab-test-assignment.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── ab-test.repository.ts
+│   │   │   │   └── ab-test-assignment.repository.ts
+│   │   │   └── services/
+│   │   │       ├── ab-test.service.ts
+│   │   │       ├── ab-test-assignment.service.ts
+│   │   │       └── ab-test-analysis.service.ts
+│   │   │
+│   │   ├── webhooks/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── webhook-event.entity.ts
+│   │   │   │   ├── outgoing-webhook.entity.ts
+│   │   │   │   └── webhook-delivery.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── webhook-event.repository.ts
+│   │   │   │   ├── outgoing-webhook.repository.ts
+│   │   │   │   └── webhook-delivery.repository.ts
+│   │   │   └── services/
+│   │   │       ├── webhook-event.service.ts
+│   │   │       ├── outgoing-webhook.service.ts
+│   │   │       └── webhook-delivery.service.ts
+│   │   │
+│   │   ├── gdpr/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── data-export-request.entity.ts
+│   │   │   │   └── account-deletion-request.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── data-export-request.repository.ts
+│   │   │   │   └── account-deletion-request.repository.ts
+│   │   │   └── services/
+│   │   │       ├── data-export.service.ts
+│   │   │       ├── account-deletion.service.ts
+│   │   │       └── privacy.service.ts
+│   │   │
+│   │   ├── referrals/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   └── referral.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   └── referral.repository.ts
+│   │   │   └── services/
+│   │   │       └── referral.service.ts
+│   │   │
+│   │   ├── api-keys/
+│   │   │   ├── index.ts
+│   │   │   ├── entities/
+│   │   │   │   ├── api-key.entity.ts
+│   │   │   │   └── api-request-log.entity.ts
+│   │   │   ├── repositories/
+│   │   │   │   ├── api-key.repository.ts
+│   │   │   │   └── api-request-log.repository.ts
+│   │   │   └── services/
+│   │   │       ├── api-key.service.ts
+│   │   │       └── api-request-log.service.ts
+│   │   │
+│   │   └── system/
+│   │       ├── index.ts
+│   │       ├── entities/
+│   │       │   ├── audit-log.entity.ts
+│   │       │   ├── feature-flag.entity.ts
+│   │       │   ├── job-queue.entity.ts
+│   │       │   ├── rate-limit.entity.ts
+│   │       │   ├── cache-invalidation.entity.ts
+│   │       │   ├── health-check.entity.ts
+│   │       │   ├── incident.entity.ts
+│   │       │   ├── platform-config.entity.ts
+│   │       │   ├── tier-limits.entity.ts
+│   │       │   ├── interface-translation.entity.ts
+│   │       │   └── search-index.entity.ts
+│   │       ├── repositories/
+│   │       │   ├── audit-log.repository.ts
+│   │       │   ├── feature-flag.repository.ts
+│   │       │   ├── job-queue.repository.ts
+│   │       │   ├── rate-limit.repository.ts
+│   │       │   ├── health-check.repository.ts
+│   │       │   ├── incident.repository.ts
+│   │       │   ├── platform-config.repository.ts
+│   │       │   ├── tier-limits.repository.ts
+│   │       │   └── search-index.repository.ts
+│   │       └── services/
+│   │           ├── audit-log.service.ts
+│   │           ├── feature-flag.service.ts
+│   │           ├── job-queue.service.ts
+│   │           ├── rate-limit.service.ts
+│   │           ├── health-check.service.ts
+│   │           ├── incident.service.ts
+│   │           ├── platform-config.service.ts
+│   │           ├── tier-limits.service.ts
+│   │           ├── i18n.service.ts
+│   │           └── search.service.ts
+│   │
+│   ├── infrastructure/
+│   │   ├── index.ts
+│   │   │
+│   │   ├── storage/
+│   │   │   ├── index.ts
+│   │   │   ├── storage.service.ts               # Storage abstraction
+│   │   │   ├── storage.interface.ts             # Storage interface
+│   │   │   └── providers/
+│   │   │       ├── s3.provider.ts               # AWS S3
+│   │   │       ├── gcs.provider.ts              # Google Cloud Storage
+│   │   │       ├── azure.provider.ts            # Azure Blob Storage
+│   │   │       ├── cloudflare-r2.provider.ts    # Cloudflare R2
+│   │   │       └── local.provider.ts            # Local filesystem
+│   │   │
+│   │   ├── email/
+│   │   │   ├── index.ts
+│   │   │   ├── email.service.ts                 # Email service
+│   │   │   ├── email.interface.ts               # Email interface
+│   │   │   ├── templates/
+│   │   │   │   ├── base.template.ts             # Base template
+│   │   │   │   ├── welcome.template.ts
+│   │   │   │   ├── verification.template.ts
+│   │   │   │   ├── password-reset.template.ts
+│   │   │   │   ├── new-chapter.template.ts
+│   │   │   │   ├── subscription.template.ts
+│   │   │   │   ├── payment.template.ts
+│   │   │   │   └── broadcast.template.ts
+│   │   │   └── providers/
+│   │   │       ├── ses.provider.ts              # AWS SES
+│   │   │       ├── sendgrid.provider.ts         # SendGrid
+│   │   │       ├── postmark.provider.ts         # Postmark
+│   │   │       └── nodemailer.provider.ts       # Nodemailer (dev)
+│   │   │
+│   │   ├── sms/
+│   │   │   ├── index.ts
+│   │   │   ├── sms.service.ts                   # SMS service
+│   │   │   ├── sms.interface.ts                 # SMS interface
+│   │   │   └── providers/
+│   │   │       ├── twilio.provider.ts           # Twilio
+│   │   │       └── sns.provider.ts              # AWS SNS
+│   │   │
+│   │   ├── push/
+│   │   │   ├── index.ts
+│   │   │   ├── push.service.ts                  # Push notification service
+│   │   │   ├── push.interface.ts                # Push interface
+│   │   │   └── providers/
+│   │   │       ├── fcm.provider.ts              # Firebase Cloud Messaging
+│   │   │       ├── apns.provider.ts             # Apple Push Notification
+│   │   │       └── web-push.provider.ts         # Web Push
+│   │   │
+│   │   ├── payment-gateways/
+│   │   │   ├── index.ts
+│   │   │   ├── payment-gateway.interface.ts     # Gateway interface
+│   │   │   ├── payment-gateway.factory.ts       # Gateway factory
+│   │   │   └── providers/
+│   │   │       ├── razorpay/
+│   │   │       │   ├── razorpay.provider.ts     # Razorpay provider
+│   │   │       │   ├── razorpay.types.ts        # Razorpay types
+│   │   │       │   └── razorpay.webhook.ts      # Webhook handler
+│   │   │       ├── stripe/
+│   │   │       │   ├── stripe.provider.ts       # Stripe provider
+│   │   │       │   ├── stripe.types.ts          # Stripe types
+│   │   │       │   └── stripe.webhook.ts        # Webhook handler
+│   │   │       └── xendit/
+│   │   │           ├── xendit.provider.ts       # Xendit provider
+│   │   │           ├── xendit.types.ts          # Xendit types
+│   │   │           └── xendit.webhook.ts        # Webhook handler
+│   │   │
+│   │   ├── ai/
+│   │   │   ├── index.ts
+│   │   │   ├── ai.interface.ts                  # AI interface
+│   │   │   └── providers/
+│   │   │       ├── openai/
+│   │   │       │   ├── openai.provider.ts       # OpenAI provider
+│   │   │       │   ├── openai.types.ts          # OpenAI types
+│   │   │       │   ├── chat.service.ts          # Chat completions
+│   │   │       │   └── image.service.ts         # Image generation
+│   │   │       ├── anthropic/
+│   │   │       │   ├── anthropic.provider.ts    # Anthropic provider
+│   │   │       │   └── anthropic.types.ts       # Anthropic types
+│   │   │       ├── deepl/
+│   │   │       │   ├── deepl.provider.ts        # DeepL provider
+│   │   │       │   └── deepl.types.ts           # DeepL types
+│   │   │       └── google-vision/
+│   │   │           ├── vision.provider.ts       # Google Vision (OCR)
+│   │   │           └── vision.types.ts          # Vision types
+│   │   │
+│   │   ├── search/
+│   │   │   ├── index.ts
+│   │   │   ├── search.service.ts                # Search service
+│   │   │   ├── search.interface.ts              # Search interface
+│   │   │   └── providers/
+│   │   │       ├── meilisearch.provider.ts      # Meilisearch
+│   │   │       ├── elasticsearch.provider.ts   # Elasticsearch
+│   │   │       └── postgres-fts.provider.ts     # PostgreSQL FTS
+│   │   │
+│   │   ├── cdn/
+│   │   │   ├── index.ts
+│   │   │   ├── cdn.service.ts                   # CDN service
+│   │   │   ├── cdn.interface.ts                 # CDN interface
+│   │   │   └── providers/
+│   │   │       ├── cloudflare.provider.ts       # Cloudflare
+│   │   │       ├── cloudfront.provider.ts       # AWS CloudFront
+│   │   │       └── bunny.provider.ts            # Bunny CDN
+│   │   │
+│   │   ├── dns/
+│   │   │   ├── index.ts
+│   │   │   ├── dns.service.ts                   # DNS service
+│   │   │   └── providers/
+│   │   │       ├── cloudflare.provider.ts       # Cloudflare DNS
+│   │   │       └── route53.provider.ts          # AWS Route53
+│   │   │
+│   │   ├── ssl/
+│   │   │   ├── index.ts
+│   │   │   ├── ssl.service.ts                   # SSL service
+│   │   │   └── providers/
+│   │   │       ├── letsencrypt.provider.ts      # Let's Encrypt
+│   │   │       └── cloudflare.provider.ts       # Cloudflare SSL
+│   │   │
+│   │   ├── monitoring/
+│   │   │   ├── index.ts
+│   │   │   ├── monitoring.service.ts            # Monitoring service
+│   │   │   ├── metrics.service.ts               # Metrics collection
+│   │   │   ├── tracing.service.ts               # Distributed tracing
+│   │   │   └── providers/
+│   │   │       ├── datadog.provider.ts          # Datadog
+│   │   │       ├── newrelic.provider.ts         # New Relic
+│   │   │       └── prometheus.provider.ts       # Prometheus
+│   │   │
+│   │   └── secrets/
+│   │       ├── index.ts
+│   │       ├── secrets.service.ts               # Secrets service
+│   │       └── providers/
+│   │           ├── aws-secrets.provider.ts      # AWS Secrets Manager
+│   │           ├── hashicorp-vault.provider.ts  # HashiCorp Vault
+│   │           └── env.provider.ts              # Environment variables
+│   │
+│   ├── plugins/
+│   │   ├── index.ts
+│   │   ├── auth.plugin.ts                       # Authentication plugin
+│   │   ├── cors.plugin.ts                       # CORS plugin
+│   │   ├── helmet.plugin.ts                     # Security headers
+│   │   ├── rate-limit.plugin.ts                 # Rate limiting
+│   │   ├── compress.plugin.ts                   # Compression
+│   │   ├── swagger.plugin.ts                    # Swagger documentation
+│   │   ├── multipart.plugin.ts                  # File uploads
+│   │   ├── cookie.plugin.ts                     # Cookie handling
+│   │   ├── redis.plugin.ts                      # Redis integration
+│   │   ├── prisma.plugin.ts                     # Prisma integration
+│   │   ├── queue.plugin.ts                      # Queue integration
+│   │   ├── websocket.plugin.ts                  # WebSocket support
+│   │   └── graceful-shutdown.plugin.ts          # Graceful shutdown
+│   │
+│   ├── schemas/
+│   │   ├── index.ts
+│   │   ├── common/
+│   │   │   ├── pagination.schema.ts             # Pagination schema
+│   │   │   ├── id.schema.ts                     # ID schemas
+│   │   │   ├── date.schema.ts                   # Date schemas
+│   │   │   └── response.schema.ts               # Response schemas
+│   │   ├── auth/
+│   │   │   ├── login.schema.ts
+│   │   │   ├── register.schema.ts
+│   │   │   ├── token.schema.ts
+│   │   │   └── mfa.schema.ts
+│   │   ├── user/
+│   │   │   ├── user.schema.ts
+│   │   │   ├── profile.schema.ts
+│   │   │   └── preferences.schema.ts
+│   │   ├── content/
+│   │   │   ├── series.schema.ts
+│   │   │   ├── chapter.schema.ts
+│   │   │   └── page.schema.ts
+│   │   ├── subscription/
+│   │   │   ├── tier.schema.ts
+│   │   │   └── subscription.schema.ts
+│   │   ├── payment/
+│   │   │   ├── payment.schema.ts
+│   │   │   └── payout.schema.ts
+│   │   └── analytics/
+│   │       ├── event.schema.ts
+│   │       └── report.schema.ts
+│   │
+│   ├── websocket/
+│   │   ├── index.ts
+│   │   ├── websocket.gateway.ts                 # WebSocket gateway
+│   │   ├── websocket.service.ts                 # WebSocket service
+│   │   ├── rooms/
+│   │   │   ├── analytics.room.ts                # Real-time analytics
+│   │   │   ├── notifications.room.ts            # Live notifications
+│   │   │   └── reading.room.ts                  # Reading sync
+│   │   └── handlers/
+│   │       ├── connection.handler.ts            # Connection handling
+│   │       ├── authentication.handler.ts        # WS authentication
+│   │       └── presence.handler.ts              # User presence
+│   │
+│   └── cli/
+│       ├── index.ts                             # CLI entry point
+│       ├── cli.ts                               # CLI setup
+│       └── commands/
+│           ├── db/
+│           │   ├── migrate.command.ts           # Database migration
+│           │   ├── seed.command.ts              # Database seeding
+│           │   ├── reset.command.ts             # Database reset
+│           │   └── backup.command.ts            # Database backup
+│           ├── user/
+│           │   ├── create-admin.command.ts      # Create admin user
+│           │   └── reset-password.command.ts    # Reset password
+│           ├── cache/
+│           │   ├── clear.command.ts             # Clear cache
+│           │   └── warmup.command.ts            # Warmup cache
+│           ├── queue/
+│           │   ├── process.command.ts           # Process queue
+│           │   ├── retry.command.ts             # Retry failed jobs
+│           │   └── clear.command.ts             # Clear queue
+│           ├── maintenance/
+│           │   ├── cleanup.command.ts           # Run cleanup tasks
+│           │   └── refresh-views.command.ts     # Refresh views
+│           └── generate/
+│               ├── api-docs.command.ts          # Generate API docs
+│               └── types.command.ts             # Generate types
+│
+├── tests/
+│   ├── setup.ts                                 # Test setup
+│   ├── teardown.ts                              # Test teardown
+│   ├── jest.config.ts                           # Jest configuration
+│   │
+│   ├── fixtures/
+│   │   ├── users.fixture.ts                     # User test data
+│   │   ├── series.fixture.ts                    # Series test data
+│   │   ├── chapters.fixture.ts                  # Chapter test data
+│   │   ├── subscriptions.fixture.ts             # Subscription test data
+│   │   └── payments.fixture.ts                  # Payment test data
+│   │
+│   ├── factories/
+│   │   ├── user.factory.ts                      # User factory
+│   │   ├── series.factory.ts                    # Series factory
+│   │   ├── chapter.factory.ts                   # Chapter factory
+│   │   ├── subscription.factory.ts              # Subscription factory
+│   │   └── payment.factory.ts                   # Payment factory
+│   │
+│   ├── mocks/
+│   │   ├── prisma.mock.ts                       # Prisma mock
+│   │   ├── redis.mock.ts                        # Redis mock
+│   │   ├── storage.mock.ts                      # Storage mock
+│   │   ├── email.mock.ts                        # Email mock
+│   │   ├── payment.mock.ts                      # Payment gateway mock
+│   │   └── ai.mock.ts                           # AI service mock
+│   │
+│   ├── helpers/
+│   │   ├── test-app.helper.ts                   # Test app setup
+│   │   ├── auth.helper.ts                       # Authentication helper
+│   │   ├── database.helper.ts                   # Database helper
+│   │   └── request.helper.ts                    # Request helper
+│   │
+│   ├── unit/
+│   │   ├── services/
+│   │   │   ├── auth.service.test.ts
+│   │   │   ├── user.service.test.ts
+│   │   │   ├── series.service.test.ts
+│   │   │   ├── chapter.service.test.ts
+│   │   │   ├── subscription.service.test.ts
+│   │   │   └── payment.service.test.ts
+│   │   ├── utils/
+│   │   │   ├── string.utils.test.ts
+│   │   │   ├── crypto.utils.test.ts
+│   │   │   └── pagination.utils.test.ts
+│   │   └── validators/
+│   │       ├── user.validator.test.ts
+│   │       └── content.validator.test.ts
+│   │
+│   ├── integration/
+│   │   ├── auth/
+│   │   │   ├── login.test.ts
+│   │   │   ├── register.test.ts
+│   │   │   ├── oauth.test.ts
+│   │   │   └── mfa.test.ts
+│   │   ├── users/
+│   │   │   ├── profile.test.ts
+│   │   │   └── preferences.test.ts
+│   │   ├── content/
+│   │   │   ├── series.test.ts
+│   │   │   ├── chapters.test.ts
+│   │   │   └── publishing.test.ts
+│   │   ├── subscriptions/
+│   │   │   ├── tiers.test.ts
+│   │   │   ├── subscribe.test.ts
+│   │   │   └── cancel.test.ts
+│   │   └── payments/
+│   │       ├── checkout.test.ts
+│   │       ├── webhooks.test.ts
+│   │       └── refunds.test.ts
+│   │
+│   └── e2e/
+│       ├── flows/
+│       │   ├── author-onboarding.test.ts        # Author signup flow
+│       │   ├── reader-subscription.test.ts      # Reader subscription flow
+│       │   ├── content-publishing.test.ts       # Content publishing flow
+│       │   └── payment-flow.test.ts             # Payment flow
+│       └── scenarios/
+│           ├── high-traffic.test.ts             # High traffic scenario
+│           └── concurrent-access.test.ts        # Concurrent access
+│
+├── .dockerignore
+├── .editorconfig
+├── .env.example
+├── .env.development
+├── .env.test
+├── .eslintignore
+├── .eslintrc.js
+├── .gitignore
+├── .npmrc
+├── .nvmrc
+├── .prettierignore
+├── .prettierrc
+├── CHANGELOG.md
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── nodemon.json
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+├── tsconfig.build.json
+└── turbo.json                                   # Turborepo config (if monorepo)

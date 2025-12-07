@@ -1,0 +1,1537 @@
+
+├── src/
+│   │
+│   ├── app/                                    # Next.js App Router
+│   │   ├── (auth)/                             # Auth route group
+│   │   │   ├── layout.tsx                      # Auth layout
+│   │   │   ├── login/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── login-form.tsx
+│   │   │   │       ├── social-login-buttons.tsx
+│   │   │   │       └── remember-me-checkbox.tsx
+│   │   │   ├── register/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── register-form.tsx
+│   │   │   │       ├── terms-checkbox.tsx
+│   │   │   │       └── password-strength-indicator.tsx
+│   │   │   ├── forgot-password/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       └── forgot-password-form.tsx
+│   │   │   ├── reset-password/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       └── reset-password-form.tsx
+│   │   │   ├── verify-email/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       └── verification-status.tsx
+│   │   │   ├── mfa/
+│   │   │   │   ├── setup/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── verify/
+│   │   │   │       └── page.tsx
+│   │   │   └── oauth/
+│   │   │       └── callback/
+│   │   │           └── [provider]/
+│   │   │               └── page.tsx
+│   │   │
+│   │   ├── (marketing)/                        # Marketing/public pages
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx                        # Homepage
+│   │   │   ├── about/
+│   │   │   │   └── page.tsx
+│   │   │   ├── pricing/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── pricing-table.tsx
+│   │   │   │       ├── pricing-card.tsx
+│   │   │   │       ├── feature-comparison.tsx
+│   │   │   │       └── faq-section.tsx
+│   │   │   ├── features/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── for-authors/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── for-readers/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── ai-tools/
+│   │   │   │       └── page.tsx
+│   │   │   ├── blog/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── contact/
+│   │   │   │   └── page.tsx
+│   │   │   ├── careers/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   └── legal/
+│   │   │       ├── terms/
+│   │   │       │   └── page.tsx
+│   │   │       ├── privacy/
+│   │   │       │   └── page.tsx
+│   │   │       ├── cookies/
+│   │   │       │   └── page.tsx
+│   │   │       ├── dmca/
+│   │   │       │   └── page.tsx
+│   │   │       └── content-guidelines/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── (reader)/                           # Reader-facing pages
+│   │   │   ├── layout.tsx
+│   │   │   │
+│   │   │   ├── discover/                       # Discovery/browse
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   ├── trending/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── popular/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── new/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── updated/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── featured/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── discovery-hero.tsx
+│   │   │   │       ├── series-carousel.tsx
+│   │   │   │       ├── featured-series.tsx
+│   │   │   │       ├── trending-sidebar.tsx
+│   │   │   │       └── content-type-tabs.tsx
+│   │   │   │
+│   │   │   ├── genres/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [slug]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── loading.tsx
+│   │   │   │
+│   │   │   ├── tags/
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── search/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── search-bar.tsx
+│   │   │   │       ├── search-filters.tsx
+│   │   │   │       ├── search-results.tsx
+│   │   │   │       └── advanced-search-modal.tsx
+│   │   │   │
+│   │   │   ├── rankings/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── daily/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── weekly/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── monthly/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── ranking-table.tsx
+│   │   │   │       └── ranking-filters.tsx
+│   │   │   │
+│   │   │   ├── authors/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [username]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       ├── loading.tsx
+│   │   │   │       └── _components/
+│   │   │   │           ├── author-header.tsx
+│   │   │   │           ├── author-bio.tsx
+│   │   │   │           ├── author-series-grid.tsx
+│   │   │   │           └── follow-button.tsx
+│   │   │   │
+│   │   │   └── forum/
+│   │   │       ├── page.tsx
+│   │   │       ├── [categorySlug]/
+│   │   │       │   └── page.tsx
+│   │   │       └── post/
+│   │   │           └── [postId]/
+│   │   │               └── page.tsx
+│   │   │
+│   │   ├── (reader-dashboard)/                 # Reader dashboard
+│   │   │   ├── layout.tsx
+│   │   │   ├── library/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── continue-reading/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── history/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── library-tabs.tsx
+│   │   │   │       ├── continue-reading-card.tsx
+│   │   │   │       └── reading-history-item.tsx
+│   │   │   │
+│   │   │   ├── bookmarks/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── reading-lists/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [listId]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── subscriptions/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [subscriptionId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── purchases/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [purchaseId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── following/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── notifications/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   └── settings/
+│   │   │       ├── page.tsx
+│   │   │       ├── profile/
+│   │   │       │   └── page.tsx
+│   │   │       ├── account/
+│   │   │       │   └── page.tsx
+│   │   │       ├── security/
+│   │   │       │   └── page.tsx
+│   │   │       ├── reading/
+│   │   │       │   └── page.tsx
+│   │   │       ├── notifications/
+│   │   │       │   └── page.tsx
+│   │   │       ├── privacy/
+│   │   │       │   └── page.tsx
+│   │   │       ├── billing/
+│   │   │       │   └── page.tsx
+│   │   │       └── _components/
+│   │   │           ├── settings-nav.tsx
+│   │   │           ├── profile-form.tsx
+│   │   │           ├── avatar-upload.tsx
+│   │   │           ├── password-change-form.tsx
+│   │   │           ├── mfa-settings.tsx
+│   │   │           ├── reading-preferences-form.tsx
+│   │   │           ├── notification-preferences.tsx
+│   │   │           ├── connected-accounts.tsx
+│   │   │           └── danger-zone.tsx
+│   │   │
+│   │   ├── (author)/                           # Author dashboard
+│   │   │   ├── layout.tsx
+│   │   │   │
+│   │   │   ├── dashboard/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── stats-overview.tsx
+│   │   │   │       ├── revenue-chart.tsx
+│   │   │   │       ├── subscriber-chart.tsx
+│   │   │   │       ├── recent-activity.tsx
+│   │   │   │       ├── quick-actions.tsx
+│   │   │   │       └── upcoming-schedule.tsx
+│   │   │   │
+│   │   │   ├── sites/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [siteId]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       ├── settings/
+│   │   │   │       │   ├── page.tsx
+│   │   │   │       │   ├── general/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   ├── branding/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   ├── theme/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   ├── domain/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   ├── seo/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   └── danger/
+│   │   │   │       │       └── page.tsx
+│   │   │   │       ├── pages/
+│   │   │   │       │   ├── page.tsx
+│   │   │   │       │   ├── create/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   └── [pageId]/
+│   │   │   │       │       └── edit/
+│   │   │   │       │           └── page.tsx
+│   │   │   │       ├── collaborators/
+│   │   │   │       │   └── page.tsx
+│   │   │   │       └── _components/
+│   │   │   │           ├── site-header.tsx
+│   │   │   │           ├── site-nav.tsx
+│   │   │   │           ├── site-settings-form.tsx
+│   │   │   │           ├── branding-form.tsx
+│   │   │   │           ├── theme-selector.tsx
+│   │   │   │           ├── domain-settings.tsx
+│   │   │   │           ├── collaborator-list.tsx
+│   │   │   │           └── invite-collaborator-modal.tsx
+│   │   │   │
+│   │   │   ├── series/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [seriesId]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       ├── edit/
+│   │   │   │       │   └── page.tsx
+│   │   │   │       ├── chapters/
+│   │   │   │       │   ├── page.tsx
+│   │   │   │       │   ├── create/
+│   │   │   │       │   │   └── page.tsx
+│   │   │   │       │   └── [chapterId]/
+│   │   │   │       │       ├── edit/
+│   │   │   │       │       │   └── page.tsx
+│   │   │   │       │       ├── versions/
+│   │   │   │       │       │   └── page.tsx
+│   │   │   │       │       └── settings/
+│   │   │   │       │           └── page.tsx
+│   │   │   │       ├── analytics/
+│   │   │   │       │   └── page.tsx
+│   │   │   │       ├── comments/
+│   │   │   │       │   └── page.tsx
+│   │   │   │       ├── reviews/
+│   │   │   │       │   └── page.tsx
+│   │   │   │       ├── translations/
+│   │   │   │       │   ├── page.tsx
+│   │   │   │       │   └── [language]/
+│   │   │   │       │       └── page.tsx
+│   │   │   │       └── _components/
+│   │   │   │           ├── series-header.tsx
+│   │   │   │           ├── series-form.tsx
+│   │   │   │           ├── cover-upload.tsx
+│   │   │   │           ├── genre-selector.tsx
+│   │   │   │           ├── tag-input.tsx
+│   │   │   │           ├── content-warnings-selector.tsx
+│   │   │   │           ├── chapter-list.tsx
+│   │   │   │           ├── chapter-reorder.tsx
+│   │   │   │           └── series-stats-cards.tsx
+│   │   │   │
+│   │   │   ├── editor/                         # Chapter editor
+│   │   │   │   └── [chapterId]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── _components/
+│   │   │   │           ├── editor-header.tsx
+│   │   │   │           ├── rich-text-editor.tsx
+│   │   │   │           ├── comic-uploader.tsx
+│   │   │   │           ├── image-reorder.tsx
+│   │   │   │           ├── ai-assistant-panel.tsx
+│   │   │   │           ├── word-count.tsx
+│   │   │   │           ├── autosave-indicator.tsx
+│   │   │   │           ├── publish-modal.tsx
+│   │   │   │           ├── schedule-modal.tsx
+│   │   │   │           └── access-settings-modal.tsx
+│   │   │   │
+│   │   │   ├── subscribers/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [subscriberId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── tiers/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [tierId]/
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── products/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [productId]/
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── discounts/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [discountId]/
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── analytics/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── traffic/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── revenue/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── subscribers/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── content/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── _components/
+│   │   │   │       ├── analytics-header.tsx
+│   │   │   │       ├── date-range-picker.tsx
+│   │   │   │       ├── analytics-chart.tsx
+│   │   │   │       ├── metrics-grid.tsx
+│   │   │   │       ├── top-content-table.tsx
+│   │   │   │       ├── geography-map.tsx
+│   │   │   │       └── export-button.tsx
+│   │   │   │
+│   │   │   ├── payments/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── setup/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── transactions/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── payouts/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── broadcasts/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [broadcastId]/
+│   │   │   │       ├── page.tsx
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── announcements/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [announcementId]/
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx
+│   │   │   │
+│   │   │   ├── calendar/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── goals/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [goalId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── social/
+│   │   │   │   ├── connections/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── posts/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── webhooks/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [webhookId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── api-keys/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── import-export/
+│   │   │   │   ├── import/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── export/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── ai/
+│   │   │   │   ├── writing/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── translation/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── covers/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── usage/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── ab-tests/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [testId]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── subscription/                   # Author's platform subscription
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── plans/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── invoices/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   └── settings/
+│   │   │       ├── page.tsx
+│   │   │       ├── profile/
+│   │   │       │   └── page.tsx
+│   │   │       ├── account/
+│   │   │       │   └── page.tsx
+│   │   │       └── notifications/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── (reading)/                          # Reading experience
+│   │   │   ├── layout.tsx
+│   │   │   └── read/
+│   │   │       └── [siteSlug]/
+│   │   │           └── [seriesSlug]/
+│   │   │               └── [chapterSlug]/
+│   │   │                   ├── page.tsx
+│   │   │                   ├── loading.tsx
+│   │   │                   └── _components/
+│   │   │                       ├── reader-header.tsx
+│   │   │                       ├── reader-navigation.tsx
+│   │   │                       ├── reader-settings-drawer.tsx
+│   │   │                       ├── text-content-viewer.tsx
+│   │   │                       ├── comic-viewer.tsx
+│   │   │                       ├── vertical-scroll-viewer.tsx
+│   │   │                       ├── paginated-viewer.tsx
+│   │   │                       ├── progress-bar.tsx
+│   │   │                       ├── chapter-sidebar.tsx
+│   │   │                       ├── comments-section.tsx
+│   │   │                       ├── reactions-bar.tsx
+│   │   │                       ├── bookmark-button.tsx
+│   │   │                       ├── font-settings.tsx
+│   │   │                       ├── theme-switcher.tsx
+│   │   │                       └── auto-scroll-controls.tsx
+│   │   │
+│   │   ├── (site)/                             # Author's public site
+│   │   │   ├── layout.tsx
+│   │   │   └── s/
+│   │   │       └── [siteSlug]/
+│   │   │           ├── page.tsx
+│   │   │           ├── loading.tsx
+│   │   │           ├── series/
+│   │   │           │   └── [seriesSlug]/
+│   │   │           │       ├── page.tsx
+│   │   │           │       ├── loading.tsx
+│   │   │           │       └── _components/
+│   │   │           │           ├── series-header.tsx
+│   │   │           │           ├── series-info.tsx
+│   │   │           │           ├── chapter-list.tsx
+│   │   │           │           ├── subscription-cta.tsx
+│   │   │           │           ├── reviews-section.tsx
+│   │   │           │           └── related-series.tsx
+│   │   │           ├── page/
+│   │   │           │   └── [pageSlug]/
+│   │   │           │       └── page.tsx
+│   │   │           ├── announcements/
+│   │   │           │   ├── page.tsx
+│   │   │           │   └── [slug]/
+│   │   │           │       └── page.tsx
+│   │   │           ├── subscribe/
+│   │   │           │   ├── page.tsx
+│   │   │           │   └── _components/
+│   │   │           │       ├── tier-selection.tsx
+│   │   │           │       ├── checkout-form.tsx
+│   │   │           │       └── payment-methods.tsx
+│   │   │           ├── shop/
+│   │   │           │   ├── page.tsx
+│   │   │           │   └── [productSlug]/
+│   │   │           │       └── page.tsx
+│   │   │           └── _components/
+│   │   │               ├── site-header.tsx
+│   │   │               ├── site-footer.tsx
+│   │   │               ├── site-navigation.tsx
+│   │   │               ├── author-sidebar.tsx
+│   │   │               └── series-grid.tsx
+│   │   │
+│   │   ├── (admin)/                            # Admin dashboard
+│   │   │   ├── layout.tsx
+│   │   │   ├── admin/
+│   │   │   │   ├── page.tsx                    # Admin dashboard
+│   │   │   │   ├── users/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── [userId]/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── sites/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── [siteId]/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── series/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── [seriesId]/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── moderation/
+│   │   │   │   │   ├── reports/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── queue/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── logs/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── support/
+│   │   │   │   │   ├── tickets/
+│   │   │   │   │   │   ├── page.tsx
+│   │   │   │   │   │   └── [ticketId]/
+│   │   │   │   │   │       └── page.tsx
+│   │   │   │   │   └── articles/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── taxonomies/
+│   │   │   │   │   ├── genres/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   ├── tags/
+│   │   │   │   │   │   └── page.tsx
+│   │   │   │   │   └── warnings/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── themes/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── feature-flags/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── config/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── tier-limits/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   ├── analytics/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── jobs/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── audit-logs/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   ├── incidents/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── [incidentId]/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   └── health/
+│   │   │   │       └── page.tsx
+│   │   │   └── _components/
+│   │   │       ├── admin-sidebar.tsx
+│   │   │       ├── admin-header.tsx
+│   │   │       ├── stats-card.tsx
+│   │   │       ├── data-table.tsx
+│   │   │       └── user-actions-menu.tsx
+│   │   │
+│   │   ├── (support)/                          # Support pages
+│   │   │   ├── layout.tsx
+│   │   │   ├── help/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── [categorySlug]/
+│   │   │   │   │   ├── page.tsx
+│   │   │   │   │   └── [articleSlug]/
+│   │   │   │   │       └── page.tsx
+│   │   │   │   └── search/
+│   │   │   │       └── page.tsx
+│   │   │   └── tickets/
+│   │   │       ├── page.tsx
+│   │   │       ├── create/
+│   │   │       │   └── page.tsx
+│   │   │       └── [ticketId]/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── (checkout)/                         # Checkout flow
+│   │   │   ├── layout.tsx
+│   │   │   └── checkout/
+│   │   │       ├── subscription/
+│   │   │       │   └── [tierId]/
+│   │   │       │       ├── page.tsx
+│   │   │       │       └── _components/
+│   │   │       │           ├── checkout-summary.tsx
+│   │   │       │           ├── payment-form.tsx
+│   │   │       │           ├── billing-cycle-selector.tsx
+│   │   │       │           ├── discount-code-input.tsx
+│   │   │       │           └── order-total.tsx
+│   │   │       ├── product/
+│   │   │       │   └── [productId]/
+│   │   │       │       └── page.tsx
+│   │   │       ├── chapter/
+│   │   │       │   └── [chapterId]/
+│   │   │       │       └── page.tsx
+│   │   │       ├── gift/
+│   │   │       │   └── [tierId]/
+│   │   │       │       └── page.tsx
+│   │   │       ├── success/
+│   │   │       │   └── page.tsx
+│   │   │       └── cancelled/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── api/                                # API routes
+│   │   │   ├── auth/
+│   │   │   │   ├── [...nextauth]/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── csrf/
+│   │   │   │       └── route.ts
+│   │   │   ├── webhooks/
+│   │   │   │   ├── razorpay/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── stripe/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── xendit/
+│   │   │   │       └── route.ts
+│   │   │   ├── upload/
+│   │   │   │   └── route.ts
+│   │   │   ├── og/
+│   │   │   │   └── route.tsx                   # OG image generation
+│   │   │   ├── sitemap/
+│   │   │   │   └── route.ts
+│   │   │   └── revalidate/
+│   │   │       └── route.ts
+│   │   │
+│   │   ├── error.tsx                           # Global error boundary
+│   │   ├── global-error.tsx                    # Root error boundary
+│   │   ├── not-found.tsx                       # 404 page
+│   │   ├── loading.tsx                         # Global loading
+│   │   ├── layout.tsx                          # Root layout
+│   │   └── providers.tsx                       # Client providers wrapper
+│   │
+│   ├── components/
+│   │   ├── ui/                                 # Base UI components (shadcn/ui style)
+│   │   │   ├── accordion.tsx
+│   │   │   ├── alert.tsx
+│   │   │   ├── alert-dialog.tsx
+│   │   │   ├── aspect-ratio.tsx
+│   │   │   ├── avatar.tsx
+│   │   │   ├── badge.tsx
+│   │   │   ├── breadcrumb.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── calendar.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── carousel.tsx
+│   │   │   ├── checkbox.tsx
+│   │   │   ├── collapsible.tsx
+│   │   │   ├── command.tsx
+│   │   │   ├── context-menu.tsx
+│   │   │   ├── data-table.tsx
+│   │   │   ├── date-picker.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── drawer.tsx
+│   │   │   ├── dropdown-menu.tsx
+│   │   │   ├── form.tsx
+│   │   │   ├── hover-card.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── input-otp.tsx
+│   │   │   ├── label.tsx
+│   │   │   ├── menubar.tsx
+│   │   │   ├── navigation-menu.tsx
+│   │   │   ├── pagination.tsx
+│   │   │   ├── popover.tsx
+│   │   │   ├── progress.tsx
+│   │   │   ├── radio-group.tsx
+│   │   │   ├── resizable.tsx
+│   │   │   ├── scroll-area.tsx
+│   │   │   ├── select.tsx
+│   │   │   ├── separator.tsx
+│   │   │   ├── sheet.tsx
+│   │   │   ├── skeleton.tsx
+│   │   │   ├── slider.tsx
+│   │   │   ├── sonner.tsx
+│   │   │   ├── spinner.tsx
+│   │   │   ├── switch.tsx
+│   │   │   ├── table.tsx
+│   │   │   ├── tabs.tsx
+│   │   │   ├── textarea.tsx
+│   │   │   ├── toast.tsx
+│   │   │   ├── toaster.tsx
+│   │   │   ├── toggle.tsx
+│   │   │   ├── toggle-group.tsx
+│   │   │   ├── tooltip.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── common/                             # Shared components
+│   │   │   ├── logo.tsx
+│   │   │   ├── theme-toggle.tsx
+│   │   │   ├── language-switcher.tsx
+│   │   │   ├── user-menu.tsx
+│   │   │   ├── notification-bell.tsx
+│   │   │   ├── search-command.tsx
+│   │   │   ├── mobile-nav.tsx
+│   │   │   ├── footer.tsx
+│   │   │   ├── cookie-consent.tsx
+│   │   │   ├── loading-screen.tsx
+│   │   │   ├── error-boundary.tsx
+│   │   │   ├── offline-indicator.tsx
+│   │   │   ├── update-prompt.tsx
+│   │   │   ├── back-button.tsx
+│   │   │   ├── copy-button.tsx
+│   │   │   ├── share-button.tsx
+│   │   │   ├── rating-stars.tsx
+│   │   │   ├── price-display.tsx
+│   │   │   ├── time-ago.tsx
+│   │   │   ├── read-time.tsx
+│   │   │   ├── word-count.tsx
+│   │   │   ├── empty-state.tsx
+│   │   │   ├── confirm-dialog.tsx
+│   │   │   ├── infinite-scroll.tsx
+│   │   │   ├── virtual-list.tsx
+│   │   │   ├── image-with-fallback.tsx
+│   │   │   ├── optimized-image.tsx
+│   │   │   ├── video-player.tsx
+│   │   │   ├── audio-player.tsx
+│   │   │   ├── markdown-renderer.tsx
+│   │   │   ├── html-content.tsx
+│   │   │   ├── code-block.tsx
+│   │   │   ├── spoiler-text.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── forms/                              # Form components
+│   │   │   ├── form-field.tsx
+│   │   │   ├── form-section.tsx
+│   │   │   ├── input-field.tsx
+│   │   │   ├── textarea-field.tsx
+│   │   │   ├── select-field.tsx
+│   │   │   ├── checkbox-field.tsx
+│   │   │   ├── radio-field.tsx
+│   │   │   ├── switch-field.tsx
+│   │   │   ├── date-field.tsx
+│   │   │   ├── time-field.tsx
+│   │   │   ├── file-upload.tsx
+│   │   │   ├── image-upload.tsx
+│   │   │   ├── multi-image-upload.tsx
+│   │   │   ├── rich-text-editor.tsx
+│   │   │   ├── markdown-editor.tsx
+│   │   │   ├── color-picker.tsx
+│   │   │   ├── tag-input.tsx
+│   │   │   ├── combobox.tsx
+│   │   │   ├── multi-select.tsx
+│   │   │   ├── slider-field.tsx
+│   │   │   ├── number-input.tsx
+│   │   │   ├── currency-input.tsx
+│   │   │   ├── phone-input.tsx
+│   │   │   ├── password-input.tsx
+│   │   │   ├── otp-input.tsx
+│   │   │   ├── autocomplete.tsx
+│   │   │   ├── address-autocomplete.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── layouts/                            # Layout components
+│   │   │   ├── marketing-header.tsx
+│   │   │   ├── marketing-footer.tsx
+│   │   │   ├── app-header.tsx
+│   │   │   ├── app-sidebar.tsx
+│   │   │   ├── app-footer.tsx
+│   │   │   ├── dashboard-layout.tsx
+│   │   │   ├── dashboard-header.tsx
+│   │   │   ├── dashboard-sidebar.tsx
+│   │   │   ├── dashboard-nav.tsx
+│   │   │   ├── reader-layout.tsx
+│   │   │   ├── site-layout.tsx
+│   │   │   ├── auth-layout.tsx
+│   │   │   ├── checkout-layout.tsx
+│   │   │   ├── admin-layout.tsx
+│   │   │   ├── page-header.tsx
+│   │   │   ├── page-container.tsx
+│   │   │   ├── section.tsx
+│   │   │   ├── container.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── content/                            # Content-related components
+│   │   │   ├── series/
+│   │   │   │   ├── series-card.tsx
+│   │   │   │   ├── series-card-horizontal.tsx
+│   │   │   │   ├── series-card-compact.tsx
+│   │   │   │   ├── series-grid.tsx
+│   │   │   │   ├── series-list.tsx
+│   │   │   │   ├── series-carousel.tsx
+│   │   │   │   ├── series-cover.tsx
+│   │   │   │   ├── series-info.tsx
+│   │   │   │   ├── series-stats.tsx
+│   │   │   │   ├── series-status-badge.tsx
+│   │   │   │   ├── series-rating.tsx
+│   │   │   │   ├── content-type-icon.tsx
+│   │   │   │   ├── content-rating-badge.tsx
+│   │   │   │   ├── genre-badges.tsx
+│   │   │   │   ├── tag-badges.tsx
+│   │   │   │   ├── warning-badges.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── chapters/
+│   │   │   │   ├── chapter-list-item.tsx
+│   │   │   │   ├── chapter-list.tsx
+│   │   │   │   ├── chapter-grid.tsx
+│   │   │   │   ├── chapter-card.tsx
+│   │   │   │   ├── chapter-thumbnail.tsx
+│   │   │   │   ├── chapter-access-badge.tsx
+│   │   │   │   ├── chapter-progress.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── authors/
+│   │   │   │   ├── author-card.tsx
+│   │   │   │   ├── author-avatar.tsx
+│   │   │   │   ├── author-info.tsx
+│   │   │   │   ├── author-stats.tsx
+│   │   │   │   ├── author-badge.tsx
+│   │   │   │   ├── follow-author-button.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── reviews/
+│   │   │   │   ├── review-card.tsx
+│   │   │   │   ├── review-list.tsx
+│   │   │   │   ├── review-form.tsx
+│   │   │   │   ├── review-stats.tsx
+│   │   │   │   ├── rating-distribution.tsx
+│   │   │   │   ├── helpful-button.tsx
+│   │   │   │   └── index.ts
+│   │   │   ├── comments/
+│   │   │   │   ├── comment-item.tsx
+│   │   │   │   ├── comment-list.tsx
+│   │   │   │   ├── comment-form.tsx
+│   │   │   │   ├── comment-thread.tsx
+│   │   │   │   ├── comment-actions.tsx
+│   │   │   │   ├── reaction-picker.tsx
+│   │   │   │   └── index.ts
+│   │   │   └── reader/
+│   │   │       ├── text-viewer.tsx
+│   │   │       ├── comic-viewer.tsx
+│   │   │       ├── webtoon-viewer.tsx
+│   │   │       ├── image-zoom.tsx
+│   │   │       ├── page-navigation.tsx
+│   │   │       ├── reader-toolbar.tsx
+│   │   │       ├── reader-settings-panel.tsx
+│   │   │       ├── toc-drawer.tsx
+│   │   │       ├── bookmark-panel.tsx
+│   │   │       └── index.ts
+│   │   │
+│   │   ├── subscription/                       # Subscription components
+│   │   │   ├── tier-card.tsx
+│   │   │   ├── tier-comparison.tsx
+│   │   │   ├── subscription-badge.tsx
+│   │   │   ├── subscribe-button.tsx
+│   │   │   ├── subscription-status.tsx
+│   │   │   ├── billing-cycle-toggle.tsx
+│   │   │   ├── discount-badge.tsx
+│   │   │   ├── trial-badge.tsx
+│   │   │   ├── cancel-subscription-dialog.tsx
+│   │   │   ├── pause-subscription-dialog.tsx
+│   │   │   ├── gift-subscription-form.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── payment/                            # Payment components
+│   │   │   ├── payment-form.tsx
+│   │   │   ├── card-input.tsx
+│   │   │   ├── saved-payment-methods.tsx
+│   │   │   ├── payment-method-card.tsx
+│   │   │   ├── payment-gateway-selector.tsx
+│   │   │   ├── razorpay-button.tsx
+│   │   │   ├── stripe-elements.tsx
+│   │   │   ├── invoice-preview.tsx
+│   │   │   ├── receipt-preview.tsx
+│   │   │   ├── transaction-item.tsx
+│   │   │   ├── payout-item.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── analytics/                          # Analytics components
+│   │   │   ├── stats-card.tsx
+│   │   │   ├── trend-indicator.tsx
+│   │   │   ├── line-chart.tsx
+│   │   │   ├── bar-chart.tsx
+│   │   │   ├── area-chart.tsx
+│   │   │   ├── pie-chart.tsx
+│   │   │   ├── donut-chart.tsx
+│   │   │   ├── sparkline.tsx
+│   │   │   ├── heatmap.tsx
+│   │   │   ├── geography-map.tsx
+│   │   │   ├── data-table.tsx
+│   │   │   ├── metric-card.tsx
+│   │   │   ├── comparison-card.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── editor/                             # Editor components
+│   │   │   ├── rich-text/
+│   │   │   │   ├── rich-text-editor.tsx
+│   │   │   │   ├── toolbar.tsx
+│   │   │   │   ├── bubble-menu.tsx
+│   │   │   │   ├── floating-menu.tsx
+│   │   │   │   ├── link-editor.tsx
+│   │   │   │   ├── image-upload.tsx
+│   │   │   │   ├── code-block.tsx
+│   │   │   │   ├── mention-list.tsx
+│   │   │   │   └── extensions/
+│   │   │   │       ├── spoiler.ts
+│   │   │   │       ├── footnote.ts
+│   │   │   │       └── author-note.ts
+│   │   │   ├── comic/
+│   │   │   │   ├── comic-uploader.tsx
+│   │   │   │   ├── image-reorder.tsx
+│   │   │   │   ├── image-crop.tsx
+│   │   │   │   ├── page-settings.tsx
+│   │   │   │   └── bulk-upload.tsx
+│   │   │   └── ai/
+│   │   │       ├── ai-assistant.tsx
+│   │   │       ├── ai-suggestion-panel.tsx
+│   │   │       ├── ai-prompt-input.tsx
+│   │   │       ├── ai-response-display.tsx
+│   │   │       └── ai-usage-indicator.tsx
+│   │   │
+│   │   ├── dashboard/                          # Dashboard components
+│   │   │   ├── nav-item.tsx
+│   │   │   ├── nav-group.tsx
+│   │   │   ├── sidebar-toggle.tsx
+│   │   │   ├── quick-actions.tsx
+│   │   │   ├── activity-feed.tsx
+│   │   │   ├── notification-list.tsx
+│   │   │   ├── schedule-widget.tsx
+│   │   │   ├── goals-widget.tsx
+│   │   │   ├── streak-widget.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── moderation/                         # Moderation components
+│   │   │   ├── report-dialog.tsx
+│   │   │   ├── report-form.tsx
+│   │   │   ├── moderation-queue-item.tsx
+│   │   │   ├── moderation-actions.tsx
+│   │   │   ├── ban-dialog.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── social/                             # Social components
+│   │   │   ├── share-dialog.tsx
+│   │   │   ├── social-share-buttons.tsx
+│   │   │   ├── embed-code-generator.tsx
+│   │   │   ├── social-connection-card.tsx
+│   │   │   ├── post-preview.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   └── seo/                                # SEO components
+│   │       ├── meta-tags.tsx
+│   │       ├── json-ld.tsx
+│   │       ├── canonical-url.tsx
+│   │       └── index.ts
+│   │
+│   ├── hooks/                                  # Custom React hooks
+│   │   ├── use-auth.ts
+│   │   ├── use-user.ts
+│   │   ├── use-session.ts
+│   │   ├── use-permissions.ts
+│   │   ├── use-subscription.ts
+│   │   ├── use-feature-flag.ts
+│   │   │
+│   │   ├── use-api.ts
+│   │   ├── use-mutation.ts
+│   │   ├── use-infinite-query.ts
+│   │   ├── use-optimistic-update.ts
+│   │   │
+│   │   ├── use-local-storage.ts
+│   │   ├── use-session-storage.ts
+│   │   ├── use-cookie.ts
+│   │   │
+│   │   ├── use-debounce.ts
+│   │   ├── use-throttle.ts
+│   │   ├── use-timeout.ts
+│   │   ├── use-interval.ts
+│   │   │
+│   │   ├── use-media-query.ts
+│   │   ├── use-breakpoint.ts
+│   │   ├── use-window-size.ts
+│   │   ├── use-scroll-position.ts
+│   │   ├── use-scroll-lock.ts
+│   │   ├── use-intersection-observer.ts
+│   │   ├── use-resize-observer.ts
+│   │   │
+│   │   ├── use-form.ts
+│   │   ├── use-form-field.ts
+│   │   ├── use-form-validation.ts
+│   │   │
+│   │   ├── use-clipboard.ts
+│   │   ├── use-copy-to-clipboard.ts
+│   │   ├── use-download.ts
+│   │   │
+│   │   ├── use-keyboard-shortcut.ts
+│   │   ├── use-keypress.ts
+│   │   ├── use-hotkeys.ts
+│   │   │
+│   │   ├── use-theme.ts
+│   │   ├── use-dark-mode.ts
+│   │   ├── use-reading-settings.ts
+│   │   │
+│   │   ├── use-toast.ts
+│   │   ├── use-dialog.ts
+│   │   ├── use-drawer.ts
+│   │   ├── use-modal.ts
+│   │   ├── use-popover.ts
+│   │   │
+│   │   ├── use-analytics.ts
+│   │   ├── use-page-view.ts
+│   │   ├── use-track-event.ts
+│   │   │
+│   │   ├── use-offline.ts
+│   │   ├── use-online.ts
+│   │   ├── use-network-state.ts
+│   │   │
+│   │   ├── use-geolocation.ts
+│   │   ├── use-locale.ts
+│   │   ├── use-translations.ts
+│   │   │
+│   │   ├── use-pagination.ts
+│   │   ├── use-sorting.ts
+│   │   ├── use-filtering.ts
+│   │   │
+│   │   ├── use-reading-progress.ts
+│   │   ├── use-chapter-navigation.ts
+│   │   ├── use-bookmark.ts
+│   │   ├── use-auto-scroll.ts
+│   │   │
+│   │   ├── use-countdown.ts
+│   │   ├── use-stopwatch.ts
+│   │   ├── use-timer.ts
+│   │   │
+│   │   ├── use-previous.ts
+│   │   ├── use-mounted.ts
+│   │   ├── use-isomorphic-layout-effect.ts
+│   │   ├── use-event-listener.ts
+│   │   ├── use-click-outside.ts
+│   │   ├── use-focus-trap.ts
+│   │   │
+│   │   └── index.ts
+│   │
+│   ├── lib/                                    # Utility libraries
+│   │   ├── api/
+│   │   │   ├── client.ts                       # API client setup
+│   │   │   ├── interceptors.ts                 # Request/response interceptors
+│   │   │   ├── error-handler.ts                # API error handling
+│   │   │   ├── types.ts                        # API types
+│   │   │   └── endpoints/
+│   │   │       ├── auth.ts
+│   │   │       ├── users.ts
+│   │   │       ├── sites.ts
+│   │   │       ├── series.ts
+│   │   │       ├── chapters.ts
+│   │   │       ├── subscriptions.ts
+│   │   │       ├── payments.ts
+│   │   │       ├── analytics.ts
+│   │   │       └── index.ts
+│   │   │
+│   │   ├── auth/
+│   │   │   ├── auth-options.ts                 # NextAuth options
+│   │   │   ├── providers.ts                    # Auth providers
+│   │   │   ├── callbacks.ts                    # Auth callbacks
+│   │   │   ├── jwt.ts                          # JWT utilities
+│   │   │   └── session.ts                      # Session utilities
+│   │   │
+│   │   ├── validation/
+│   │   │   ├── schemas/
+│   │   │   │   ├── auth.schema.ts
+│   │   │   │   ├── user.schema.ts
+│   │   │   │   ├── site.schema.ts
+│   │   │   │   ├── series.schema.ts
+│   │   │   │   ├── chapter.schema.ts
+│   │   │   │   ├── subscription.schema.ts
+│   │   │   │   ├── payment.schema.ts
+│   │   │   │   └── common.schema.ts
+│   │   │   └── validators.ts
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── cn.ts                           # Class name utility
+│   │   │   ├── format.ts                       # Formatting utilities
+│   │   │   ├── date.ts                         # Date utilities
+│   │   │   ├── number.ts                       # Number utilities
+│   │   │   ├── string.ts                       # String utilities
+│   │   │   ├── array.ts                        # Array utilities
+│   │   │   ├── object.ts                       # Object utilities
+│   │   │   ├── url.ts                          # URL utilities
+│   │   │   ├── file.ts                         # File utilities
+│   │   │   ├── image.ts                        # Image utilities
+│   │   │   ├── color.ts                        # Color utilities
+│   │   │   ├── currency.ts                     # Currency utilities
+│   │   │   ├── slug.ts                         # Slug utilities
+│   │   │   ├── seo.ts                          # SEO utilities
+│   │   │   ├── analytics.ts                    # Analytics utilities
+│   │   │   ├── storage.ts                      # Storage utilities
+│   │   │   ├── device.ts                       # Device detection
+│   │   │   ├── browser.ts                      # Browser utilities
+│   │   │   ├── clipboard.ts                    # Clipboard utilities
+│   │   │   ├── share.ts                        # Share utilities
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── constants/
+│   │   │   ├── routes.ts                       # Route constants
+│   │   │   ├── api.ts                          # API constants
+│   │   │   ├── keys.ts                         # Query keys
+│   │   │   ├── config.ts                       # App configuration
+│   │   │   ├── seo.ts                          # SEO constants
+│   │   │   ├── limits.ts                       # Limits/quotas
+│   │   │   ├── features.ts                     # Feature flags
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── i18n/
+│   │   │   ├── config.ts                       # i18n configuration
+│   │   │   ├── server.ts                       # Server-side i18n
+│   │   │   ├── client.ts                       # Client-side i18n
+│   │   │   ├── middleware.ts                   # i18n middleware
+│   │   │   └── locales/
+│   │   │       ├── en/
+│   │   │       │   ├── common.json
+│   │   │       │   ├── auth.json
+│   │   │       │   ├── dashboard.json
+│   │   │       │   ├── reader.json
+│   │   │       │   ├── errors.json
+│   │   │       │   └── validation.json
+│   │   │       ├── hi/
+│   │   │       │   └── ...
+│   │   │       └── ...
+│   │   │
+│   │   ├── fonts/
+│   │   │   └── index.ts                        # Font configurations
+│   │   │
+│   │   ├── metadata/
+│   │   │   ├── site.ts                         # Site metadata
+│   │   │   ├── pages.ts                        # Page-specific metadata
+│   │   │   └── generators.ts                   # Dynamic metadata
+│   │   │
+│   │   └── third-party/
+│   │       ├── analytics/
+│   │       │   ├── google-analytics.ts
+│   │       │   ├── mixpanel.ts
+│   │       │   └── segment.ts
+│   │       ├── payment/
+│   │       │   ├── razorpay.ts
+│   │       │   ├── stripe.ts
+│   │       │   └── xendit.ts
+│   │       ├── sentry.ts
+│   │       ├── crisp.ts
+│   │       └── hotjar.ts
+│   │
+│   ├── services/                               # Client-side services
+│   │   ├── auth.service.ts
+│   │   ├── user.service.ts
+│   │   ├── site.service.ts
+│   │   ├── series.service.ts
+│   │   ├── chapter.service.ts
+│   │   ├── subscription.service.ts
+│   │   ├── payment.service.ts
+│   │   ├── analytics.service.ts
+│   │   ├── notification.service.ts
+│   │   ├── upload.service.ts
+│   │   ├── reading-progress.service.ts
+│   │   └── index.ts
+│   │
+│   ├── stores/                                 # State management (Zustand)
+│   │   ├── auth.store.ts
+│   │   ├── user.store.ts
+│   │   ├── theme.store.ts
+│   │   ├── reader-settings.store.ts
+│   │   ├── reading-progress.store.ts
+│   │   ├── notification.store.ts
+│   │   ├── sidebar.store.ts
+│   │   ├── modal.store.ts
+│   │   ├── toast.store.ts
+│   │   ├── editor.store.ts
+│   │   └── index.ts
+│   │
+│   ├── providers/                              # React Context providers
+│   │   ├── auth-provider.tsx
+│   │   ├── theme-provider.tsx
+│   │   ├── query-provider.tsx
+│   │   ├── toast-provider.tsx
+│   │   ├── modal-provider.tsx
+│   │   ├── analytics-provider.tsx
+│   │   ├── feature-flag-provider.tsx
+│   │   ├── i18n-provider.tsx
+│   │   ├── reading-settings-provider.tsx
+│   │   └── index.tsx
+│   │
+│   ├── types/                                  # TypeScript types
+│   │   ├── api/
+│   │   │   ├── auth.types.ts
+│   │   │   ├── user.types.ts
+│   │   │   ├── site.types.ts
+│   │   │   ├── series.types.ts
+│   │   │   ├── chapter.types.ts
+│   │   │   ├── subscription.types.ts
+│   │   │   ├── payment.types.ts
+│   │   │   ├── analytics.types.ts
+│   │   │   ├── common.types.ts
+│   │   │   └── index.ts
+│   │   ├── models/
+│   │   │   ├── user.model.ts
+│   │   │   ├── site.model.ts
+│   │   │   ├── series.model.ts
+│   │   │   ├── chapter.model.ts
+│   │   │   ├── subscription.model.ts
+│   │   │   ├── payment.model.ts
+│   │   │   └── index.ts
+│   │   ├── components/
+│   │   │   └── props.types.ts
+│   │   ├── next-auth.d.ts
+│   │   ├── global.d.ts
+│   │   ├── env.d.ts
+│   │   └── index.ts
+│   │
+│   ├── styles/
+│   │   ├── globals.css                         # Global styles
+│   │   ├── themes/
+│   │   │   ├── light.css
+│   │   │   ├── dark.css
+│   │   │   ├── sepia.css
+│   │   │   └── amoled.css
+│   │   ├── reader/
+│   │   │   ├── reader.css
+│   │   │   ├── text-viewer.css
+│   │   │   ├── comic-viewer.css
+│   │   │   └── webtoon-viewer.css
+│   │   ├── editor/
+│   │   │   └── editor.css
+│   │   ├── fonts.css
+│   │   └── animations.css
+│   │
+│   ├── config/
+│   │   ├── site.config.ts                      # Site configuration
+│   │   ├── navigation.config.ts                # Navigation menus
+│   │   ├── dashboard.config.ts                 # Dashboard navigation
+│   │   ├── admin.config.ts                     # Admin navigation
+│   │   ├── features.config.ts                  # Feature configuration
+│   │   ├── seo.config.ts                       # SEO configuration
+│   │   ├── theme.config.ts                     # Theme configuration
+│   │   ├── editor.config.ts                    # Editor configuration
+│   │   ├── reader.config.ts                    # Reader configuration
+│   │   └── index.ts
+│   │
+│   └── middleware.ts                           # Next.js middleware
+│
+├── tests/
+│   ├── setup.ts                                # Test setup
+│   ├── utils/
+│   │   ├── test-utils.tsx                      # Test utilities
+│   │   ├── mock-router.ts                      # Router mock
+│   │   ├── mock-session.ts                     # Session mock
+│   │   └── custom-render.tsx                   # Custom render
+│   │
+│   ├── mocks/
+│   │   ├── handlers/
+│   │   │   ├── auth.handlers.ts
+│   │   │   ├── user.handlers.ts
+│   │   │   ├── series.handlers.ts
+│   │   │   └── index.ts
+│   │   ├── data/
+│   │   │   ├── users.mock.ts
+│   │   │   ├── series.mock.ts
+│   │   │   ├── chapters.mock.ts
+│   │   │   └── index.ts
+│   │   ├── server.ts                           # MSW server
+│   │   └── browser.ts                          # MSW browser
+│   │
+│   ├── unit/
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── button.test.tsx
+│   │   │   │   ├── input.test.tsx
+│   │   │   │   └── ...
+│   │   │   ├── common/
+│   │   │   │   ├── logo.test.tsx
+│   │   │   │   └── ...
+│   │   │   └── content/
+│   │   │       ├── series-card.test.tsx
+│   │   │       └── ...
+│   │   ├── hooks/
+│   │   │   ├── use-auth.test.ts
+│   │   │   ├── use-debounce.test.ts
+│   │   │   └── ...
+│   │   └── utils/
+│   │       ├── format.test.ts
+│   │       ├── date.test.ts
+│   │       └── ...
+│   │
+│   ├── integration/
+│   │   ├── auth/
+│   │   │   ├── login.test.tsx
+│   │   │   ├── register.test.tsx
+│   │   │   └── logout.test.tsx
+│   │   ├── dashboard/
+│   │   │   └── series.test.tsx
+│   │   └── reader/
+│   │       └── reading.test.tsx
+│   │
+│   └── e2e/
+│       ├── auth.spec.ts
+│       ├── dashboard.spec.ts
+│       ├── reader.spec.ts
+│       ├── subscription.spec.ts
+│       └── ...
+│
+├── stories/                                    # Storybook stories
+│   ├── ui/
+│   │   ├── Button.stories.tsx
+│   │   ├── Input.stories.tsx
+│   │   ├── Select.stories.tsx
+│   │   ├── Dialog.stories.tsx
+│   │   ├── Card.stories.tsx
+│   │   ├── Table.stories.tsx
+│   │   ├── Tabs.stories.tsx
+│   │   ├── Toast.stories.tsx
+│   │   ├── Tooltip.stories.tsx
+│   │   ├── Dropdown.stories.tsx
+│   │   ├── Badge.stories.tsx
+│   │   ├── Avatar.stories.tsx
+│   │   ├── Skeleton.stories.tsx
+│   │   ├── Progress.stories.tsx
+│   │   ├── Spinner.stories.tsx
+│   │   └── ...
+│   │
+│   ├── forms/
+│   │   ├── FormField.stories.tsx
+│   │   ├── FileUpload.stories.tsx
+│   │   ├── ImageUpload.stories.tsx
+│   │   ├── RichTextEditor.stories.tsx
+│   │   ├── TagInput.stories.tsx
+│   │   ├── ColorPicker.stories.tsx
+│   │   ├── DatePicker.stories.tsx
+│   │   └── ...
+│   │
+│   ├── common/
+│   │   ├── Logo.stories.tsx
+│   │   ├── ThemeToggle.stories.tsx
+│   │   ├── UserMenu.stories.tsx
+│   │   ├── SearchCommand.stories.tsx
+│   │   ├── EmptyState.stories.tsx
+│   │   ├── ErrorBoundary.stories.tsx
+│   │   ├── InfiniteScroll.stories.tsx
+│   │   └── ...
+│   │
+│   ├── content/
+│   │   ├── series/
+│   │   │   ├── SeriesCard.stories.tsx
+│   │   │   ├── SeriesGrid.stories.tsx
+│   │   │   ├── SeriesCarousel.stories.tsx
+│   │   │   └── ...
+│   │   ├── chapters/
+│   │   │   ├── ChapterList.stories.tsx
+│   │   │   ├── ChapterCard.stories.tsx
+│   │   │   └── ...
+│   │   ├── authors/
+│   │   │   ├── AuthorCard.stories.tsx
+│   │   │   ├── FollowButton.stories.tsx
+│   │   │   └── ...
+│   │   ├── reviews/
+│   │   │   ├── ReviewCard.stories.tsx
+│   │   │   ├── ReviewForm.stories.tsx
+│   │   │   └── ...
+│   │   ├── comments/
+│   │   │   ├── CommentItem.stories.tsx
+│   │   │   ├── CommentThread.stories.tsx
+│   │   │   └── ...
+│   │   └── reader/
+│   │       ├── TextViewer.stories.tsx
+│   │       ├── ComicViewer.stories.tsx
+│   │       ├── ReaderSettings.stories.tsx
+│   │       └── ...
+│   │
+│   ├── subscription/
+│   │   ├── TierCard.stories.tsx
+│   │   ├── TierComparison.stories.tsx
+│   │   ├── SubscribeButton.stories.tsx
+│   │   └── ...
+│   │
+│   ├── payment/
+│   │   ├── PaymentForm.stories.tsx
+│   │   ├── PaymentMethodCard.stories.tsx
+│   │   ├── InvoicePreview.stories.tsx
+│   │   └── ...
+│   │
+│   ├── analytics/
+│   │   ├── StatsCard.stories.tsx
+│   │   ├── LineChart.stories.tsx
+│   │   ├── BarChart.stories.tsx
+│   │   └── ...
+│   │
+│   ├── editor/
+│   │   ├── RichTextEditor.stories.tsx
+│   │   ├── ComicUploader.stories.tsx
+│   │   ├── AIAssistant.stories.tsx
+│   │   └── ...
+│   │
+│   ├── layouts/
+│   │   ├── DashboardLayout.stories.tsx
+│   │   ├── ReaderLayout.stories.tsx
+│   │   ├── AuthLayout.stories.tsx
+│   │   └── ...
+│   │
+│   └── pages/
+│       ├── HomePage.stories.tsx
+│       ├── LoginPage.stories.tsx
+│       ├── DashboardPage.stories.tsx
+│       └── ...
+│
+├── scripts/
+│   ├── generate-sitemap.ts                     # Sitemap generation
+│   ├── generate-rss.ts                         # RSS feed generation
+│   ├── generate-icons.ts                       # Icon generation
+│   ├── optimize-images.ts                      # Image optimization
+│   ├── analyze-bundle.ts                       # Bundle analysis
+│   ├── check-i18n.ts                           # i18n key checker
+│   ├── extract-i18n.ts                         # Extract i18n keys
+│   ├── sync-types.ts                           # Sync API types
+│   ├── generate-api-client.ts                  # Generate API client from OpenAPI
+│   └── lighthouse-ci.ts                        # Lighthouse CI script
+│
+├── cypress/                                    # Cypress E2E tests
+│   ├── e2e/
+│   │   ├── auth/
+│   │   │   ├── login.cy.ts
+│   │   │   ├── register.cy.ts
+│   │   │   ├── forgot-password.cy.ts
+│   │   │   └── oauth.cy.ts
+│   │   ├── reader/
+│   │   │   ├── discover.cy.ts
+│   │   │   ├── series.cy.ts
+│   │   │   ├── reading.cy.ts
+│   │   │   └── subscription.cy.ts
+│   │   ├── author/
+│   │   │   ├── dashboard.cy.ts
+│   │   │   ├── series-management.cy.ts
+│   │   │   ├── chapter-editor.cy.ts
+│   │   │   └── analytics.cy.ts
+│   │   ├── payment/
+│   │   │   ├── checkout.cy.ts
+│   │   │   └── subscription.cy.ts
+│   │   └── admin/
+│   │       ├── users.cy.ts
+│   │       ├── moderation.cy.ts
+│   │       └── settings.cy.ts
+│   ├── fixtures/
+│   │   ├── users.json
+│   │   ├── series.json
+│   │   ├── chapters.json
+│   │   └── subscriptions.json
+│   ├── support/
+│   │   ├── commands.ts
+│   │   ├── e2e.ts
+│   │   └── component.ts
+│   ├── plugins/
+│   │   └── index.ts
+│   ├── downloads/
+│   ├── screenshots/
+│   ├── videos/
+│   └── cypress.config.ts
+│
+├── playwright/                                 # Playwright E2E tests (alternative)
+│   ├── tests/
+│   │   ├── auth.spec.ts
+│   │   ├── reader.spec.ts
+│   │   ├── author.spec.ts
+│   │   └── admin.spec.ts
+│   ├── fixtures/
+│   │   └── test-data.ts
+│   └── playwright.config.ts
+││
+├── docs/
+│   ├── README.md                               # Documentation overview
+│   ├── getting-started.md                      # Getting started guide
+│   ├── architecture.md                         # Architecture documentation
+│   ├── components.md                           # Component documentation
+│   ├── hooks.md                                # Hooks documentation
+│   ├── state-management.md                     # State management guide
+│   ├── styling.md                              # Styling guide
+│   ├── testing.md                              # Testing guide
+│   ├── i18n.md                                 # Internationalization guide
+│   ├── accessibility.md                        # Accessibility guidelines
+│   ├── performance.md                          # Performance guidelines
+│   ├── deployment.md                           # Deployment guide
+│   └── contributing.md                         # Contributing guide
+│
+├── .dockerignore
+├── .editorconfig
+├── .env.example
+├── .env.local.example
+├── .env.development
+├── .env.production
+├── .env.test
+├── .eslintignore
+├── .eslintrc.js
+├── .gitignore
+├── .npmrc
+├── .nvmrc
+├── .prettierignore
+├── .prettierrc
+├── .sentryclirc
+├── components.json                             # shadcn/ui configuration
+├── cypress.config.ts
+├── jest.config.js
+├── jest.setup.js
+├── lighthouserc.js                             # Lighthouse CI config
+├── next-env.d.ts
+├── next-sitemap.config.js                      # Sitemap configuration
+├── next.config.js                              # Next.js configuration
+├── package.json
+├── package-lock.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.ts                          # Tailwind configuration
+├── tsconfig.json
+├── tsconfig.test.json
+└── turbo.json                                  # Turborepo config (if monorepo)

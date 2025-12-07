@@ -1,0 +1,66 @@
+{
+  // ---------- 🌱 Existing User Settings ----------
+  "terminal.integrated.commandsToSkipShell": [
+    "terminal.integrated.commandsToSkipShell"
+  ],
+  "files.autoSave": "afterDelay",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.next/**": true
+  },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/*.lock": true
+  },
+
+  "typescript.tsserver.maxTsServerMemory": 4096, // stronger TS checks
+
+  "git.autorefresh": false,
+  "git.enableSmartCommit": true,
+  "git.autofetch": false,
+
+  "editor.minimap.enabled": false,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true
+  },
+
+  // ---------- 🧠 Required For Better Error Surfacing ----------
+
+  // ✔ Use workspace TS version (never outdated global version)
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // ✔ Show TypeScript errors proactively
+  "typescript.validate.enable": true,
+
+  // ✔ Show ESLint issues in real-time
+  "eslint.run": "onType", 
+  "eslint.validate": [
+    "javascript", "javascriptreact",
+    "typescript", "typescriptreact"
+  ],
+   "eslint.useFlatConfig": true,
+
+  // ✔ Auto-fix on save: Prettier + ESLint + Import-ordering
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // ✔ Display errors inline — easy to see everything
+  "errorLens.enabled": true,
+  "errorLens.fontWeight": "bold",
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"]
+}
