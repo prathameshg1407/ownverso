@@ -1,1 +1,0 @@
-{"version":3,"file":"delete-me.handler.d.ts","sourceRoot":"","sources":["../../../../../src/api/v1/users/handlers/delete-me.handler.ts"],"names":[],"mappings":"AAAA;;GAEG;AAEH,OAAO,KAAK,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAI5D,wBAAsB,eAAe,CACnC,OAAO,EAAE,cAAc,EACvB,KAAK,EAAE,YAAY,GAClB,OAAO,CAAC,IAAI,CAAC,CAGf"}

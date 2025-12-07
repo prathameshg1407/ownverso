@@ -1,1 +1,0 @@
-{"version":3,"file":"login-history.handler.d.ts","sourceRoot":"","sources":["../../../../../../src/api/v1/users/handlers/security/login-history.handler.ts"],"names":[],"mappings":"AAAA;;GAEG;AAEH,OAAO,KAAK,EAAE,cAAc,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAK5D,wBAAsB,mBAAmB,CACvC,OAAO,EAAE,cAAc,EACvB,KAAK,EAAE,YAAY,GAClB,OAAO,CAAC,IAAI,CAAC,CAKf"}
